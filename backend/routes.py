@@ -64,23 +64,19 @@ def _parse_readme_status(readme_path):
     try:
         with open(readme_path, 'r') as f:
             content = f.read()
-        lines = content.split('\n')
-        for line in lines:
-            lower = line.lower()
-            if 'erledigt' in lower or '✅' in line:
-                # Zähle erledigte Items (z.B. "✅ Traefik" oder "2 erledigt")
-                import re
-                nums = re.findall(r'(\d+)\s*erledigt', lower)
-                if nums:
-                    status['erledigt'] = int(nums[0])
-                else:
-                    status['erledigt'] += line.count('✅')
-            if 'offen' in lower or '●' in line:
-                nums = re.findall(r'(\d+)\s*offen', lower)
-                if nums:
-                    status['offen'] = int(nums[0])
-                else:
-                    status['offen'] += line.count('●')
+        import re
+        # Zähle explizite Status-Angaben ("2 erledigt", "1 offen")
+        done_nums = re.findall(r'(\d+)\s*erledigt', content.lower())
+        open_nums = re.findall(r'(\d+)\s*offen', content.lower())
+        if done_nums:
+            status['erledigt'] = max(int(n) for n in done_nums)
+        if open_nums:
+            status['offen'] = max(int(n) for n in open_nums)
+        # Fallback: zähle ✅ und ● wenn keine Zahlen gefunden
+        if not done_nums:
+            status['erledigt'] = content.count('✅')
+        if not open_nums:
+            status['offen'] = content.count('●')
         # Erste 200 Zeichen als Kurz-Summary
         status['summary'] = content[:200].strip()
         # Finde die Frage (erste Zeile nach "**Status:**" oder erste H1)
