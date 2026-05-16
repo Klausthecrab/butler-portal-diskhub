@@ -16,6 +16,12 @@ Entscheidung für **Traefik** als zentralen Gateway. Docker-Label-Discovery für
 
 *session: gw-20260512-a3f2 · Übernommen 13.05.2026*
 
+### Block: Test-Eintrag
+
+Dies ist ein Test-Eintrag über Hermes CLI.
+
+*session: test-20260517 · 17.05.2026*
+
 ### Sub: API-Key-Handling (✓ erledigt)
 
 Gateway routet nur. API-Key-Validierung bleibt beim Schlüsselmeister. Schlüsselmeister bekommt vorgelagerten Auth-Check-Endpoint.

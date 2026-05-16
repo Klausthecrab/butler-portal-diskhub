@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import styles from './Page.module.css'
 
 const API = '/api/diskhub'
@@ -16,35 +16,23 @@ function timeAgo(ts) {
 
 function renderMarkdown(md) {
   if (!md) return ''
-  // Simple markdown to HTML (MVP — kein Parser, nur Basics)
   let html = md
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    // Code blocks
     .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-    // Inline code
     .replace(/`([^`]+)`/g, '<code>$1</code>')
-    // Bold
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    // Italic
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-    // Images
     .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />')
-    // Links
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-    // Horizontal rules
     .replace(/^---+/gm, '<hr />')
-    // Blockquotes
     .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
-    // Headers
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    // Unordered lists
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
-    // Paragraphs (double newlines)
     .replace(/\n\n/g, '</p><p>')
     .replace(/^(.+)$/gm, (m) => {
       if (m.startsWith('<')) return m
@@ -52,6 +40,89 @@ function renderMarkdown(md) {
     })
   return `<p>${html}</p>`
 }
+
+// ─── Readme Update Modal ──────────────────────────────────────────────────────
+
+function ReadmeModal({ discussionId, onClose, onUpdate, isSub, subId }) {
+  const [loading, setLoading] = useState(false)
+  const [current, setCurrent] = useState('')
+  const [suggested, setSuggested] = useState('')
+  const [editing, setEditing] = useState(false)
+  const [editText, setEditText] = useState('')
+
+  useEffect(() => {
+    setLoading(true)
+    const params = new URLSearchParams({ discussion_id: discussionId })
+    if (isSub && subId) {
+      params.set('is_sub', 'true')
+      params.set('sub_id', subId)
+    }
+    fetch(`${API}/suggest-readme?${params}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === 'ok') {
+          setCurrent(d.current_readme)
+          setSuggested(d.suggested_readme)
+          setEditText(d.suggested_readme)
+        } else {
+          setSuggested('Fehler: ' + (d.error || 'Unbekannt'))
+        }
+        setLoading(false)
+      })
+      .catch(() => { setLoading(false); setSuggested('Fehler beim Laden') })
+  }, [discussionId, isSub, subId])
+
+  const handleOverlay = (e) => {
+    if (e.target === e.currentTarget) onClose()
+  }
+
+  return (
+    <div className={styles.readmeModalOverlay} onClick={handleOverlay}>
+      <div className={styles.readmeModal}>
+        <div className={styles.readmeModalHeader}>
+          <span>📋 README aktualisieren</span>
+          <button className={styles.modalClose} onClick={onClose}>✕</button>
+        </div>
+        {loading ? (
+          <div className={styles.readmeBody}>
+            <div className={styles.loading}>Hermi vergleicht README mit index.md…</div>
+          </div>
+        ) : (
+          <div className={styles.readmeBody}>
+            <div className={styles.readmeCompare}>
+              <div className={styles.readmeCol}>
+                <div className={styles.readmeColLabel}>Aktuelle README</div>
+                <pre className={styles.readmePre}>{current}</pre>
+              </div>
+              <div className={styles.readmeCol}>
+                <div className={styles.readmeColLabel}>Vorschlag</div>
+                {editing ? (
+                  <textarea
+                    className={styles.readmeTextarea}
+                    value={editText}
+                    onChange={e => setEditText(e.target.value)}
+                  />
+                ) : (
+                  <pre className={styles.readmePre}>{suggested}</pre>
+                )}
+              </div>
+            </div>
+            <div className={styles.readmeActions}>
+              <button className={styles.previewBtn} onClick={() => { setEditing(!editing); if (!editing) setEditText(suggested) }}>
+                {editing ? '📖 Vorschau' : '✏️ Bearbeiten'}
+              </button>
+              <button className={styles.previewBtnPrimary} onClick={() => onUpdate(editing ? editText : suggested)}>
+                ✅ Übernehmen
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Discussion Card ─────────────────────────────────────────────────────────
 
 function DiscussionCard({ discussion, onClick }) {
   const { name, status, subs, last_modified } = discussion
@@ -88,10 +159,27 @@ function DiscussionCard({ discussion, onClick }) {
   )
 }
 
+// ─── Split-View Modal (Diskussion + Preview) ─────────────────────────────────
+
 function SplitViewModal({ discussion, onClose }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  // Session State
+  const [previewState, setPreviewState] = useState('idle') // idle|starting|polling|active|generating|adopting|error
+  const [sessionTitle, setSessionTitle] = useState('')
+  const [sessionId, setSessionId] = useState(null)
+  const [messages, setMessages] = useState([])
+  const [selectedSet, setSelectedSet] = useState(new Set())
+  const [userNotes, setUserNotes] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
+  const [generatedBlock, setGeneratedBlock] = useState('')
+  const [triggeredAt, setTriggeredAt] = useState(null)
+  const [showReadmeModal, setShowReadmeModal] = useState(false)
+  const pollRef = useRef(null)
+  const [activeSubId, setActiveSubId] = useState(null)
+
+  // Lade Diskussionsdaten
   useEffect(() => {
     setLoading(true)
     fetch(`${API}/${discussion.id}`)
@@ -100,23 +188,272 @@ function SplitViewModal({ discussion, onClose }) {
       .catch(() => setLoading(false))
   }, [discussion.id])
 
+  // Escape zum Schliessen
   useEffect(() => {
     const handleKey = (e) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   }, [onClose])
 
+  // Cleanup Polling
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+  }, [])
+
+  // Session-Polling
+  useEffect(() => {
+    if (previewState !== 'polling') return
+
+    let attempts = 0
+    const maxAttempts = 60 // 5min bei 5s Intervall
+
+    const poll = () => {
+      const params = new URLSearchParams({ title: sessionTitle })
+      if (triggeredAt) params.set('since', String(triggeredAt))
+
+      fetch(`${API}/session-status?${params}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.found && d.session) {
+            setSessionId(d.session.id)
+            setPreviewState('active')
+            fetchMessages(d.session.id)
+            if (pollRef.current) clearInterval(pollRef.current)
+          } else {
+            attempts++
+            if (attempts >= maxAttempts) {
+              setPreviewState('error')
+              setErrorMsg('Hermi hat nicht reagiert. Session manuell in Discord starten?')
+              if (pollRef.current) clearInterval(pollRef.current)
+            }
+          }
+        })
+        .catch(() => {
+          attempts++
+          if (attempts >= maxAttempts) {
+            setPreviewState('error')
+            setErrorMsg('Polling fehlgeschlagen')
+            if (pollRef.current) clearInterval(pollRef.current)
+          }
+        })
+    }
+
+    pollRef.current = setInterval(poll, 5000)
+    return () => { if (pollRef.current) clearInterval(pollRef.current) }
+  }, [previewState, sessionTitle, triggeredAt])
+
+  const fetchMessages = (sid) => {
+    if (!sid) return
+    fetch(`${API}/session-messages/${sid}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.messages) setMessages(d.messages)
+      })
+      .catch(() => {})
+  }
+
+  // Refresh-Nachrichten (wenn aktiv)
+  useEffect(() => {
+    if (previewState !== 'active' || !sessionId) return
+    const iv = setInterval(() => {
+      fetchMessages(sessionId)
+    }, 8000)
+    return () => clearInterval(iv)
+  }, [previewState, sessionId])
+
+  // "Hier weiterdiskutieren"
+  const handleStartSession = () => {
+    setPreviewState('starting')
+    const currentSubId = activeSubId === '__main__' ? null : activeSubId
+
+    fetch(`${API}/start-session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        discussion_id: currentSubId ? discussion.id + '-' + currentSubId : discussion.id,
+        is_sub: !!currentSubId,
+        sub_id: currentSubId || undefined,
+      }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === 'triggered' || d.status === 'partial') {
+          setSessionTitle(d.session_title)
+          setTriggeredAt(Math.floor(Date.now() / 1000))
+          setPreviewState('polling')
+        } else {
+          setPreviewState('error')
+          setErrorMsg('Webhook-Fehler: ' + JSON.stringify(d))
+        }
+      })
+      .catch(e => {
+        setPreviewState('error')
+        setErrorMsg('Netzwerkfehler: ' + e.message)
+      })
+  }
+
+  // Nachricht umschalten (selektieren)
+  const toggleMessage = (idx) => {
+    const s = new Set(selectedSet)
+    if (s.has(idx)) s.delete(idx)
+    else s.add(idx)
+    setSelectedSet(s)
+  }
+
+  // Von Hermi generieren
+  const handleGenerate = () => {
+    setPreviewState('generating')
+    const selectedMsgs = Array.from(selectedSet).map(i => messages[i]).filter(Boolean)
+
+    fetch(`${API}/generate-summary`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        discussion_id: discussion.id,
+        selected_messages: selectedMsgs,
+        user_notes: userNotes,
+      }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === 'ok') {
+          setGeneratedBlock(d.summary)
+          setUserNotes(d.summary)
+        } else {
+          setErrorMsg(d.error || 'Generation fehlgeschlagen')
+        }
+        setPreviewState('active')
+      })
+      .catch(() => {
+        setPreviewState('active')
+        setErrorMsg('Netzwerkfehler')
+      })
+  }
+
+  // In Dokument übernehmen
+  const handleAdopt = () => {
+    setPreviewState('adopting')
+    const currentSubId = activeSubId === '__main__' ? null : activeSubId
+
+    fetch(`${API}/adopt-block`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        discussion_id: currentSubId ? discussion.id + '-' + currentSubId : discussion.id,
+        block_content: userNotes || generatedBlock || '(kein Inhalt)',
+        is_sub: !!currentSubId,
+        sub_id: currentSubId || undefined,
+      }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        setPreviewState('active')
+        if (d.status === 'ok') {
+          setErrorMsg('✅ Übernommen: ' + (d.sha || 'ok'))
+          setUserNotes('')
+          setGeneratedBlock('')
+          setSelectedSet(new Set())
+        } else {
+          setErrorMsg('❌ ' + (d.error || 'Übernahme fehlgeschlagen'))
+        }
+      })
+      .catch(() => {
+        setPreviewState('active')
+        setErrorMsg('❌ Netzwerkfehler bei Übernahme')
+      })
+  }
+
+  // Sub-Diskussion starten
+  const handleStartSub = () => {
+    setPreviewState('starting')
+    setActiveSubId(null) // zurücksetzen für neuen Flow
+    fetch(`${API}/start-sub-discussion`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        discussion_id: discussion.id,
+        sub_id: 'neue-sub-' + Date.now(),
+      }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === 'triggered' || d.status === 'partial') {
+          setSessionTitle(d.session_title)
+          setTriggeredAt(Math.floor(Date.now() / 1000))
+          setPreviewState('polling')
+        } else {
+          setPreviewState('error')
+          setErrorMsg('Webhook-Fehler: ' + JSON.stringify(d))
+        }
+      })
+      .catch(e => {
+        setPreviewState('error')
+        setErrorMsg('Netzwerkfehler: ' + e.message)
+      })
+  }
+
+  // README aktualisieren
+  const handleReadmeUpdate = (newContent) => {
+    fetch(`${API}/update-readme`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        discussion_id: discussion.id,
+        new_readme: newContent,
+      }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        setShowReadmeModal(false)
+        if (d.status === 'ok') {
+          setErrorMsg('✅ README aktualisiert: ' + (d.sha || 'ok'))
+        } else {
+          setErrorMsg('❌ ' + (d.error || 'Update fehlgeschlagen'))
+        }
+      })
+      .catch(() => {
+        setShowReadmeModal(false)
+        setErrorMsg('❌ Netzwerkfehler')
+      })
+  }
+
+  // Session verwerfen
+  const handleDiscard = () => {
+    if (pollRef.current) clearInterval(pollRef.current)
+    setPreviewState('idle')
+    setSessionId(null)
+    setMessages([])
+    setSelectedSet(new Set())
+    setUserNotes('')
+    setGeneratedBlock('')
+    setErrorMsg('')
+    setTriggeredAt(null)
+  }
+
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) onClose()
   }
 
+  const selectedCount = selectedSet.size
+  const userMsgCount = messages.filter(m => m.role === 'user').length
+  const assistantMsgCount = messages.filter(m => m.role === 'assistant').length
+
   return (
     <div className={styles.modalOverlay} onClick={handleOverlayClick}>
       <div className={styles.modalContent}>
+        {/* Header */}
         <div className={styles.modalHeader}>
-          <div className={styles.modalTitle}>💬 {discussion.name}</div>
+          <div className={styles.modalHeaderLeft}>
+            <div className={styles.modalTitle}>💬 {discussion.name}</div>
+            <button className={styles.readmeBtn} onClick={() => setShowReadmeModal(true)} title="README aktualisieren">
+              📋 README
+            </button>
+          </div>
           <button className={styles.modalClose} onClick={onClose}>✕</button>
         </div>
+
         <div className={styles.splitView}>
           {/* LEFT: Document */}
           <div className={styles.docPanel}>
@@ -137,8 +474,8 @@ function SplitViewModal({ discussion, onClose }) {
                       />
                     )}
                     {data.subs && data.subs.map(sub => (
-                      <div key={sub.id} style={{ marginTop: 16, padding: '12px 16px', background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-                        <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#475569', marginBottom: 8 }}>📂 {sub.name}</h3>
+                      <div key={sub.id} className={styles.subDocBlock}>
+                        <h3 className={styles.subDocTitle}>📂 {sub.name}</h3>
                         {sub.readme && (
                           <div className={styles.markdownContent}
                             dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.readme) }}
@@ -158,21 +495,174 @@ function SplitViewModal({ discussion, onClose }) {
               </div>
             </div>
           </div>
-          {/* RIGHT: Preview Panel (Placeholder) */}
+
+          {/* RIGHT: Preview Panel */}
           <div className={styles.previewPanel}>
-            <div className={styles.previewPlaceholder}>
-              <h3>🗣️ Unter Vorbehalt</h3>
-              <p>
-                Hier erscheint später der Live-Chat aus Discord.<br />
-                Klicke auf <strong>"Hier weiterdiskutieren"</strong> um eine neue Session zu starten.
-              </p>
-            </div>
+            {previewState === 'idle' && (
+              <div className={styles.previewPlaceholder}>
+                <h3>🗣️ Unter Vorbehalt</h3>
+                <p>
+                  Klicke auf <strong>"Hier weiterdiskutieren"</strong> um eine neue Session zu starten.
+                  Die Diskussion läuft dann in <strong>#diskussion-one</strong> auf Discord.
+                </p>
+                <button className={styles.previewBtnPrimary} onClick={handleStartSession}>
+                  🎤 Hier weiterdiskutieren
+                </button>
+              </div>
+            )}
+
+            {previewState === 'starting' && (
+              <div className={styles.previewPlaceholder}>
+                <div className={styles.spinner} />
+                <p>Starte Diskussion via Discord-Webhook…</p>
+              </div>
+            )}
+
+            {previewState === 'polling' && (
+              <div className={styles.previewPlaceholder}>
+                <div className={styles.spinner} />
+                <p>Warte auf Antwort von Hermi in #diskussion-one…</p>
+                <p className={styles.pollingHint}>Session: {sessionTitle}</p>
+                <button className={styles.previewBtnDanger} onClick={handleDiscard}>
+                  ✕ Abbrechen
+                </button>
+              </div>
+            )}
+
+            {previewState === 'active' && (
+              <div className={styles.previewActive}>
+                {/* Session Header */}
+                <div className={styles.previewHeader}>
+                  <div className={styles.previewHeaderInfo}>
+                    <span className={styles.previewDot} />
+                    <span className={styles.previewSessionName}>{sessionTitle || 'Aktive Session'}</span>
+                    <span className={styles.previewMsgCount}>
+                      {userMsgCount} User · {assistantMsgCount} Hermi
+                    </span>
+                  </div>
+                  <div className={styles.previewHeaderActions}>
+                    <button className={styles.previewBtnSmall} onClick={handleStartSession} title="Neue Session starten">
+                      🔄 Neu starten
+                    </button>
+                    <button className={styles.previewBtnDangerSmall} onClick={handleDiscard} title="Session verwerfen">
+                      ✕
+                    </button>
+                  </div>
+                </div>
+
+                {/* Breadcrumb / Sub-Tabs */}
+                <div className={styles.previewBreadcrumb}>
+                  <span className={styles.breadcrumbMain}>📌 {discussion.name}</span>
+                </div>
+
+                {/* Chat Messages */}
+                <div className={styles.chatArea}>
+                  {messages.filter(m => m.role !== 'tool' && m.role !== 'session_meta').map((m, idx) => {
+                    const realIdx = messages.indexOf(m)
+                    const isSelected = selectedSet.has(realIdx)
+                    const isUser = m.role === 'user'
+                    const isAssistant = m.role === 'assistant'
+                    return (
+                      <div
+                        key={idx}
+                        className={`${styles.chatMsg} ${isSelected ? styles.chatMsgSelected : ''} ${isUser ? styles.chatMsgUser : styles.chatMsgHermi}`}
+                        onClick={() => toggleMessage(realIdx)}
+                      >
+                        <div className={styles.chatMsgHeader}>
+                          <span className={isUser ? styles.chatAuthorUser : styles.chatAuthorHermi}>
+                            {isUser ? 'Max' : 'Hermi'}
+                          </span>
+                          <span className={styles.chatTime}>{m.timestamp}</span>
+                        </div>
+                        <div className={styles.chatMsgContent}>{m.content}</div>
+                      </div>
+                    )
+                  })}
+                  {messages.filter(m => m.role !== 'tool' && m.role !== 'session_meta').length === 0 && (
+                    <div className={styles.chatEmpty}>Noch keine Nachrichten. Diskutiere in #diskussion-one auf Discord.</div>
+                  )}
+                </div>
+
+                {/* Selection Counter */}
+                <div className={styles.selectionBar}>
+                  <span>{selectedCount > 0 ? `${selectedCount} von ${messages.filter(m => m.role !== 'tool' && m.role !== 'session_meta').length} Nachrichten ausgewählt` : 'Klicke auf Nachrichten zur Auswahl'}</span>
+                </div>
+
+                {/* Summary Editor */}
+                <div className={styles.summaryEditor}>
+                  <textarea
+                    className={styles.summaryTextarea}
+                    placeholder="Stichpunkte oder generierten Block editieren…"
+                    value={userNotes}
+                    onChange={e => setUserNotes(e.target.value)}
+                  />
+                  <div className={styles.summaryActions}>
+                    <button className={styles.previewBtn} onClick={handleGenerate} disabled={previewState === 'generating'}>
+                      🤖 Von Hermi generieren
+                    </button>
+                    <button className={styles.previewBtnPrimary} onClick={handleAdopt} disabled={previewState === 'adopting' || !userNotes.trim()}>
+                      ✅ In Dokument übernehmen
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {previewState === 'generating' && (
+              <div className={styles.previewPlaceholder}>
+                <div className={styles.spinner} />
+                <p>Hermi generiert Zusammenfassung…</p>
+              </div>
+            )}
+
+            {previewState === 'adopting' && (
+              <div className={styles.previewPlaceholder}>
+                <div className={styles.spinner} />
+                <p>⏳ Hermi arbeitet an der Übernahme…</p>
+                <p className={styles.pollingHint}>Das kann bis zu 30s dauern.</p>
+              </div>
+            )}
+
+            {previewState === 'error' && (
+              <div className={styles.previewError}>
+                <div className={styles.errorBanner}>
+                  <span>❌ {errorMsg || 'Unbekannter Fehler'}</span>
+                  <button className={styles.previewBtnDangerSmall} onClick={handleDiscard}>
+                    ✕ Schließen
+                  </button>
+                </div>
+                <button className={styles.previewBtn} onClick={handleStartSession} style={{ marginTop: 12 }}>
+                  🔄 Erneut versuchen
+                </button>
+              </div>
+            )}
+
+            {/* Error Banner (non-blocking) */}
+            {errorMsg && previewState === 'active' && (
+              <div className={styles.errorBanner}>
+                <span>{errorMsg}</span>
+                <button className={styles.errorBannerClose} onClick={() => setErrorMsg('')}>✕</button>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* README Modal */}
+        {showReadmeModal && (
+          <ReadmeModal
+            discussionId={discussion.id}
+            onClose={() => setShowReadmeModal(false)}
+            onUpdate={handleReadmeUpdate}
+            isSub={false}
+            subId={null}
+          />
+        )}
       </div>
     </div>
   )
 }
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function Page() {
   const [discussions, setDiscussions] = useState([])

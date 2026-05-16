@@ -1,0 +1,16 @@
+# DiskHub Portal — Konfiguration
+# Discord-Webhook für Session-Trigger + Pfade
+
+webhook:
+  # Webhook für Channel #diskussion-one (ID: 1505338710491926560)
+  url: "https://discord.com/api/webhooks/1505338792972910642/HGtaG2ettwRaiInpHIpJpHermS4YXCLWfTzfdlyoHCOEbjmTULywq5WC0GCJ0NERUpnx"
+  bot_mention: "<@1467915427077423216>"
+  channel_id: "1505338710491926560"
+
+paths:
+  repo_dir: "~/repos/butler-portal-diskhub"
+  state_db: "~/.hermes/state.db"
+
+polling:
+  interval: 5  # Sekunden zwischen Polls
+  timeout: 120  # Max Sekunden auf Session warten
