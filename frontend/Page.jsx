@@ -328,8 +328,25 @@ function SplitViewModal({ discussion, onClose }) {
         .then(d => {
           if (d.found && d.session) {
             setSessionId(d.session.id)
+
+            // Messages vor dem SSE-Connect laden — so ist since_ts korrekt
+            fetch(`${API}/session-messages/${d.session.id}`)
+              .then(r => r.json())
+              .then(msgData => {
+                if (msgData.messages) {
+                  setMessages(msgData.messages)
+                  const timestamps = msgData.messages
+                    .filter(m => m.ts != null)
+                    .map(m => parseFloat(m.ts))
+                    .filter(t => !isNaN(t))
+                  if (timestamps.length > 0) {
+                    lastTsRef.current = Math.max(...timestamps)
+                  }
+                }
+              })
+              .catch(() => {})
+
             setPreviewState('active')
-            fetchMessages(d.session.id)
             if (pollRef.current) clearInterval(pollRef.current)
           } else {
             attempts++
@@ -371,8 +388,13 @@ function SplitViewModal({ discussion, onClose }) {
     // Bestehende Verbindung schließen
     if (sseRef.current) sseRef.current.close()
 
-    // SSE-Verbindung aufbauen
-    const eventSource = new EventSource(`${API}/session-messages-stream/${sessionId}?since_ts=${lastTsRef.current}`)
+    // SSE-Verbindung aufbauen — since_ts aus aktuellen Messages, nicht aus 0
+    const maxTs = messages
+      .filter(m => m.ts != null)
+      .map(m => parseFloat(m.ts))
+      .filter(t => !isNaN(t))
+    const sinceTs = maxTs.length > 0 ? Math.max(...maxTs) : lastTsRef.current
+    const eventSource = new EventSource(`${API}/session-messages-stream/${sessionId}?since_ts=${sinceTs}`)
     sseRef.current = eventSource
 
     eventSource.onmessage = (event) => {
@@ -425,7 +447,7 @@ function SplitViewModal({ discussion, onClose }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        discussion_id: currentSubId ? discussion.id + '-' + currentSubId : discussion.id,
+        discussion_id: discussion.id,
         is_sub: !!currentSubId,
         sub_id: currentSubId || undefined,
       }),
@@ -511,7 +533,7 @@ function SplitViewModal({ discussion, onClose }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        discussion_id: currentSubId ? discussion.id + '-' + currentSubId : discussion.id,
+        discussion_id: discussion.id,
         block_content: userNotes || generatedBlock || '(kein Inhalt)',
         is_sub: !!currentSubId,
         sub_id: currentSubId || undefined,
@@ -864,11 +886,18 @@ function SplitViewModal({ discussion, onClose }) {
               </div>
             )}
 
-            {/* Error Banner (non-blocking) */}
+            {/* Error Banner (non-blocking) with retry */}
             {errorMsg && previewState === 'active' && (
               <div className={styles.errorBanner}>
                 <span>{errorMsg}</span>
-                <button className={styles.errorBannerClose} onClick={() => setErrorMsg('')}>✕</button>
+                <div className={styles.errorBannerActions}>
+                  {errorMsg.startsWith('❌') && (userNotes || generatedBlock) && (
+                    <button className={styles.errorRetryBtn} onClick={handleAdopt}>
+                      🔄 Erneut versuchen
+                    </button>
+                  )}
+                  <button className={styles.errorBannerClose} onClick={() => setErrorMsg('')}>✕</button>
+                </div>
               </div>
             )}
           </div>

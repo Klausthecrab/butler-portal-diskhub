@@ -876,10 +876,34 @@ def adopt_block():
         'sub_id': sub_id,
     })
 
+    # Fehlerklassifikation
+    error_type = 'unknown'
+    error_text = result['output'][:500] if result['output'] else 'Unbekannter Fehler'
+
+    if not result['success']:
+        output_lower = (result.get('output', '') or '').lower()
+        raw_lower = (result.get('raw', '') or '').lower()
+        combined = output_lower + ' ' + raw_lower
+
+        if 'timeout' in combined and '60s' in combined:
+            error_type = 'timeout'
+        elif 'position' in combined and ('nicht gefunden' in combined or 'not found' in combined or 'exist' in combined):
+            error_type = 'position_error'
+        elif 'nicht lesbar' in combined or 'cannot read' in combined or 'no such file' in combined or 'not readable' in combined:
+            error_type = 'file_error'
+        elif 'bild' in combined and ('nicht geladen' in combined or 'failed' in combined or 'error' in combined):
+            error_type = 'image_error'
+        elif 'merge conflict' in combined or 'git conflict' in combined or 'conflict' in combined:
+            error_type = 'git_conflict'
+
     if result['success']:
-        return jsonify({'status': 'ok', 'sha': sha, 'output': result['output'][:500]})
+        return jsonify({'status': 'ok', 'sha': sha, 'error_type': None, 'output': result['output'][:300]})
     else:
-        return jsonify({'status': 'error', 'error': result['output'][:500]}), 500
+        return jsonify({
+            'status': 'error',
+            'error_type': error_type,
+            'error': error_text,
+        }), 500
 
 
 @diskhub.route('/diskhub/generate-summary', methods=['POST'])
