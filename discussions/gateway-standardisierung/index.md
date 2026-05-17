@@ -4,31 +4,33 @@
 
 ---
 
-### Block: Einheitlicher Reverse-Proxy
+### Sollen wir einen einheitlichen Reverse-Proxy setzen?
 
 Einheitlicher Reverse-Proxy für alle externen API-Calls. Aktuell: n8n, Hermes, changedetection, Schlüsselmeister — jedes mit eigenem Routing. Ziel: ein zentraler Entrypoint.
 
 *session: gw-20260512-a3f2 · Übernommen 13.05.2026*
 
-### Block: Entscheidung für Traefik
+### Sollten wir uns für Traefik entscheiden?
 
 Entscheidung für **Traefik** als zentralen Gateway. Docker-Label-Discovery für Container, file Provider (YAML) für native Services. Auto-Let's-Encrypt, zentrale Metriken, skalierbar.
 
 *session: gw-20260512-a3f2 · Übernommen 13.05.2026*
 
-### Block: Test-Eintrag
+### Ist dies ein valider Test-Eintrag?
 
 Dies ist ein Test-Eintrag über Hermes CLI.
 
 *session: test-20260517 · 17.05.2026*
 
-### Sub: API-Key-Handling (✓ erledigt)
+### Sub: Wie handhaben wir API-Keys?
 
 Gateway routet nur. API-Key-Validierung bleibt beim Schlüsselmeister. Schlüsselmeister bekommt vorgelagerten Auth-Check-Endpoint.
 
+> **Ergebnis:** API-Key-Validierung bleibt beim Schlüsselmeister. Gateway übernimmt reines Routing.
+
 *session: gw-sub-auth-20260513 · 15.05.2026*
 
-### Sub: Docker-Label-Kompatibilität (● offen)
+### Sub: Wie integrieren wir Docker-Label-Kompatibilität?
 
 Schlüsselmeister läuft nativ — wie registriert er sich bei Traefik? Lösung: file Provider mit YAML-Konfiguration. Einmalig schreiben, Integration klären.
 

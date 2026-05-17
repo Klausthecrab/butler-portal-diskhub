@@ -41,6 +41,106 @@ function renderMarkdown(md) {
   return `<p>${html}</p>`
 }
 
+// Block-aware rendering for index.md — drei Zonen: Header, Content, Footer
+function renderIndexMd(md) {
+  if (!md) return ''
+
+  const lines = md.split('\n')
+  let result = ''
+  let currentBlock = null
+  const preamble = []
+
+  for (const line of lines) {
+    if (line.startsWith('### ')) {
+      // Vorherigen Block finalisieren
+      if (currentBlock) {
+        result += renderBlock(currentBlock)
+      } else if (preamble.length > 0) {
+        // Erster Block — preamble vorher rendern
+        result = renderMarkdown(preamble.join('\n'))
+      }
+      currentBlock = {
+        heading: line,
+        content: [],
+        footnote: '',
+      }
+    } else if (currentBlock) {
+      // Prüfen auf Fußnote: *session:...* oder *Fußnote:...*
+      const footnoteMatch = line.match(/^\*(session:|Fußnote:).+\*$/)
+      if (footnoteMatch) {
+        currentBlock.footnote = line
+      } else if (line.startsWith('> **Ergebnis:**')) {
+        currentBlock.result = line
+      } else {
+        currentBlock.content.push(line)
+      }
+    } else {
+      preamble.push(line)
+    }
+  }
+
+  // Letzten Block finalisieren
+  if (currentBlock) {
+    result += renderBlock(currentBlock)
+  } else if (preamble.length > 0 && !result) {
+    result = renderMarkdown(preamble.join('\n'))
+  }
+
+  return result
+}
+
+function renderBlock(block) {
+  const heading = block.heading.substring(4).trim() // "### " entfernen
+  const content = block.content.join('\n').trim()
+  const footnote = block.footnote || ''
+  const result = block.result || ''
+
+  const isSub = heading.startsWith('Sub:')
+  // Status-Marker aus Heading entfernen (von alter Formatierung)
+  const headingClean = heading.replace(/ \((✓ erledigt|● offen)\)$/, '')
+  const cleanHeading = isSub ? headingClean.substring(4).trim() : headingClean
+
+  // Prüfen ob Block erledigt (Ergebnis-Zeile vorhanden oder alter Status)
+  const hasResult = !!block.result || heading.includes('(✓ erledigt)')
+
+  // Inline-Escaping für den Heading-Text
+  const escapedHeading = cleanHeading
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+
+  const statusBadge = hasResult
+    ? `<span class="${styles.blockStatusBadge} ${styles.blockStatusDone}">✓ erledigt</span>`
+    : ''
+
+  let html = `<div class="${isSub ? styles.blockCardSub : styles.blockCard}">`
+  html += `<div class="${styles.blockHeader}"><h3>${escapedHeading}${statusBadge}</h3></div>`
+  html += `<div class="${styles.blockContent}">${renderMarkdown(content)}</div>`
+  if (result) {
+    // Ergebnis-Zeile rendern
+    const resultText = result
+      .replace(/^> \*\*Ergebnis:\*\*\s*/i, '')
+      .trim()
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+    html += `<div class="${styles.blockResult}"><span class="${styles.blockResultIcon}">📌</span> ${resultText}</div>`
+  }
+  if (footnote) {
+    // Fußnote ohne äußere Sternchen rendern
+    const cleanFootnote = footnote.replace(/^\*|\*$/g, '').trim()
+    const escapedFootnote = cleanFootnote
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+    html += `<div class="${styles.blockFooter}"><em>${escapedFootnote}</em></div>`
+  }
+  html += `</div>`
+  return html
+}
+
 // Discord-CDN-URLs im Chat als Bilder rendern
 function renderMessageContent(text) {
   if (!text) return text
@@ -195,6 +295,8 @@ function SplitViewModal({ discussion, onClose }) {
   const [activeTab, setActiveTab] = useState('discussion')
   const [gitLog, setGitLog] = useState(null)
   const [gitLogLoading, setGitLogLoading] = useState(false)
+  const [showSubDialog, setShowSubDialog] = useState(false)
+  const [subDialogName, setSubDialogName] = useState('')
 
   // SSE Streaming
   const lastTsRef = useRef(0)
@@ -559,8 +661,9 @@ function SplitViewModal({ discussion, onClose }) {
       })
   }
 
-  // Sub-Diskussion starten
-  const handleStartSub = () => {
+  // Sub-Diskussion starten (C.3 — mit Namenseingabe)
+  const handleStartSub = (subName) => {
+    const name = subName || ('neue-sub-' + Date.now())
     setPreviewState('starting')
     setActiveSubId(null) // zurücksetzen für neuen Flow
     fetch(`${API}/start-sub-discussion`, {
@@ -568,7 +671,7 @@ function SplitViewModal({ discussion, onClose }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         discussion_id: discussion.id,
-        sub_id: 'neue-sub-' + Date.now(),
+        sub_id: name,
       }),
     })
       .then(r => r.json())
@@ -680,7 +783,7 @@ function SplitViewModal({ discussion, onClose }) {
                       )}
                       {data.index && (
                         <div className={styles.markdownContent}
-                          dangerouslySetInnerHTML={{ __html: renderMarkdown(data.index) }}
+                          dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index) }}
                         />
                       )}
                       {data.subs && data.subs.map(sub => (
@@ -693,7 +796,7 @@ function SplitViewModal({ discussion, onClose }) {
                           )}
                           {sub.index && (
                             <div className={styles.markdownContent}
-                              dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.index) }}
+                              dangerouslySetInnerHTML={{ __html: renderIndexMd(sub.index) }}
                             />
                           )}
                         </div>
@@ -799,10 +902,45 @@ function SplitViewModal({ discussion, onClose }) {
                   </div>
                 </div>
 
-                {/* Breadcrumb / Sub-Tabs */}
+                {/* Breadcrumb + Fokus-Dot (B.4) */}
                 <div className={styles.previewBreadcrumb}>
-                  <span className={styles.breadcrumbMain}>📌 {discussion.name}</span>
+                  <span className={styles.breadcrumbDotMain} />
+                  <span className={styles.breadcrumbMain}>{discussion.name}</span>
+                  {activeSubId && activeSubId !== '__main__' && data && data.subs && (
+                    (() => {
+                      const activeSub = data.subs.find(s => s.id === activeSubId)
+                      if (!activeSub) return null
+                      return (
+                        <>
+                          <span className={styles.breadcrumbSep}>▶</span>
+                          <span className={styles.breadcrumbDotSub} />
+                          <span className={styles.breadcrumbSub}>{activeSub.name}</span>
+                        </>
+                      )
+                    })()
+                  )}
                 </div>
+
+                {/* Sub-Tabs (B.3) */}
+                {data && data.subs && data.subs.length > 0 && (
+                  <div className={styles.subTabs}>
+                    <button
+                      className={`${styles.subTab} ${(!activeSubId || activeSubId === '__main__') ? styles.subTabActive : ''}`}
+                      onClick={() => setActiveSubId('__main__')}
+                    >
+                      📌 Haupt
+                    </button>
+                    {data.subs.map(sub => (
+                      <button
+                        key={sub.id}
+                        className={`${styles.subTab} ${activeSubId === sub.id ? styles.subTabActive : ''}`}
+                        onClick={() => setActiveSubId(sub.id)}
+                      >
+                        📂 {sub.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Chat Messages */}
                 <div className={styles.chatArea}>
@@ -848,6 +986,9 @@ function SplitViewModal({ discussion, onClose }) {
                   <div className={styles.summaryActions}>
                     <button className={styles.previewBtn} onClick={handleGenerate} disabled={previewState === 'generating'}>
                       🤖 Von Hermi generieren
+                    </button>
+                    <button className={styles.previewBtn} onClick={() => setShowSubDialog(true)} title="Neue Sub-Diskussion starten">
+                      + Sub-Diskussion starten
                     </button>
                     <button className={styles.previewBtnPrimary} onClick={handleAdopt} disabled={previewState === 'adopting' || !userNotes.trim()}>
                       ✅ In Dokument übernehmen
@@ -897,6 +1038,41 @@ function SplitViewModal({ discussion, onClose }) {
                     </button>
                   )}
                   <button className={styles.errorBannerClose} onClick={() => setErrorMsg('')}>✕</button>
+                </div>
+              </div>
+            )}
+
+            {/* Sub-Start Dialog (C.3) */}
+            {showSubDialog && (
+              <div className={styles.subDialogOverlay} onClick={(e) => { if (e.target === e.currentTarget) { setShowSubDialog(false); setSubDialogName('') } }}>
+                <div className={styles.subDialog}>
+                  <div className={styles.subDialogHeader}>
+                    + Neue Sub-Diskussion starten
+                  </div>
+                  <input
+                    className={styles.subDialogInput}
+                    type="text"
+                    placeholder="z.B. API-Key-Handling"
+                    value={subDialogName}
+                    onChange={e => setSubDialogName(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && subDialogName.trim()) { const n = subDialogName.trim(); setShowSubDialog(false); setSubDialogName(''); handleStartSub(n) } }}
+                    autoFocus
+                  />
+                  <div className={styles.subDialogHint}>
+                    Die Sub-Diskussion wird im Ordner der Haupt-Diskussion angelegt.
+                  </div>
+                  <div className={styles.subDialogActions}>
+                    <button className={styles.previewBtn} onClick={() => { setShowSubDialog(false); setSubDialogName('') }}>
+                      Abbrechen
+                    </button>
+                    <button
+                      className={styles.previewBtnPrimary}
+                      disabled={!subDialogName.trim()}
+                      onClick={() => { const n = subDialogName.trim(); setShowSubDialog(false); setSubDialogName(''); handleStartSub(n) }}
+                    >
+                      🚀 Starten
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
