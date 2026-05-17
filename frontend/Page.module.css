@@ -455,12 +455,24 @@
 }
 
 .blockCardSub {
+  position: relative;
   margin-bottom: 14px;
-  margin-left: 20px;
+  margin-left: 28px;
   border-radius: 10px;
-  overflow: hidden;
   border: 1px solid #2d3f52;
   background: #243447;
+}
+
+.blockCardSub::before {
+  content: '';
+  position: absolute;
+  left: -28px;
+  top: 20px;
+  width: 28px;
+  height: 20px;
+  border-left: 2px solid #5457c0;
+  border-bottom: 2px solid #5457c0;
+  border-radius: 0 0 0 4px;
 }
 
 .blockCardSub .blockHeader {
