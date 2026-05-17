@@ -541,10 +541,11 @@ def start_session():
     if not webhook_url:
         return jsonify({'error': 'Keine Webhook-URL konfiguriert'}), 500
 
-    # Session-Titel für Polling
-    session_title = f'disc-{discussion_id}'
+    # Session-Titel für Polling — Timestamp-Suffix verhindert Konflikte
+    ts = int(time.time())
+    session_title = f'disc-{discussion_id}-{ts}'
     if is_sub and sub_id:
-        session_title = f'disc-{discussion_id}-{sub_id}'
+        session_title = f'disc-{discussion_id}-{sub_id}-{ts}'
 
     # Datei-Pfad für Kontext-Prompt
     if is_sub and sub_id:

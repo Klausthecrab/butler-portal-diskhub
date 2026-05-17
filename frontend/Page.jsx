@@ -710,6 +710,7 @@ function SplitViewModal({ discussion, onClose }) {
   // "Hier weiterdiskutieren"
   const handleStartSession = () => {
     setPreviewState('starting')
+    setTriggeredAt(Math.floor(Date.now() / 1000))  // JETZT erfassen — vor dem Fetch
     const currentSubId = activeSubId === '__main__' ? null : activeSubId
 
     fetch(`${API}/start-session`, {
@@ -725,7 +726,6 @@ function SplitViewModal({ discussion, onClose }) {
       .then(d => {
         if (d.status === 'triggered' || d.status === 'partial') {
           setSessionTitle(d.session_title)
-          setTriggeredAt(Math.floor(Date.now() / 1000))
           setPreviewState('polling')
         } else {
           setPreviewState('error')
@@ -832,6 +832,7 @@ function SplitViewModal({ discussion, onClose }) {
   const handleStartSub = (subName) => {
     const name = subName || ('neue-sub-' + Date.now())
     setPreviewState('starting')
+    setTriggeredAt(Math.floor(Date.now() / 1000))  // vor dem Fetch
     setActiveSubId(null) // zurücksetzen für neuen Flow
     fetch(`${API}/start-sub-discussion`, {
       method: 'POST',
