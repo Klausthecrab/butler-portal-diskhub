@@ -464,6 +464,8 @@ function SplitViewModal({ discussion, onClose }) {
   const [gitLogLoading, setGitLogLoading] = useState(false)
   const [showSubDialog, setShowSubDialog] = useState(false)
   const [subDialogName, setSubDialogName] = useState('')
+  const [freitextMode, setFreitextMode] = useState(false)
+  const fileInputRef = useRef(null)
 
   // SSE Streaming
   const lastTsRef = useRef(0)
@@ -589,6 +591,7 @@ function SplitViewModal({ discussion, onClose }) {
     const maxAttempts = 60 // 5min bei 5s Intervall
 
     const poll = () => {
+      console.log('[DISKHUB] Poll', { title: sessionTitle, triggeredAt, attempt: attempts + 1 })
       const params = new URLSearchParams({ title: sessionTitle })
       if (triggeredAt) params.set('since', String(triggeredAt))
 
@@ -596,6 +599,7 @@ function SplitViewModal({ discussion, onClose }) {
         .then(r => r.json())
         .then(d => {
           if (d.found && d.session) {
+            console.log('[DISKHUB] Poll SUCCESS', { sessionId: d.session.id, title: d.session.title, msgs: d.session.message_count })
             setSessionId(d.session.id)
 
             // Messages vor dem SSE-Connect laden — so ist since_ts korrekt
@@ -670,6 +674,7 @@ function SplitViewModal({ discussion, onClose }) {
       if (!event.data || event.data.startsWith(':')) return
       try {
         const data = JSON.parse(event.data)
+        console.log('[DISKHUB] SSE message', { msgCount: data.messages?.length, total_new: data.total_new })
         if (data.messages && data.messages.length > 0) {
           setMessages(prev => [...prev, ...data.messages])
         }
@@ -679,8 +684,8 @@ function SplitViewModal({ discussion, onClose }) {
     }
 
     eventSource.onerror = () => {
-      // EventSource reconnectiert automatisch in den meisten Browsern
-      // Fallback: einmalig nach 30s ohne SSE-Daten polling starten
+      console.log('[DISKHUB] SSE error — reconnect/fallback')
+      // EventSource reconnectiert automatisch
       if (!pollFallbackRef.current) {
         const iv = setInterval(() => {
           fetchMessages(sessionId)
@@ -709,6 +714,7 @@ function SplitViewModal({ discussion, onClose }) {
 
   // "Hier weiterdiskutieren"
   const handleStartSession = () => {
+    console.log('[DISKHUB] handleStartSession', { discussion_id: discussion.id, t: Math.floor(Date.now() / 1000) })
     setPreviewState('starting')
     setTriggeredAt(Math.floor(Date.now() / 1000))  // JETZT erfassen — vor dem Fetch
     const currentSubId = activeSubId === '__main__' ? null : activeSubId
@@ -830,6 +836,7 @@ function SplitViewModal({ discussion, onClose }) {
 
   // Sub-Diskussion starten (C.3 — mit Namenseingabe)
   const handleStartSub = (subName) => {
+    console.log('[DISKHUB] handleStartSub', { subName, discussion_id: discussion.id, t: Math.floor(Date.now() / 1000) })
     const name = subName || ('neue-sub-' + Date.now())
     setPreviewState('starting')
     setTriggeredAt(Math.floor(Date.now() / 1000))  // vor dem Fetch
