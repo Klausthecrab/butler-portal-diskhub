@@ -281,6 +281,71 @@ def _read_file_content(filepath):
         return None
 
 
+def _parse_discussion_header(readme):
+    """Extrahiert Header-Infos (Titel, Frage, Datum, Status) aus README.md.
+    
+    Returns: (header_dict, body_string)
+      header_dict = {title, question, created_at, updated_at, done_count, open_count}
+      body_string = README ohne Header-Zeilen (ab **Erledigt:** oder ---)
+    """
+    header = {'title': '', 'question': '', 'created_at': '', 'updated_at': '',
+              'done_count': 0, 'open_count': 0}
+    if not readme:
+        return header, readme
+    
+    lines = readme.split('\n')
+    
+    # H1-Titel
+    for line in lines:
+        if line.startswith('# '):
+            header['title'] = line[2:].strip()
+            break
+    
+    # Metadaten (Erstellt, Zuletzt aktualisiert, Status)
+    for line in lines[:10]:
+        m = re.search(r'\*\*Erstellt:\*\*\s*([^*\n·]+)', line)
+        if m:
+            header['created_at'] = m.group(1).strip()
+        m = re.search(r'\*\*Zuletzt aktualisiert:\*\*\s*([^*\n]+)', line)
+        if m:
+            header['updated_at'] = m.group(1).strip().rstrip()
+        m = re.search(r'\*\*Status:\*\*\s*(\d+)\s*erledigt', line)
+        if m:
+            header['done_count'] = int(m.group(1))
+        m = re.search(r'·\s*(\d+)\s*offen', line)
+        if m:
+            header['open_count'] = int(m.group(1))
+    
+    # Frage: erster nicht-leerer Absatz nach der Status-Zeile
+    status_idx = -1
+    for i, line in enumerate(lines[:15]):
+        if '**Status:**' in line:
+            status_idx = i
+            break
+    if status_idx >= 0:
+        for i in range(status_idx + 1, len(lines)):
+            cleaned = lines[i].strip()
+            if cleaned and not cleaned.startswith('**') and not cleaned.startswith('#'):
+                para = []
+                j = i
+                while j < len(lines) and lines[j].strip():
+                    para.append(lines[j].strip())
+                    j += 1
+                header['question'] = ' '.join(para)
+                break
+    
+    # Body: alles ab **Erledigt:** oder **Offen:** oder ---
+    body_start = len(lines)
+    for i, line in enumerate(lines):
+        s = line.strip()
+        if s.startswith('**Erledigt:**') or s.startswith('**Offen:**') or s == '---':
+            body_start = i
+            break
+    
+    body = '\n'.join(lines[body_start:]) if body_start < len(lines) else ''
+    return header, body
+
+
 def _parse_hermes_response(raw_output):
     """Extrahiert die eigentliche Hermes-Antwort aus dem CLI-Output.
     
@@ -389,7 +454,12 @@ def get_discussion(discussion_id):
     readme_path = os.path.join(folder, 'README.md')
     if os.path.isfile(readme_path):
         with open(readme_path, 'r') as f:
-            result['readme'] = f.read()
+            readme_content = f.read()
+        result['readme'] = readme_content
+        # Header-Infos parsen (E.3)
+        header, body = _parse_discussion_header(readme_content)
+        result['parsed'] = header
+        result['readme_body'] = body
 
     index_path = os.path.join(folder, 'index.md')
     if os.path.isfile(index_path):

@@ -458,7 +458,6 @@ function SplitViewModal({ discussion, onClose }) {
   const [triggeredAt, setTriggeredAt] = useState(null)
   const [showReadmeModal, setShowReadmeModal] = useState(false)
   const pollRef = useRef(null)
-  const [activeSubId, setActiveSubId] = useState(null)
   const [activeTab, setActiveTab] = useState('discussion')
   const [gitLog, setGitLog] = useState(null)
   const [gitLogLoading, setGitLogLoading] = useState(false)
@@ -574,15 +573,12 @@ function SplitViewModal({ discussion, onClose }) {
   useEffect(() => {
     if (activeTab !== 'technical' || !discussion?.id) return
     setGitLogLoading(true)
-    const currentSubId = activeSubId === '__main__' ? null : activeSubId
-    const params = new URLSearchParams()
-    if (currentSubId) params.set('sub_id', currentSubId)
-    fetch(`${API}/git-log/${discussion.id}?${params}`)
+    fetch(`${API}/git-log/${discussion.id}`)
       .then(r => r.json())
       .then(d => { setGitLog(d); setGitLogLoading(false) })
       .catch(() => { setGitLog(null); setGitLogLoading(false) })
-  }, [activeTab, discussion?.id, activeSubId])
-
+  }, [activeTab, discussion?.id])
+  
   // Session-Polling
   useEffect(() => {
     if (previewState !== 'polling') return
@@ -717,15 +713,13 @@ function SplitViewModal({ discussion, onClose }) {
     console.log('[DISKHUB] handleStartSession', { discussion_id: discussion.id, t: Math.floor(Date.now() / 1000) })
     setPreviewState('starting')
     setTriggeredAt(Math.floor(Date.now() / 1000))  // JETZT erfassen — vor dem Fetch
-    const currentSubId = activeSubId === '__main__' ? null : activeSubId
 
     fetch(`${API}/start-session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         discussion_id: discussion.id,
-        is_sub: !!currentSubId,
-        sub_id: currentSubId || undefined,
+        is_sub: false,
       }),
     })
       .then(r => r.json())
@@ -840,7 +834,6 @@ function SplitViewModal({ discussion, onClose }) {
     const name = subName || ('neue-sub-' + Date.now())
     setPreviewState('starting')
     setTriggeredAt(Math.floor(Date.now() / 1000))  // vor dem Fetch
-    setActiveSubId(null) // zurücksetzen für neuen Flow
     fetch(`${API}/start-sub-discussion`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -950,11 +943,36 @@ function SplitViewModal({ discussion, onClose }) {
                     <div className={styles.loading}>Lade Diskussion...</div>
                   ) : data ? (
                     <>
-                      {data.readme && (
+                      {data.parsed && (
+                        <div className={styles.discHeader}>
+                          <div className={styles.discTitle}>{data.parsed.title}</div>
+                          {data.parsed.question && (
+                            <div className={styles.discQuestion}>{data.parsed.question}</div>
+                          )}
+                          <div className={styles.discStats}>
+                            <span>Erstellt {data.parsed.created_at}</span>
+                            <span className={styles.statsSep}>·</span>
+                            <span className={styles.statDone}>{data.parsed.done_count} ✓</span>
+                            <span className={styles.statsSep}>·</span>
+                            <span className={styles.statOpen}>{data.parsed.open_count} ●</span>
+                            {data.parsed.updated_at && (
+                              <>
+                                <span className={styles.statsSep}>·</span>
+                                <span>Zuletzt {data.parsed.updated_at}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {data.readme_body ? (
+                        <div className={styles.markdownContent}
+                          dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme_body) }}
+                        />
+                      ) : data.readme ? (
                         <div className={styles.markdownContent}
                           dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme) }}
                         />
-                      )}
+                      ) : null}
                       {data.index && (
                         <div className={styles.markdownContent}
                           dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index) }}
@@ -1076,45 +1094,11 @@ function SplitViewModal({ discussion, onClose }) {
                   </div>
                 </div>
 
-                {/* Breadcrumb + Fokus-Dot (B.4) */}
+                {/* Breadcrumb */}
                 <div className={styles.previewBreadcrumb}>
                   <span className={styles.breadcrumbDotMain} />
                   <span className={styles.breadcrumbMain}>{discussion.name}</span>
-                  {activeSubId && activeSubId !== '__main__' && data && data.subs && (
-                    (() => {
-                      const activeSub = data.subs.find(s => s.id === activeSubId)
-                      if (!activeSub) return null
-                      return (
-                        <>
-                          <span className={styles.breadcrumbSep}>▶</span>
-                          <span className={styles.breadcrumbDotSub} />
-                          <span className={styles.breadcrumbSub}>{activeSub.name}</span>
-                        </>
-                      )
-                    })()
-                  )}
                 </div>
-
-                {/* Sub-Tabs (B.3) */}
-                {data && data.subs && data.subs.length > 0 && (
-                  <div className={styles.subTabs}>
-                    <button
-                      className={`${styles.subTab} ${(!activeSubId || activeSubId === '__main__') ? styles.subTabActive : ''}`}
-                      onClick={() => setActiveSubId('__main__')}
-                    >
-                      📌 Haupt
-                    </button>
-                    {data.subs.map(sub => (
-                      <button
-                        key={sub.id}
-                        className={`${styles.subTab} ${activeSubId === sub.id ? styles.subTabActive : ''}`}
-                        onClick={() => setActiveSubId(sub.id)}
-                      >
-                        📂 {sub.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
 
                 {/* Chat Messages */}
                 <div className={styles.chatArea}>
