@@ -1,6 +1,9 @@
 # Gateway-Strategie: Standardisierung
 
-**Erstellt:** 12.05.2026
+**Erstellt:** 12.05.2026 · **Zuletzt aktualisiert:** 16.05.2026  
 **Status:** 2 erledigt · 1 offen
 
-Test-Update per API
+Sollten wir für alle externen API-Calls einen einheitlichen Reverse-Proxy setzen?
+
+**Erledigt:** ✅ Traefik-Entscheidung · ✅ API-Key-Handling  
+**Offen:** ● Docker-Label-Kompatibilität
