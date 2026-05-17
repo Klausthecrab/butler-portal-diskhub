@@ -35,7 +35,6 @@ diskhub = Blueprint('diskhub', __name__)
 REPO_DIR = os.path.expanduser('~/repos/butler-portal-diskhub')
 DISCUSSIONS_DIR = os.path.join(REPO_DIR, 'discussions')
 ACTIVITY_LOG = os.path.expanduser('~/data/portal-logs/diskhub.json')
-CONFIG_PATH = os.path.join(REPO_DIR, 'config.yaml')
 STATE_DB = os.path.expanduser('~/.hermes/state.db')
 
 # ── Hardcodierte Webhook-Konfiguration ────────────────────────────────────────
@@ -43,18 +42,6 @@ STATE_DB = os.path.expanduser('~/.hermes/state.db')
 WEBHOOK_URL = "https://discord.com/api/webhooks/1505338792972910642/HGtaG2ettwRaiInpHIpJpHermS4YXCLWfTzfdlyoHCOEbjmTULywq5WC0GCJ0NERUpnx"
 BOT_MENTION = "<@1467915427077423216>"
 CHANNEL_ID = "1505338710491926560"
-
-
-def _load_config():
-    """Liest config.yaml (YAML-Subset, importlib-freundlich)."""
-    import yaml
-    if not os.path.isfile(CONFIG_PATH):
-        return {'webhook': {}, 'paths': {}, 'polling': {'interval': 5, 'timeout': 120}}
-    try:
-        with open(CONFIG_PATH) as f:
-            return yaml.safe_load(f) or {}
-    except Exception:
-        return {'webhook': {}, 'paths': {}, 'polling': {'interval': 5, 'timeout': 120}}
 
 
 def init_diskhub(data_dir=None):
