@@ -177,6 +177,7 @@ function renderIndexMd(md) {
   let result = ''
   let currentBlock = null
   const preamble = []
+  const blocks = [] // Alle geparsten Blöcke für TOC-Generierung
 
   for (const line of lines) {
     // Leerzeilen überspringen (kein semantischer Inhalt)
@@ -184,7 +185,7 @@ function renderIndexMd(md) {
     if (trimmed === '---' || trimmed === '___' || trimmed === '***') {
       // Horizontaler Strich: finalisiert aktuellen Block, reset zu preamble
       if (currentBlock) {
-        result += renderBlock(currentBlock)
+        blocks.push(currentBlock)
         currentBlock = null
         continue // Struktur-Trenner zwischen Blöcken — nicht sichtbar rendern
       }
@@ -193,7 +194,7 @@ function renderIndexMd(md) {
     if (line.startsWith('### ')) {
       // Vorherigen Block finalisieren
       if (currentBlock) {
-        result += renderBlock(currentBlock)
+        blocks.push(currentBlock)
       } else if (preamble.length > 0) {
         // Erster Block — preamble vorher rendern
         result = renderMarkdown(preamble.join('\n'))
@@ -220,8 +221,29 @@ function renderIndexMd(md) {
 
   // Letzten Block finalisieren
   if (currentBlock) {
-    result += renderBlock(currentBlock)
+    blocks.push(currentBlock)
   }
+
+  // TOC generieren (aus allen Blöcken)
+  if (blocks.length > 0) {
+    result += '<div class="miniToc">'
+    for (const block of blocks) {
+      const isSub = block.heading.startsWith('### Sub:')
+      const title = block.heading.replace(/^###\s+/, '').replace(/^Sub:\s*/, '').trim()
+      if (isSub) {
+        result += `<div class="tocSub">• ${title}</div>`
+      } else {
+        result += `<div class="tocBlock">• ${title}</div>`
+      }
+    }
+    result += '</div>'
+  }
+
+  // Alle Blöcke rendern
+  for (const block of blocks) {
+    result += renderBlock(block)
+  }
+
   // Rest-Preamble nach allen Blöcken anhängen (Sub-Referenzen, Footer)
   if (preamble.length > 0) {
     result += renderMarkdown(preamble.join('\n'))
