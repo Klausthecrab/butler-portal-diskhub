@@ -361,8 +361,12 @@ function ReadmeModal({ discussionId, onClose, onUpdate, isSub, subId }) {
           <button className={styles.modalClose} onClick={onClose}>✕</button>
         </div>
         {loading ? (
-          <div className={styles.readmeBody}>
-            <div className={styles.loading}>Hermi vergleicht README mit index.md…</div>
+          <div>
+            <div className={styles.readmeLoadingWrap}>
+              <div className={styles.spinner} />
+              <p className={styles.readmeLoadingText}>Hermi analysiert README und index.md…</p>
+              <p className={styles.readmeLoadingHint}>Das kann bis zu 30s dauern.</p>
+            </div>
           </div>
         ) : (
           <div className={styles.readmeBody}>

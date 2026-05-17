@@ -600,6 +600,7 @@ def start_session():
 def get_session_status():
     """
     Pollt state.db nach einer Session mit bestimmtem Titel.
+    Fallback: falls Titel-Suche leer und since gesetzt → neueste aktive Session seit since.
 
     Query-Params:
       title (str) — Session-Titel zum Suchen (z.B. 'disc-gateway-standardisierung')
@@ -622,6 +623,22 @@ def get_session_status():
             sessions = [s for s in sessions if s.get('started_at') and s['started_at'] >= since_ts]
         except (ValueError, TypeError):
             pass
+
+    if not sessions:
+        # Fallback: Title-LIKE hat nichts gefunden → neueste aktive Session seit since
+        if since:
+            try:
+                since_ts = float(since)
+                all_recent = _query_state_db()  # ohne Title-Filter, letzte 20
+                fallback = [
+                    s for s in all_recent
+                    if s.get('started_at') and s['started_at'] >= since_ts
+                    and s.get('ended_at') is None  # nur aktive Sessions
+                ]
+                if fallback:
+                    sessions = fallback
+            except (ValueError, TypeError):
+                pass
 
     if not sessions:
         return jsonify({'found': False, 'session': None})
