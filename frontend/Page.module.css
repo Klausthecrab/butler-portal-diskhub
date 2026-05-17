@@ -270,6 +270,24 @@
   color: #f1f5f9;
 }
 
+.backBtn {
+  background: none;
+  border: 1px solid #475569;
+  color: #94a3b8;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+
+.backBtn:hover {
+  border-color: #6366f1;
+  color: #f1f5f9;
+  background: #1e2d4a;
+}
+
 /* Split-View Layout */
 .splitView {
   display: flex;
@@ -555,37 +573,117 @@
 /* ─── Block Cards (Dreiteilung) ─────────────────────────────────── */
 
 .blockCard {
+  position: relative;
   margin-bottom: 14px;
+  margin-left: 22px;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid #334155;
   background: #1e293b;
 }
 
+.blockCard::before {
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: 0;
+  width: 18px;
+  height: 20px;
+  border-left: 2px solid #475569;
+  border-top: 2px solid #475569;
+  border-radius: 4px 0 0 0;
+}
+
 .blockCardSub {
   position: relative;
   margin-bottom: 14px;
-  margin-left: 28px;
+  margin-left: 22px;
   border-radius: 10px;
-  border: 1px solid #78350f;
+  overflow: hidden;
+  border: 1px solid #334155;
   background: #1c1917;
-  border-left: 3px solid #d97706;
 }
 
 .blockCardSub::before {
   content: '';
   position: absolute;
-  left: -28px;
+  left: -22px;
   top: 0;
-  width: 25px;
-  height: 24px;
-  border-left: 2px solid #d97706;
-  border-bottom: 2px solid #d97706;
-  border-radius: 0 0 0 4px;
+  width: 18px;
+  height: 20px;
+  border-left: 2px solid #475569;
+  border-top: 2px solid #475569;
+  border-radius: 4px 0 0 0;
 }
 
 .blockCardSub .blockHeader {
   background: #78350f;
+}
+
+/* ─── Status-Farben (L.3) ────────────────────────────────────────── */
+
+/* Gelöste Box (Pastell-Grün) */
+.blockCard[data-status="done"] {
+  border-color: #22c55e66;
+}
+.blockCard[data-status="done"] .blockHeader {
+  background: #166534;
+}
+.blockCard[data-status="done"]::before {
+  border-left-color: #22c55e;
+  border-top-color: #22c55e;
+}
+
+/* Offene Box (Gelb) */
+.blockCard[data-status="open"] {
+  border-color: #f59e0b66;
+}
+.blockCard[data-status="open"] .blockHeader {
+  background: #92400e;
+}
+.blockCard[data-status="open"]::before {
+  border-left-color: #f59e0b;
+  border-top-color: #f59e0b;
+}
+
+/* Offene Sub-Diskussion (Orange) */
+.blockCardSub[data-status="open"] {
+  border-color: #ea580c66;
+}
+.blockCardSub[data-status="open"] .blockHeader {
+  background: #9a3412;
+}
+.blockCardSub[data-status="open"]::before {
+  border-left-color: #ea580c;
+  border-top-color: #ea580c;
+}
+
+/* Gelöste Sub-Diskussion (Dunkel-Grün) */
+.blockCardSub[data-status="done"] {
+  border-color: #05966966;
+}
+.blockCardSub[data-status="done"] .blockHeader {
+  background: #065f46;
+}
+.blockCardSub[data-status="done"]::before {
+  border-left-color: #059669;
+  border-top-color: #059669;
+}
+
+/* ─── Rot-Akzent: Neueste offene Sub/Box (L.7) ──────────────────── */
+.blockCard[data-hot="true"],
+.blockCardSub[data-hot="true"] {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.25);
+}
+.blockCard[data-hot="true"] .blockHeader,
+.blockCardSub[data-hot="true"] .blockHeader {
+  background: #991b1b !important;
+}
+.blockCard[data-hot="true"]::before,
+.blockCardSub[data-hot="true"]::before {
+  border-left-color: #dc2626 !important;
+  border-top-color: #dc2626 !important;
 }
 
 .blockHeader {
@@ -770,6 +868,20 @@ details[open] .blockHeader::after {
   border: 1px solid rgba(217, 119, 6, 0.35);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+/* ─── Accordion Zwei-Titel (L.6) ─── */
+.titleClosed {
+  display: inline;
+}
+.titleOpen {
+  display: none;
+}
+details[open] .titleClosed {
+  display: none;
+}
+details[open] .titleOpen {
+  display: inline;
 }
 
 /* ─── Sub-Block Status (für später: grün=erledigt, gelb=offen) ─── */

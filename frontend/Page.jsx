@@ -230,7 +230,7 @@ function renderIndexMd(md) {
 result += '<div class="tocHeading">📋 Inhaltsverzeichnis</div>'
     for (const block of blocks) {
       const isSub = block.heading.startsWith('### Sub:')
-      const title = block.heading.replace(/^###\s+/, '').replace(/^Sub:\s*/, '').trim()
+      const title = block.heading.replace(/^###\s+/, '').replace(/^Sub:\s*/, '').replace(/\s*\|\|.*/, '').trim()
       const hasResult = !!block.result || block.heading.includes('(✓ erledigt)')
       const statusChar = hasResult ? '✅' : '●'
       if (isSub) {
@@ -242,9 +242,21 @@ result += '<div class="tocHeading">📋 Inhaltsverzeichnis</div>'
     result += '</div>'
   }
 
+  // Letzten offenen Block finden für Rot-Akzent (L.7)
+  let latestOpenIndex = -1
+  for (let bIdx = blocks.length - 1; bIdx >= 0; bIdx--) {
+    const b = blocks[bIdx]
+    const bIsDone = !!b.result || b.heading.includes('(✓ erledigt)')
+    if (!bIsDone) {
+      latestOpenIndex = bIdx
+      break
+    }
+  }
+
   // Alle Blöcke rendern
-  for (const block of blocks) {
-    result += renderBlock(block)
+  for (let bIdx = 0; bIdx < blocks.length; bIdx++) {
+    const block = blocks[bIdx]
+    result += renderBlock(block, bIdx === latestOpenIndex)
   }
 
   // Rest-Preamble nach allen Blöcken anhängen (Sub-Referenzen, Footer)
@@ -255,7 +267,7 @@ result += '<div class="tocHeading">📋 Inhaltsverzeichnis</div>'
   return result
 }
 
-function renderBlock(block) {
+function renderBlock(block, isHot) {
   const heading = block.heading.substring(4).trim() // "### " entfernen
   const content = block.content.join('\n').trim()
   const footnote = block.footnote || ''
@@ -275,6 +287,16 @@ function renderBlock(block) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
 
+  // Zwei-Titel-System für Accordion (L.6): "Frage || Aussage"
+  let titleQuestion = escapedHeading
+  let titleStatement = ''
+  const separatorIndex = escapedHeading.indexOf(' || ')
+  if (separatorIndex >= 0) {
+    titleQuestion = escapedHeading.slice(0, separatorIndex).trim()
+    titleStatement = escapedHeading.slice(separatorIndex + 4).trim()
+  }
+  const hasSeparator = separatorIndex >= 0 && titleStatement.length > 0
+
   const statusBadge = hasResult
     ? `<span class="${styles.blockStatusBadge} ${styles.blockStatusDone}">✓ erledigt</span>`
     : ''
@@ -282,9 +304,16 @@ function renderBlock(block) {
     ? `<span class="${styles.blockSubBadge}">Sub</span>`
     : ''
 
-  let html = `<div class="${isSub ? styles.blockCardSub : styles.blockCard}">`
+  let html = `<div class="${isSub ? styles.blockCardSub : styles.blockCard}" data-status="${hasResult ? 'done' : 'open'}"${isHot ? ' data-hot="true"' : ''}>`
+  // Accordion-Titel mit Frage↔Aussage (L.6)
+  let summaryTitle
+  if (hasSeparator) {
+    summaryTitle = `<span class="${styles.titleClosed}">${titleStatement}</span><span class="${styles.titleOpen}">${titleQuestion}</span>`
+  } else {
+    summaryTitle = escapedHeading
+  }
   html += `<details${hasResult ? ' open' : ''}>`
-  html += `<summary class="${styles.blockHeader}"><h3>${subBadge}${escapedHeading}${statusBadge}</h3></summary>`
+  html += `<summary class="${styles.blockHeader}"><h3>${subBadge}${summaryTitle}${statusBadge}</h3></summary>`
   html += `<div class="${styles.blockContent}">${renderMarkdown(content)}</div>`
   if (result) {
     // Ergebnis-Zeile rendern
@@ -989,7 +1018,20 @@ function SplitViewModal({ discussion, onClose }) {
         {/* Header */}
         <div className={styles.modalHeader}>
           <div className={styles.modalHeaderLeft}>
-            <div className={styles.modalTitle}>💬 {discussion.name}</div>
+            {activeSubView ? (
+              <>
+                <button
+                  className={styles.backBtn}
+                  onClick={() => setActiveSubView(null)}
+                  title="Zurück zur Hauptdiskussion"
+                >
+                  ← Zurück
+                </button>
+                <div className={styles.modalTitle}>📂 {subViewData?.sub_name || activeSubView}</div>
+              </>
+            ) : (
+              <div className={styles.modalTitle}>💬 {discussion.name}</div>
+            )}
             <button className={styles.readmeBtn} onClick={() => setShowReadmeModal(true)} title="README aktualisieren">
               📋 README
             </button>
@@ -1396,7 +1438,7 @@ function SplitViewModal({ discussion, onClose }) {
                     autoFocus
                   />
                   <div className={styles.subDialogHint}>
-                    Die Sub-Diskussion wird im Ordner der Haupt-Diskussion angelegt.
+                    Eine Sub-Diskussion entsteht, wenn eine KI-Session zu einer konkreten Fragestellung stattfand. Normale Blöcke dokumentieren Ideen und Entscheidungen — Subs sind das Ergebnis einer Diskussion mit Hermi.
                   </div>
                   <div className={styles.subDialogActions}>
                     <button className={styles.previewBtn} onClick={() => { setShowSubDialog(false); setSubDialogName('') }}>
