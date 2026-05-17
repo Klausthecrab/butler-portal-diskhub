@@ -1107,7 +1107,7 @@ function SplitViewModal({ discussion, onClose }) {
                 <div className={styles.summaryEditor}>
                   <textarea
                     className={styles.summaryTextarea}
-                    placeholder="Stichpunkte oder generierten Block editieren…"
+                    placeholder={freitextMode ? "Freitext eingeben…" : "Stichpunkte oder generierten Block editieren…"}
                     value={userNotes}
                     onChange={e => setUserNotes(e.target.value)}
                   />
@@ -1115,6 +1115,31 @@ function SplitViewModal({ discussion, onClose }) {
                     <button className={styles.previewBtn} onClick={handleGenerate} disabled={previewState === 'generating'}>
                       🤖 Von Hermi generieren
                     </button>
+                    <button className={styles.previewBtn} onClick={() => {
+                      setFreitextMode(true)
+                      document.querySelector(`.${styles.summaryTextarea.split(' ')[0]}`)?.focus()
+                    }} title="Freitext schreiben">
+                      ✏️ Freitext
+                    </button>
+                    <button className={styles.previewBtn} onClick={() => fileInputRef.current?.click()} title="Bild einfügen">
+                      📷 Bild einfügen
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={e => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        const reader = new FileReader()
+                        reader.onload = () => {
+                          setUserNotes(prev => prev + (prev ? '\n' : '') + `![${file.name}](${reader.result})`)
+                        }
+                        reader.readAsDataURL(file)
+                        e.target.value = ''
+                      }}
+                    />
                     <button className={styles.previewBtn} onClick={() => setShowSubDialog(true)} title="Neue Sub-Diskussion starten">
                       + Sub-Diskussion starten
                     </button>
