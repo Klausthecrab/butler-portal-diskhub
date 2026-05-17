@@ -459,8 +459,12 @@
   margin-left: 20px;
   border-radius: 10px;
   overflow: hidden;
-  border: 1px solid #334155;
-  background: #1e293b;
+  border: 1px solid #2d3f52;
+  background: #243447;
+}
+
+.blockCardSub .blockHeader {
+  background: #5457c0;
 }
 
 .blockHeader {
