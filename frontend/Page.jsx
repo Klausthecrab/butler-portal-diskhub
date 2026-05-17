@@ -14,31 +14,159 @@ function timeAgo(ts) {
   return new Date(ts * 1000).toLocaleDateString('de-DE')
 }
 
+function parseTable(tableLines) {
+  let headerRow = null
+  const bodyRows = []
+  let isHeader = true
+  for (let t = 0; t < tableLines.length; t++) {
+    const row = tableLines[t]
+    if (/^\|[\s\-:]+\|$/.test(row)) { isHeader = false; continue }
+    const cells = row.split('|').slice(1, -1).map(c => c.trim())
+    if (isHeader) headerRow = cells
+    else bodyRows.push(cells)
+  }
+  let html = '<table>'
+  if (headerRow) html += '<thead><tr>' + headerRow.map(c => `<th>${c}</th>`).join('') + '</tr></thead>'
+  if (bodyRows.length > 0) {
+    html += '<tbody>'
+    for (const row of bodyRows) html += '<tr>' + row.map(c => `<td>${c}</td>`).join('') + '</tr>'
+    html += '</tbody>'
+  }
+  html += '</table>'
+  return html
+}
+
 function renderMarkdown(md) {
   if (!md) return ''
+
+  // Stage 0: Escape HTML entities
   let html = md
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+
+  // Stage 1: Protect fenced code blocks
+  const codeBlocks = []
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+    const idx = codeBlocks.length
+    codeBlocks.push({ lang, code })
+    return `\x00CODEBLOCK${idx}\x00`
+  })
+
+  // Stage 2: Line-by-line block processing
+  const lines = html.split('\n')
+  const out = []
+  let i = 0
+  while (i < lines.length) {
+    const line = lines[i]
+
+    // Code block placeholder — pass through
+    if (line.includes('\x00CODEBLOCK')) { out.push(line); i++; continue }
+
+    // Blockquote — collect consecutive > lines
+    if (line.startsWith('> ')) {
+      const quoteLines = []
+      while (i < lines.length && lines[i].startsWith('> ')) { quoteLines.push(lines[i].slice(2)); i++ }
+      out.push(`<blockquote>${quoteLines.join('\n')}</blockquote>`)
+      continue
+    }
+
+    // Table — collect consecutive |...| lines
+    if (line.startsWith('|') && line.endsWith('|')) {
+      const tableLines = []
+      while (i < lines.length && lines[i].startsWith('|') && lines[i].endsWith('|')) { tableLines.push(lines[i]); i++ }
+      out.push(parseTable(tableLines))
+      continue
+    }
+
+    // Task list — - [x] or - [ ]
+    const taskMatch = line.match(/^[-*]\s+\[([ x])\]\s+(.+)$/)
+    if (taskMatch) {
+      const items = []
+      while (i < lines.length) {
+        const m = lines[i].match(/^[-*]\s+\[([ x])\]\s+(.+)$/)
+        if (!m) break
+        const checked = m[1] === 'x'
+        items.push(`<li class="${checked ? 'task-done' : 'task-pending'}"><input type="checkbox" ${checked ? 'checked' : ''} disabled />${m[2]}</li>`)
+        i++
+      }
+      out.push(`<ul class="task-list">${items.join('')}</ul>`)
+      continue
+    }
+
+    // Numbered list — 1. item
+    const numMatch = line.match(/^\d+\.\s+(.+)$/)
+    if (numMatch) {
+      const items = []
+      while (i < lines.length) {
+        const m = lines[i].match(/^\d+\.\s+(.+)$/)
+        if (!m) break
+        items.push(`<li>${m[1]}</li>`)
+        i++
+      }
+      out.push(`<ol>${items.join('')}</ol>`)
+      continue
+    }
+
+    // Unordered list — - item (not a task)
+    const ulMatch = line.match(/^[-*]\s+(.+)$/)
+    if (ulMatch) {
+      const items = []
+      while (i < lines.length) {
+        const m = lines[i].match(/^[-*]\s+(.+)$/)
+        if (!m) break
+        items.push(`<li>${m[1]}</li>`)
+        i++
+      }
+      out.push(`<ul>${items.join('')}</ul>`)
+      continue
+    }
+
+    // Headings
+    if (line.startsWith('### ')) { out.push(`<h3>${line.slice(4)}</h3>`); i++; continue }
+    if (line.startsWith('## ')) { out.push(`<h2>${line.slice(3)}</h2>`); i++; continue }
+    if (line.startsWith('# ')) { out.push(`<h1>${line.slice(2)}</h1>`); i++; continue }
+
+    // Horizontal rule
+    if (/^---+$/.test(line)) { out.push('<hr />'); i++; continue }
+
+    // Regular text line
+    out.push(line)
+    i++
+  }
+
+  html = out.join('\n')
+
+  // Stage 3: Restore code blocks with language class
+  html = html.replace(/\x00CODEBLOCK(\d+)\x00/g, (_, idx) => {
+    const block = codeBlocks[parseInt(idx)]
+    const langClass = block.lang ? ` class="language-${block.lang}"` : ''
+    return `<pre><code${langClass}>${block.code}</code></pre>`
+  })
+
+  // Stage 4: Inline processing (safe — code blocks are placeholder-protected)
+  html = html
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')
     .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />')
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-    .replace(/^---+/gm, '<hr />')
-    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^(.+)$/gm, (m) => {
-      if (m.startsWith('<')) return m
-      return m
+
+  // Stage 5: Smart paragraph wrapping — skip block elements
+  const blockTags = ['<h1', '<h2', '<h3', '<ul', '<ol', '<li', '<table', '<pre', '<blockquote', '<hr', '<div']
+  const paragraphs = html.split('\n\n')
+  const wrapped = paragraphs.map(p => {
+    const trimmed = p.trim()
+    if (!trimmed) return ''
+    const lines = trimmed.split('\n')
+    const allBlocks = lines.every(l => {
+      const t = l.trim()
+      return !t || blockTags.some(tag => t.startsWith(tag))
     })
-  return `<p>${html}</p>`
+    return allBlocks ? trimmed : `<p>${trimmed}</p>`
+  }).join('\n')
+
+  return wrapped
 }
 
 // Block-aware rendering for index.md — drei Zonen: Header, Content, Footer
