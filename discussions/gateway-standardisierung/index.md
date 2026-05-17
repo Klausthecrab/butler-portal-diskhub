@@ -36,6 +36,12 @@ Dies ist ein Test-Eintrag über Hermes CLI.
 
 *session: test-20260517 · 17.05.2026*
 
+### Sub: Notiz — Platzhalter
+
+Dies ist ein Platzhalter für Parent-Kind-Visualisierung.
+
+*session: demo · 17.05.2026*
+
 ---
 
 💬 **Haupt-Diskussion fortsetzen**

@@ -477,12 +477,24 @@
   font-size: 0.825rem;
   line-height: 1.7;
 }
+.tocHeading {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #818cf8;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #1e293b;
+}
 .tocBlock {
   color: #cbd5e1;
+  font-family: monospace;
+  font-size: 0.78rem;
 }
 .tocSub {
-  padding-left: 20px;
+  padding-left: 24px;
   color: #94a3b8;
+  font-family: monospace;
+  font-size: 0.75rem;
 }
 
 .subDocBlock {
@@ -491,6 +503,12 @@
   background: #0f172a;
   border-radius: 8px;
   border: 1px solid #334155;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.subDocBlock:hover {
+  border-color: #6366f1;
+  background: #1e2d4a;
 }
 
 .subDocTitle {
@@ -498,6 +516,40 @@
   font-weight: 600;
   color: #94a3b8;
   margin-bottom: 8px;
+}
+.subDocTitle:hover {
+  color: #e2e8f0;
+}
+
+/* ─── Sub-View Breadcrumb (J.5) ─── */
+.subViewBreadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  padding: 6px 12px;
+  background: #0f172a;
+  border-radius: 6px;
+  border: 1px solid #1e293b;
+  font-size: 0.8rem;
+  margin-bottom: 16px;
+}
+.subViewBreadcrumbLink {
+  color: #818cf8;
+  cursor: pointer;
+  font-weight: 500;
+}
+.subViewBreadcrumbLink:hover {
+  color: #a5b4fc;
+  text-decoration: underline;
+}
+.subViewBreadcrumbSep {
+  color: #475569;
+  font-size: 0.7rem;
+}
+.subViewBreadcrumbCurrent {
+  color: #f1f5f9;
+  font-weight: 600;
 }
 
 /* ─── Block Cards (Dreiteilung) ─────────────────────────────────── */
@@ -515,29 +567,48 @@
   margin-bottom: 14px;
   margin-left: 28px;
   border-radius: 10px;
-  border: 1px solid #2d3f52;
-  background: #243447;
+  border: 1px solid #78350f;
+  background: #1c1917;
+  border-left: 3px solid #d97706;
 }
 
 .blockCardSub::before {
   content: '';
   position: absolute;
   left: -28px;
-  top: 20px;
-  width: 28px;
-  height: 20px;
-  border-left: 2px solid #5457c0;
-  border-bottom: 2px solid #5457c0;
+  top: 0;
+  width: 25px;
+  height: 24px;
+  border-left: 2px solid #d97706;
+  border-bottom: 2px solid #d97706;
   border-radius: 0 0 0 4px;
 }
 
 .blockCardSub .blockHeader {
-  background: #5457c0;
+  background: #78350f;
 }
 
 .blockHeader {
   background: #6366f1;
   padding: 10px 16px;
+  cursor: pointer;
+  list-style: none;
+}
+.blockHeader::-webkit-details-marker {
+  display: none;
+}
+.blockHeader:hover {
+  background: #4f46e5;
+}
+.blockHeader::after {
+  content: '▾';
+  float: right;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  transition: transform 0.2s;
+}
+details[open] .blockHeader::after {
+  transform: rotate(180deg);
 }
 
 .blockHeader h3 {
@@ -685,6 +756,20 @@
   background: rgba(76, 175, 80, 0.2);
   color: #6ee7b7;
   border: 1px solid rgba(76, 175, 80, 0.3);
+}
+.blockSubBadge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-right: 6px;
+  vertical-align: middle;
+  background: rgba(217, 119, 6, 0.25);
+  color: #fbbf24;
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* ─── Sub-Block Status (für später: grün=erledigt, gelb=offen) ─── */
@@ -1286,10 +1371,29 @@
 .readmeBodySection {
   margin-bottom: 20px;
   padding: 16px 20px;
-  background: #1a1f35;
+  background: #f8fafc;
   border-radius: 10px;
-  border: 1px solid #2d3f52;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
 }
+
+.readmeBodySection .markdownContent h1,
+.readmeBodySection .markdownContent h2,
+.readmeBodySection .markdownContent h3 { color: #1e293b; }
+.readmeBodySection .markdownContent p { color: #334155; }
+.readmeBodySection .markdownContent strong { color: #0f172a; }
+.readmeBodySection .markdownContent em { color: #475569; }
+.readmeBodySection .markdownContent a { color: #6366f1; }
+.readmeBodySection .markdownContent hr { border-top-color: #d1d5db; }
+.readmeBodySection .markdownContent blockquote { border-left-color: #6366f1; color: #475569; }
+.readmeBodySection .markdownContent code { background: #e2e8f0; color: #6366f1; }
+.readmeBodySection .markdownContent pre { background: #f1f5f9; border-color: #d1d5db; color: #1e293b; }
+.readmeBodySection .markdownContent th { background: #f1f5f9; color: #6366f1; border-color: #d1d5db; }
+.readmeBodySection .markdownContent table td { border-color: #d1d5db; color: #334155; }
+.readmeBodySection .markdownContent tr:nth-child(even) td { background: #f8fafc; }
+.readmeBodySection .markdownContent ul,
+.readmeBodySection .markdownContent ol { color: #334155; }
+.readmeBodySection .markdownContent img { border-color: #d1d5db; }
 
 /* Markdown rendered in doc */
 .markdownContent {

@@ -227,13 +227,16 @@ function renderIndexMd(md) {
   // TOC generieren (aus allen Blöcken)
   if (blocks.length > 0) {
     result += '<div class="miniToc">'
+result += '<div class="tocHeading">📋 Inhaltsverzeichnis</div>'
     for (const block of blocks) {
       const isSub = block.heading.startsWith('### Sub:')
       const title = block.heading.replace(/^###\s+/, '').replace(/^Sub:\s*/, '').trim()
+      const hasResult = !!block.result || block.heading.includes('(✓ erledigt)')
+      const statusChar = hasResult ? '✅' : '●'
       if (isSub) {
-        result += `<div class="tocSub">• ${title}</div>`
+        result += `<div class="tocSub">└── ${statusChar} ${title}</div>`
       } else {
-        result += `<div class="tocBlock">• ${title}</div>`
+        result += `<div class="tocBlock">├── ${statusChar} ${title}</div>`
       }
     }
     result += '</div>'
@@ -275,9 +278,13 @@ function renderBlock(block) {
   const statusBadge = hasResult
     ? `<span class="${styles.blockStatusBadge} ${styles.blockStatusDone}">✓ erledigt</span>`
     : ''
+  const subBadge = isSub
+    ? `<span class="${styles.blockSubBadge}">Sub</span>`
+    : ''
 
   let html = `<div class="${isSub ? styles.blockCardSub : styles.blockCard}">`
-  html += `<div class="${styles.blockHeader}"><h3>${escapedHeading}${statusBadge}</h3></div>`
+  html += `<details${hasResult ? ' open' : ''}>`
+  html += `<summary class="${styles.blockHeader}"><h3>${subBadge}${escapedHeading}${statusBadge}</h3></summary>`
   html += `<div class="${styles.blockContent}">${renderMarkdown(content)}</div>`
   if (result) {
     // Ergebnis-Zeile rendern
@@ -300,6 +307,7 @@ function renderBlock(block) {
       .replace(/>/g, '&gt;')
     html += `<div class="${styles.blockFooter}"><em>${escapedFootnote}</em></div>`
   }
+  html += `</details>`
   html += `</div>`
   return html
 }
@@ -522,6 +530,9 @@ function SplitViewModal({ discussion, onClose }) {
   const [subDialogName, setSubDialogName] = useState('')
   const [freitextMode, setFreitextMode] = useState(false)
   const fileInputRef = useRef(null)
+  const [activeSubView, setActiveSubView] = useState(null)
+  const [subViewData, setSubViewData] = useState(null)
+  const [subViewLoading, setSubViewLoading] = useState(false)
 
   // SSE Streaming
   const lastTsRef = useRef(0)
@@ -545,6 +556,16 @@ function SplitViewModal({ discussion, onClose }) {
       .then(d => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
   }, [discussion.id])
+
+  // Lade Sub-Diskussionsdaten bei Zoom
+  useEffect(() => {
+    if (!activeSubView || !discussion?.id) return
+    setSubViewLoading(true)
+    fetch(`${API}/${discussion.id}?sub_id=${encodeURIComponent(activeSubView)}`)
+      .then(r => r.json())
+      .then(d => { setSubViewData(d); setSubViewLoading(false) })
+      .catch(() => setSubViewLoading(false))
+  }, [activeSubView, discussion?.id])
 
   // Draft aus localStorage wiederherstellen
   useEffect(() => {
@@ -1000,60 +1021,132 @@ function SplitViewModal({ discussion, onClose }) {
                     <div className={styles.loading}>Lade Diskussion...</div>
                   ) : data ? (
                     <>
-                      {data.parsed && (
-                        <div className={styles.discHeader}>
-                          <div className={styles.discTitle}>{data.parsed.title}</div>
-                          {data.parsed.question && (
-                            <div className={styles.discQuestion}>{data.parsed.question}</div>
-                          )}
-                          <div className={styles.discStats}>
-                            <span>Erstellt {data.parsed.created_at}</span>
-                            <span className={styles.statsSep}>·</span>
-                            <span className={styles.statDone}>{data.parsed.done_count} ✓</span>
-                            <span className={styles.statsSep}>·</span>
-                            <span className={styles.statOpen}>{data.parsed.open_count} ●</span>
-                            {data.parsed.updated_at && (
-                              <>
-                                <span className={styles.statsSep}>·</span>
-                                <span>Zuletzt {data.parsed.updated_at}</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      {data.readme_body ? (
-                        <div className={styles.readmeBodySection}>
-                          <div className={styles.markdownContent}
-                            dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme_body) }}
-                          />
-                        </div>
-                      ) : data.readme ? (
-                        <div className={styles.readmeBodySection}>
-                          <div className={styles.markdownContent}
-                            dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme) }}
-                          />
+                      {/* Sub-View Breadcrumb */}
+                      {activeSubView && subViewData ? (
+                        <div className={styles.subViewBreadcrumb}>
+                          <span className={styles.subViewBreadcrumbLink} onClick={() => setActiveSubView(null)}>
+                            {discussion.name}
+                          </span>
+                          <span className={styles.subViewBreadcrumbSep}> ▶ </span>
+                          <span className={styles.subViewBreadcrumbCurrent}>
+                            {subViewData.sub_name || activeSubView}
+                          </span>
                         </div>
                       ) : null}
-                      {data.index && (
-                        <div className={styles.markdownContent}
-                          dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index) }}
-                        />
+
+                      {activeSubView ? (
+                        /* ── SUB-VIEW ── */
+                        subViewLoading ? (
+                          <div className={styles.loading}>Lade Sub-Diskussion...</div>
+                        ) : subViewData ? (
+                          <>
+                            {subViewData.parsed && (
+                              <div className={styles.discHeader}>
+                                <div className={styles.discTitle}>{subViewData.parsed.title}</div>
+                                {subViewData.parsed.question && (
+                                  <div className={styles.discQuestion}>{subViewData.parsed.question}</div>
+                                )}
+                              </div>
+                            )}
+                            {subViewData.readme_body ? (
+                              <div className={styles.readmeBodySection}>
+                                <div className={styles.markdownContent}
+                                  dangerouslySetInnerHTML={{
+                                    __html: renderMarkdown(
+                                      subViewData.readme_body.split('\n').filter(line => {
+                                        const t = line.trim()
+                                        return !t.startsWith('**Erledigt:**') && !t.startsWith('**Offen:**')
+                                      }).join('\n')
+                                    )
+                                  }}
+                                />
+                              </div>
+                            ) : subViewData.readme ? (
+                              <div className={styles.readmeBodySection}>
+                                <div className={styles.markdownContent}
+                                  dangerouslySetInnerHTML={{ __html: renderMarkdown(subViewData.readme) }}
+                                />
+                              </div>
+                            ) : null}
+                            {subViewData.index && (
+                              <div className={styles.markdownContent}
+                                dangerouslySetInnerHTML={{ __html: renderIndexMd(subViewData.index) }}
+                              />
+                            )}
+                          </>
+                        ) : (
+                          <div className={styles.loading}>Fehler beim Laden</div>
+                        )
+                      ) : (
+                        /* ── MAIN-VIEW ── */
+                        <>
+                          {data.parsed && (
+                            <div className={styles.discHeader}>
+                              <div className={styles.discTitle}>{data.parsed.title}</div>
+                              {data.parsed.question && (
+                                <div className={styles.discQuestion}>{data.parsed.question}</div>
+                              )}
+                              <div className={styles.discStats}>
+                                <span>Erstellt {data.parsed.created_at}</span>
+                                <span className={styles.statsSep}>·</span>
+                                <span className={styles.statDone}>{data.parsed.done_count} ✓</span>
+                                <span className={styles.statsSep}>·</span>
+                                <span className={styles.statOpen}>{data.parsed.open_count} ●</span>
+                                {data.parsed.updated_at && (
+                                  <>
+                                    <span className={styles.statsSep}>·</span>
+                                    <span>Zuletzt {data.parsed.updated_at}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          {data.readme_body ? (
+                            <div className={styles.readmeBodySection}>
+                              <div className={styles.markdownContent}
+                                dangerouslySetInnerHTML={{
+                                  __html: renderMarkdown(
+                                    data.readme_body.split('\n').filter(line => {
+                                      const t = line.trim()
+                                      return !t.startsWith('**Erledigt:**') && !t.startsWith('**Offen:**')
+                                    }).join('\n')
+                                  )
+                                }}
+                              />
+                            </div>
+                          ) : data.readme ? (
+                            <div className={styles.readmeBodySection}>
+                              <div className={styles.markdownContent}
+                                dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme) }}
+                              />
+                            </div>
+                          ) : null}
+                          {data.index && (
+                            <div className={styles.markdownContent}
+                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index) }}
+                            />
+                          )}
+                          {data.subs && data.subs.map(sub => (
+                            <div key={sub.id} className={styles.subDocBlock}
+                              onClick={() => { setActiveSubView(null); setTimeout(() => setActiveSubView(sub.id), 0) }}
+                              role="button" tabIndex={0}
+                              onKeyDown={e => { if (e.key === 'Enter') { setActiveSubView(null); setTimeout(() => setActiveSubView(sub.id), 0) } }}
+                            >
+                              <h3 className={styles.subDocTitle}>📂 {sub.name}</h3>
+                              {sub.readme && (
+                                <div className={styles.markdownContent}
+                                  dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.readme) }}
+                                />
+                              )}
+                              {sub.index && (
+                                <div className={styles.markdownContent}
+                                  dangerouslySetInnerHTML={{ __html: renderIndexMd(sub.index) }}
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </>
                       )}
-                      {data.subs && data.subs.map(sub => (
-                        <div key={sub.id} className={styles.subDocBlock}>
-                          <h3 className={styles.subDocTitle}>📂 {sub.name}</h3>
-                          {sub.readme && (
-                            <div className={styles.markdownContent}
-                              dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.readme) }}
-                            />
-                          )}
-                          {sub.index && (
-                            <div className={styles.markdownContent}
-                              dangerouslySetInnerHTML={{ __html: renderIndexMd(sub.index) }}
-                            />
-                          )}
-                        </div>
-                      ))}
                     </>
                   ) : (
                     <div className={styles.loading}>Fehler beim Laden</div>

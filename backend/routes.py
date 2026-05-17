@@ -444,19 +444,31 @@ def list_discussions():
 
 @diskhub.route('/diskhub/<discussion_id>', methods=['GET'])
 def get_discussion(discussion_id):
-    """Einzelne Diskussion mit index.md + README.md Inhalt."""
-    folder = os.path.join(DISCUSSIONS_DIR, discussion_id)
+    """Einzelne Diskussion mit index.md + README.md Inhalt.
+    
+    Query-Params:
+      sub_id (str, optional) — Sub-Diskussion laden statt Haupt-Diskussion
+    """
+    sub_id = request.args.get('sub_id', '').strip()
+    
+    if sub_id:
+        folder = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id)
+    else:
+        folder = os.path.join(DISCUSSIONS_DIR, discussion_id)
+        
     if not os.path.isdir(folder):
         return jsonify({'error': 'Diskussion nicht gefunden'}), 404
 
     result = {'id': discussion_id, 'name': discussion_id.replace('-', ' ').title()}
+    if sub_id:
+        result['sub_id'] = sub_id
+        result['sub_name'] = sub_id.replace('-', ' ').title()
 
     readme_path = os.path.join(folder, 'README.md')
     if os.path.isfile(readme_path):
         with open(readme_path, 'r') as f:
             readme_content = f.read()
         result['readme'] = readme_content
-        # Header-Infos parsen (E.3)
         header, body = _parse_discussion_header(readme_content)
         result['parsed'] = header
         result['readme_body'] = body
@@ -466,7 +478,7 @@ def get_discussion(discussion_id):
         with open(index_path, 'r') as f:
             result['index'] = f.read()
 
-    # Sub-Diskussionen
+    # Sub-Diskussionen (nur bei Haupt-Ansicht oder wenn Sub selbst welche hat)
     subs = []
     for sub_name in sorted(os.listdir(folder)):
         sub_folder = os.path.join(folder, sub_name)
@@ -483,7 +495,7 @@ def get_discussion(discussion_id):
             subs.append(sub_data)
     result['subs'] = subs
 
-    _log_activity('view', {'discussion': discussion_id})
+    _log_activity('view', {'discussion': discussion_id, 'sub_id': sub_id or None})
     return jsonify(result)
 
 
