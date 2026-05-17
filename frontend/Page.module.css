@@ -477,14 +477,6 @@
   font-size: 0.825rem;
   line-height: 1.7;
 }
-.tocHeading {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #818cf8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 6px;
-}
 .tocBlock {
   color: #cbd5e1;
 }
@@ -1293,65 +1285,10 @@
 
 .readmeBodySection {
   margin-bottom: 20px;
-  padding: 20px 24px;
-  background: #ffffff;
+  padding: 16px 20px;
+  background: #1a1f35;
   border-radius: 10px;
-  border: 1px solid #d1d5db;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-.readmeBodySection .markdownContent h1,
-.readmeBodySection .markdownContent h2,
-.readmeBodySection .markdownContent h3,
-.readmeBodySection .markdownContent strong {
-  color: #1e293b;
-}
-.readmeBodySection .markdownContent p,
-.readmeBodySection .markdownContent li,
-.readmeBodySection .markdownContent td {
-  color: #334155;
-}
-.readmeBodySection .markdownContent code {
-  background: #f1f5f9;
-  color: #6366f1;
-}
-.readmeBodySection .markdownContent pre {
-  background: #f8fafc;
-  border-color: #e2e8f0;
-  color: #334155;
-}
-.readmeBodySection .markdownContent a {
-  color: #6366f1;
-}
-.readmeBodySection .markdownContent blockquote {
-  border-left-color: #6366f1;
-  color: #64748b;
-}
-.readmeBodySection .markdownContent hr {
-  border-top-color: #e2e8f0;
-}
-.readmeBodySection .markdownContent img {
-  border-color: #e2e8f0;
-}
-.readmeBodySection .markdownContent th {
-  background: #f8fafc;
-  color: #6366f1;
-  border-color: #e2e8f0;
-}
-.readmeBodySection .markdownContent td {
-  border-color: #e2e8f0;
-  color: #334155;
-}
-.readmeBodySection .markdownContent tr:nth-child(even) td {
-  background: #fafafa;
-}
-.readmeBodySection .markdownContent ul.task-list input[type="checkbox"] {
-  accent-color: #6366f1;
-}
-.readmeBodySection .markdownContent li.task-done {
-  color: #94a3b8;
-}
-.readmeBodySection .markdownContent li.task-pending {
-  color: #334155;
+  border: 1px solid #2d3f52;
 }
 
 /* Markdown rendered in doc */
