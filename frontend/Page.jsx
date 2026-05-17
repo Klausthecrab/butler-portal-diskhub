@@ -179,6 +179,17 @@ function renderIndexMd(md) {
   const preamble = []
 
   for (const line of lines) {
+    // Leerzeilen überspringen (kein semantischer Inhalt)
+    const trimmed = line.trim()
+    if (trimmed === '---' || trimmed === '___' || trimmed === '***') {
+      // Horizontaler Strich: finalisiert aktuellen Block, reset zu preamble
+      if (currentBlock) {
+        result += renderBlock(currentBlock)
+        currentBlock = null
+        continue // Struktur-Trenner zwischen Blöcken — nicht sichtbar rendern
+      }
+      // Kein offener Block → Zeile normal in preamble belassen
+    }
     if (line.startsWith('### ')) {
       // Vorherigen Block finalisieren
       if (currentBlock) {
@@ -210,8 +221,10 @@ function renderIndexMd(md) {
   // Letzten Block finalisieren
   if (currentBlock) {
     result += renderBlock(currentBlock)
-  } else if (preamble.length > 0 && !result) {
-    result = renderMarkdown(preamble.join('\n'))
+  }
+  // Rest-Preamble nach allen Blöcken anhängen (Sub-Referenzen, Footer)
+  if (preamble.length > 0) {
+    result += renderMarkdown(preamble.join('\n'))
   }
 
   return result
