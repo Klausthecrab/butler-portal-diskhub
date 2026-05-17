@@ -846,7 +846,6 @@ function SplitViewModal({ discussion, onClose }) {
       .then(d => {
         if (d.status === 'triggered' || d.status === 'partial') {
           setSessionTitle(d.session_title)
-          setTriggeredAt(Math.floor(Date.now() / 1000))
           setPreviewState('polling')
         } else {
           setPreviewState('error')
