@@ -26,7 +26,7 @@ import time
 import urllib.request
 import urllib.error
 from datetime import datetime, timezone
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response as FlaskResponse
 
 diskhub = Blueprint('diskhub', __name__)
 
@@ -37,6 +37,12 @@ DISCUSSIONS_DIR = os.path.join(REPO_DIR, 'discussions')
 ACTIVITY_LOG = os.path.expanduser('~/data/portal-logs/diskhub.json')
 CONFIG_PATH = os.path.join(REPO_DIR, 'config.yaml')
 STATE_DB = os.path.expanduser('~/.hermes/state.db')
+
+# ── Hardcodierte Webhook-Konfiguration ────────────────────────────────────────
+# Schlüsselmeister ist defekt — Werte direkt hier statt via config.yaml
+WEBHOOK_URL = "https://discord.com/api/webhooks/1505338792972910642/HGtaG2ettwRaiInpHIpJpHermS4YXCLWfTzfdlyoHCOEbjmTULywq5WC0GCJ0NERUpnx"
+BOT_MENTION = "<@1467915427077423216>"
+CHANNEL_ID = "1505338710491926560"
 
 
 def _load_config():
@@ -247,6 +253,25 @@ def _get_session_messages(session_id):
         return []
 
 
+def _get_session_messages_since(session_id, since_ts):
+    """Holt Nachrichten neuer als since_ts (Unix-Timestamp)."""
+    if not os.path.isfile(STATE_DB):
+        return []
+    try:
+        db = sqlite3.connect(STATE_DB)
+        db.row_factory = sqlite3.Row
+        c = db.cursor()
+        c.execute(
+            "SELECT role, content, timestamp FROM messages WHERE session_id = ? AND timestamp > ? ORDER BY timestamp",
+            (session_id, since_ts)
+        )
+        rows = [dict(r) for r in c.fetchall()]
+        db.close()
+        return rows
+    except sqlite3.Error:
+        return []
+
+
 def _format_timestamp(ts):
     """Unix-Timestamp in lesbares Datum."""
     if not ts:
@@ -411,6 +436,91 @@ def health():
     return jsonify({'status': 'ok', 'discussions_count': len(_scan_discussions())})
 
 
+@diskhub.route('/diskhub/git-log/<discussion_id>', methods=['GET'])
+def get_git_log(discussion_id):
+    """
+    Git-History für eine Diskussion (Technisch-Tab).
+
+    Query-Params:
+      sub_id (str, optional) — Sub-Diskussion
+      max_count (int, optional) — Max Commits (default: 50)
+
+    Returns: { commits: [{ sha, author, date, message, files_changed, insertions, deletions }] }
+    """
+    sub_id = request.args.get('sub_id', '')
+    try:
+        max_count = min(int(request.args.get('max_count', 50)), 200)
+    except (ValueError, TypeError):
+        max_count = 50
+
+    if sub_id:
+        target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id)
+    else:
+        target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id)
+
+    if not os.path.isdir(target_dir):
+        return jsonify({'error': 'Diskussion nicht gefunden'}), 404
+
+    try:
+        # Git log mit detaillierten Stats
+        result = subprocess.run(
+            ['git', 'log', f'--max-count={max_count}',
+             '--format=%H|%an|%ad|%s',
+             '--date=short', '--shortstat', '--', '.'],
+            capture_output=True, text=True, timeout=10,
+            cwd=target_dir,
+        )
+        if result.returncode != 0:
+            return jsonify({'commits': [], 'error': result.stderr.strip()})
+
+        # Parse: format wechselt zwischen log-line und shortstat
+        lines = result.stdout.strip().split('\n')
+        commits = []
+        current = None
+
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+
+            # Log-Line: SHA|Author|Date|Message
+            if '|' in line and not line.startswith(' '):
+                if current:
+                    commits.append(current)
+                parts = line.split('|', 3)
+                current = {
+                    'sha': parts[0][:7] if len(parts) > 0 else '',
+                    'author': parts[1] if len(parts) > 1 else '',
+                    'date': parts[2] if len(parts) > 2 else '',
+                    'message': parts[3] if len(parts) > 3 else '',
+                    'files_changed': 0,
+                    'insertions': 0,
+                    'deletions': 0,
+                }
+            # Shortstat: 1 file changed, 2 insertions(+), 1 deletion(-)
+            elif current and ('file changed' in line or 'files changed' in line):
+                import re as _re
+                fc = _re.search(r'(\d+) files? changed', line)
+                ins = _re.search(r'(\d+) insertions?\(\+\)', line)
+                del_ = _re.search(r'(\d+) deletions?\(-\)', line)
+                if fc:
+                    current['files_changed'] = int(fc.group(1))
+                if ins:
+                    current['insertions'] = int(ins.group(1))
+                if del_:
+                    current['deletions'] = int(del_.group(1))
+
+        if current:
+            commits.append(current)
+
+        return jsonify({'commits': commits, 'total': len(commits)})
+
+    except subprocess.TimeoutExpired:
+        return jsonify({'error': 'Git timeout'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # PHASE 2 — Discord-Integration
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -438,12 +548,11 @@ def start_session():
     if not discussion_id:
         return jsonify({'error': 'discussion_id erforderlich'}), 400
 
-    config = _load_config()
-    webhook_url = config.get('webhook', {}).get('url', '')
-    bot_mention = config.get('webhook', {}).get('bot_mention', '')
+    webhook_url = WEBHOOK_URL
+    bot_mention = BOT_MENTION
 
     if not webhook_url:
-        return jsonify({'error': 'Keine Webhook-URL in config.yaml'}), 500
+        return jsonify({'error': 'Keine Webhook-URL konfiguriert'}), 500
 
     # Session-Titel für Polling
     session_title = f'disc-{discussion_id}'
@@ -602,6 +711,87 @@ def get_session_messages(session_id):
         'messages': messages,
         'total': len(messages),
     })
+
+
+@diskhub.route('/diskhub/session-messages-stream/<session_id>', methods=['GET'])
+def stream_session_messages(session_id):
+    """
+    SSE-Endpoint: Streamt neue Nachrichten einer Session.
+    Ersetzt das alle-8s-Polling durch Push.
+
+    Query-Params:
+      since_ts (float, optional) — Unix-Timestamp, nur Nachrichten danach
+
+    Streamt Events: data: {"messages": [...], "total_new": N}
+    Keepalive: : keepalive (alle 30s)
+    Timeout: Browser schließt nach Inaktivität, Client reconnectiert
+    """
+    since_ts = request.args.get('since_ts', '0')
+    try:
+        since_ts = float(since_ts)
+    except (ValueError, TypeError):
+        since_ts = 0
+
+    def generate():
+        last_max_ts = since_ts
+        tick = 0
+        try:
+            while True:
+                new_messages = _get_session_messages_since(session_id, last_max_ts)
+                if new_messages:
+                    # Max-Timestamp für nächsten Poll
+                    try:
+                        new_max = max(
+                            float(m['timestamp']) for m in new_messages
+                            if m.get('timestamp') is not None
+                        )
+                    except (ValueError, TypeError):
+                        new_max = last_max_ts
+
+                    # Nachrichten aufbereiten (wie get_session_messages)
+                    filtered = []
+                    for m in new_messages:
+                        role = m.get('role', '')
+                        content = m.get('content', '') or ''
+                        if role == 'tool':
+                            try:
+                                parsed = json.loads(content)
+                                if isinstance(parsed, dict) and 'content' in parsed:
+                                    content = parsed['content']
+                            except (json.JSONDecodeError, TypeError):
+                                pass
+                            if len(content) > 200:
+                                content = content[:200] + '…'
+                        elif role == 'session_meta':
+                            continue
+                        filtered.append({
+                            'role': role,
+                            'content': content,
+                            'timestamp': _format_timestamp(m.get('timestamp')),
+                            'ts': m.get('timestamp'),
+                        })
+
+                    if filtered:
+                        yield f"data: {json.dumps({'messages': filtered, 'total_new': len(filtered)})}\n\n"
+                        last_max_ts = new_max
+
+                tick += 1
+                if tick % 15 == 0:
+                    yield ": keepalive\n\n"
+
+                time.sleep(2)
+        except GeneratorExit:
+            pass
+
+    return FlaskResponse(
+        generate(),
+        mimetype='text/event-stream',
+        headers={
+            'X-Accel-Buffering': 'no',
+            'Cache-Control': 'no-cache, no-store',
+            'Connection': 'keep-alive',
+        }
+    )
 
 
 @diskhub.route('/diskhub/adopt-block', methods=['POST'])
@@ -897,12 +1087,11 @@ def start_sub_discussion():
     # Einfach start-session mit is_sub=true aufrufen
     # Da wir im selben Blueprint sind, bauen wir den Aufruf manuell
 
-    config = _load_config()
-    webhook_url = config.get('webhook', {}).get('url', '')
-    bot_mention = config.get('webhook', {}).get('bot_mention', '')
+    webhook_url = WEBHOOK_URL
+    bot_mention = BOT_MENTION
 
     if not webhook_url:
-        return jsonify({'error': 'Keine Webhook-URL in config.yaml'}), 500
+        return jsonify({'error': 'Keine Webhook-URL konfiguriert'}), 500
 
     session_title = f'disc-{discussion_id}-{sub_id}'
     target_file = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id, 'index.md')

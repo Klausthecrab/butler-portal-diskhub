@@ -41,6 +41,20 @@ function renderMarkdown(md) {
   return `<p>${html}</p>`
 }
 
+// Discord-CDN-URLs im Chat als Bilder rendern
+function renderMessageContent(text) {
+  if (!text) return text
+  const imgRe = /(https:\/\/(?:cdn\.discordapp\.com|media\.discordapp\.net)\/[^\s)"'<>]+)/gi
+  const parts = text.split(imgRe)
+  if (parts.length <= 1) return text
+  return parts
+    .map((part, i) => {
+      if (i % 2 === 0) return part || null
+      return <img key={i} src={part} alt="" className={styles.chatImage} loading="lazy" />
+    })
+    .filter(Boolean)
+}
+
 // ─── Readme Update Modal ──────────────────────────────────────────────────────
 
 function ReadmeModal({ discussionId, onClose, onUpdate, isSub, subId }) {
@@ -178,6 +192,23 @@ function SplitViewModal({ discussion, onClose }) {
   const [showReadmeModal, setShowReadmeModal] = useState(false)
   const pollRef = useRef(null)
   const [activeSubId, setActiveSubId] = useState(null)
+  const [activeTab, setActiveTab] = useState('discussion')
+  const [gitLog, setGitLog] = useState(null)
+  const [gitLogLoading, setGitLogLoading] = useState(false)
+
+  // SSE Streaming
+  const lastTsRef = useRef(0)
+  const sseRef = useRef(null)
+  const pollFallbackRef = useRef(null)
+
+  // Split-View Resizer
+  const [splitRatio, setSplitRatio] = useState(() => {
+    try { return parseFloat(localStorage.getItem('diskhub-split-ratio') || '55') || 55 }
+    catch (e) { return 55 }
+  })
+  const [isDragging, setIsDragging] = useState(false)
+  const splitViewRef = useRef(null)
+  const splitRatioRef = useRef(splitRatio)
 
   // Lade Diskussionsdaten
   useEffect(() => {
@@ -187,6 +218,29 @@ function SplitViewModal({ discussion, onClose }) {
       .then(d => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
   }, [discussion.id])
+
+  // Draft aus localStorage wiederherstellen
+  useEffect(() => {
+    const key = `diskhub-draft-${discussion.id}`
+    try {
+      const saved = localStorage.getItem(key)
+      if (saved) setUserNotes(saved)
+    } catch (e) { /* localStorage nicht verfügbar */ }
+  }, [discussion.id])
+
+  // Draft in localStorage speichern (bei Änderung)
+  const draftTimerRef = useRef(null)
+  useEffect(() => {
+    const key = `diskhub-draft-${discussion.id}`
+    if (draftTimerRef.current) clearTimeout(draftTimerRef.current)
+    draftTimerRef.current = setTimeout(() => {
+      try {
+        if (userNotes) localStorage.setItem(key, userNotes)
+        else localStorage.removeItem(key)
+      } catch (e) { /* localStorage nicht verfügbar */ }
+    }, 500) // 500ms Debounce
+    return () => { if (draftTimerRef.current) clearTimeout(draftTimerRef.current) }
+  }, [userNotes, discussion.id])
 
   // Escape zum Schliessen
   useEffect(() => {
@@ -199,8 +253,64 @@ function SplitViewModal({ discussion, onClose }) {
   useEffect(() => {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current)
+      if (sseRef.current) sseRef.current.close()
+      if (pollFallbackRef.current) clearInterval(pollFallbackRef.current)
     }
   }, [])
+
+  // lastTsRef mit neuestem Nachrichten-Timestamp synchronisieren
+  useEffect(() => {
+    if (messages.length > 0) {
+      const timestamps = messages
+        .filter(m => m.ts != null)
+        .map(m => parseFloat(m.ts))
+        .filter(t => !isNaN(t))
+      if (timestamps.length > 0) {
+        lastTsRef.current = Math.max(...timestamps)
+      }
+    }
+  }, [messages])
+
+  // Sync ref for drag handler
+  useEffect(() => { splitRatioRef.current = splitRatio }, [splitRatio])
+
+  // Split-View Resizer — globaler Drag-Listener
+  useEffect(() => {
+    if (!isDragging) return
+    let lastRatio = splitRatioRef.current
+
+    const handleMove = (e) => {
+      if (!splitViewRef.current) return
+      const rect = splitViewRef.current.getBoundingClientRect()
+      lastRatio = Math.max(20, Math.min(90, ((e.clientX - rect.left) / rect.width) * 100))
+      setSplitRatio(lastRatio)
+    }
+
+    const handleUp = () => {
+      setIsDragging(false)
+      try { localStorage.setItem('diskhub-split-ratio', String(lastRatio)) } catch (e) {}
+    }
+
+    window.addEventListener('mousemove', handleMove)
+    window.addEventListener('mouseup', handleUp)
+    return () => {
+      window.removeEventListener('mousemove', handleMove)
+      window.removeEventListener('mouseup', handleUp)
+    }
+  }, [isDragging])
+
+  // Git-Log laden bei Tab-Wechsel
+  useEffect(() => {
+    if (activeTab !== 'technical' || !discussion?.id) return
+    setGitLogLoading(true)
+    const currentSubId = activeSubId === '__main__' ? null : activeSubId
+    const params = new URLSearchParams()
+    if (currentSubId) params.set('sub_id', currentSubId)
+    fetch(`${API}/git-log/${discussion.id}?${params}`)
+      .then(r => r.json())
+      .then(d => { setGitLog(d); setGitLogLoading(false) })
+      .catch(() => { setGitLog(null); setGitLogLoading(false) })
+  }, [activeTab, discussion?.id, activeSubId])
 
   // Session-Polling
   useEffect(() => {
@@ -254,13 +364,56 @@ function SplitViewModal({ discussion, onClose }) {
       .catch(() => {})
   }
 
-  // Refresh-Nachrichten (wenn aktiv)
+  // Refresh-Nachrichten — SSE statt Polling
   useEffect(() => {
     if (previewState !== 'active' || !sessionId) return
-    const iv = setInterval(() => {
-      fetchMessages(sessionId)
-    }, 8000)
-    return () => clearInterval(iv)
+
+    // Bestehende Verbindung schließen
+    if (sseRef.current) sseRef.current.close()
+
+    // SSE-Verbindung aufbauen
+    const eventSource = new EventSource(`${API}/session-messages-stream/${sessionId}?since_ts=${lastTsRef.current}`)
+    sseRef.current = eventSource
+
+    eventSource.onmessage = (event) => {
+      if (!event.data || event.data.startsWith(':')) return
+      try {
+        const data = JSON.parse(event.data)
+        if (data.messages && data.messages.length > 0) {
+          setMessages(prev => [...prev, ...data.messages])
+        }
+      } catch (e) {
+        // Ungültige Daten ignorieren
+      }
+    }
+
+    eventSource.onerror = () => {
+      // EventSource reconnectiert automatisch in den meisten Browsern
+      // Fallback: einmalig nach 30s ohne SSE-Daten polling starten
+      if (!pollFallbackRef.current) {
+        const iv = setInterval(() => {
+          fetchMessages(sessionId)
+        }, 8000)
+        pollFallbackRef.current = iv
+      }
+    }
+
+    // SSE-Erfolg: Fallback-Polling stoppen (falls aktiv)
+    eventSource.onopen = () => {
+      if (pollFallbackRef.current) {
+        clearInterval(pollFallbackRef.current)
+        pollFallbackRef.current = null
+      }
+    }
+
+    return () => {
+      eventSource.close()
+      sseRef.current = null
+      if (pollFallbackRef.current) {
+        clearInterval(pollFallbackRef.current)
+        pollFallbackRef.current = null
+      }
+    }
   }, [previewState, sessionId])
 
   // "Hier weiterdiskutieren"
@@ -337,6 +490,23 @@ function SplitViewModal({ discussion, onClose }) {
     setPreviewState('adopting')
     const currentSubId = activeSubId === '__main__' ? null : activeSubId
 
+    // Bild-URLs aus ausgewählten Nachrichten sammeln
+    const selectedMessages = Array.from(selectedSet).map(i => messages[i]).filter(Boolean)
+    const imgRe = /https:\/\/(?:cdn\.discordapp\.com|media\.discordapp\.net)\/[^\s)"'<>]+/gi
+    const images = []
+    selectedMessages.forEach(m => {
+      if (m?.content) {
+        const matches = [...m.content.matchAll(imgRe)]
+        for (const match of matches) {
+          const url = match[0]
+          const filename = url.split('/').pop()?.split('?')[0] || `bild-${Date.now()}.png`
+          if (!images.some(i => i.url === url)) {
+            images.push({ url, filename })
+          }
+        }
+      }
+    })
+
     fetch(`${API}/adopt-block`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -345,6 +515,7 @@ function SplitViewModal({ discussion, onClose }) {
         block_content: userNotes || generatedBlock || '(kein Inhalt)',
         is_sub: !!currentSubId,
         sub_id: currentSubId || undefined,
+        images: images.length > 0 ? images : undefined,
       }),
     })
       .then(r => r.json())
@@ -355,6 +526,7 @@ function SplitViewModal({ discussion, onClose }) {
           setUserNotes('')
           setGeneratedBlock('')
           setSelectedSet(new Set())
+          try { localStorage.removeItem(`diskhub-draft-${discussion.id}`) } catch (e) {}
         } else {
           setErrorMsg('❌ ' + (d.error || 'Übernahme fehlgeschlagen'))
         }
@@ -430,6 +602,7 @@ function SplitViewModal({ discussion, onClose }) {
     setGeneratedBlock('')
     setErrorMsg('')
     setTriggeredAt(null)
+    try { localStorage.removeItem(`diskhub-draft-${discussion.id}`) } catch (e) {}
   }
 
   const handleOverlayClick = (e) => {
@@ -454,50 +627,104 @@ function SplitViewModal({ discussion, onClose }) {
           <button className={styles.modalClose} onClick={onClose}>✕</button>
         </div>
 
-        <div className={styles.splitView}>
+        <div className={styles.splitView} ref={splitViewRef}>
           {/* LEFT: Document */}
-          <div className={styles.docPanel}>
+          <div className={styles.docPanel} style={{ width: `${splitRatio}%` }}>
+            <div className={styles.docTabs}>
+              <button
+                className={`${styles.docTab} ${activeTab === 'discussion' ? styles.docTabActive : ''}`}
+                onClick={() => setActiveTab('discussion')}
+              >
+                💬 Diskussion
+              </button>
+              <button
+                className={`${styles.docTab} ${activeTab === 'technical' ? styles.docTabActive : ''}`}
+                onClick={() => setActiveTab('technical')}
+              >
+                ⚙ Technisch
+              </button>
+            </div>
             <div className={styles.docInner}>
-              <div className={styles.docBody}>
-                {loading ? (
-                  <div className={styles.loading}>Lade Diskussion...</div>
-                ) : data ? (
-                  <>
-                    {data.readme && (
-                      <div className={styles.markdownContent}
-                        dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme) }}
-                      />
-                    )}
-                    {data.index && (
-                      <div className={styles.markdownContent}
-                        dangerouslySetInnerHTML={{ __html: renderMarkdown(data.index) }}
-                      />
-                    )}
-                    {data.subs && data.subs.map(sub => (
-                      <div key={sub.id} className={styles.subDocBlock}>
-                        <h3 className={styles.subDocTitle}>📂 {sub.name}</h3>
-                        {sub.readme && (
-                          <div className={styles.markdownContent}
-                            dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.readme) }}
-                          />
-                        )}
-                        {sub.index && (
-                          <div className={styles.markdownContent}
-                            dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.index) }}
-                          />
-                        )}
+              {activeTab === 'discussion' ? (
+                <div className={styles.docBody}>
+                  {loading ? (
+                    <div className={styles.loading}>Lade Diskussion...</div>
+                  ) : data ? (
+                    <>
+                      {data.readme && (
+                        <div className={styles.markdownContent}
+                          dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme) }}
+                        />
+                      )}
+                      {data.index && (
+                        <div className={styles.markdownContent}
+                          dangerouslySetInnerHTML={{ __html: renderMarkdown(data.index) }}
+                        />
+                      )}
+                      {data.subs && data.subs.map(sub => (
+                        <div key={sub.id} className={styles.subDocBlock}>
+                          <h3 className={styles.subDocTitle}>📂 {sub.name}</h3>
+                          {sub.readme && (
+                            <div className={styles.markdownContent}
+                              dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.readme) }}
+                            />
+                          )}
+                          {sub.index && (
+                            <div className={styles.markdownContent}
+                              dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.index) }}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div className={styles.loading}>Fehler beim Laden</div>
+                  )}
+                </div>
+              ) : (
+                <div className={styles.docBody}>
+                  {gitLogLoading ? (
+                    <div className={styles.loading}>Lade Git-History...</div>
+                  ) : gitLog && gitLog.commits ? (
+                    gitLog.commits.length === 0 ? (
+                      <div className={styles.loading}>Keine Commits gefunden</div>
+                    ) : (
+                      <div className={styles.gitLogList}>
+                        {gitLog.commits.map((c, i) => (
+                          <div key={c.sha || i} className={styles.gitLogEntry}>
+                            <div className={styles.gitLogHeader}>
+                              <code className={styles.gitLogSha}>{c.sha}</code>
+                              <span className={styles.gitLogDate}>{c.date}</span>
+                            </div>
+                            <div className={styles.gitLogMessage}>{c.message}</div>
+                            <div className={styles.gitLogMeta}>
+                              <span className={styles.gitLogAuthor}>{c.author}</span>
+                              <span className={styles.gitLogStats}>
+                                {c.files_changed} Datei{c.files_changed !== 1 ? 'en' : ''} ·
+                                <span className={styles.gitLogIns}> +{c.insertions}</span>
+                                {c.deletions > 0 && <span className={styles.gitLogDel}> -{c.deletions}</span>}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </>
-                ) : (
-                  <div className={styles.loading}>Fehler beim Laden</div>
-                )}
-              </div>
+                    )
+                  ) : (
+                    <div className={styles.loading}>Git-History nicht verfügbar</div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
+          {/* DIVIDER */}
+          <div
+            className={isDragging ? styles.splitDividerActive : styles.splitDivider}
+            onMouseDown={(e) => { e.preventDefault(); setIsDragging(true) }}
+          />
+
           {/* RIGHT: Preview Panel */}
-          <div className={styles.previewPanel}>
+          <div className={styles.previewPanel} style={{ width: `${100 - splitRatio}%` }}>
             {previewState === 'idle' && (
               <div className={styles.previewPlaceholder}>
                 <h3>🗣️ Unter Vorbehalt</h3>
@@ -574,7 +801,7 @@ function SplitViewModal({ discussion, onClose }) {
                           </span>
                           <span className={styles.chatTime}>{m.timestamp}</span>
                         </div>
-                        <div className={styles.chatMsgContent}>{m.content}</div>
+                        <div className={styles.chatMsgContent}>{renderMessageContent(m.content)}</div>
                       </div>
                     )
                   })}
