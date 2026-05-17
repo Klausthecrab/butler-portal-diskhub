@@ -400,7 +400,7 @@
 
 .docInner {
   max-width: 720px;
-  margin: 0 auto;
+  margin: 8px auto 0;
   background: #1e293b;
   border-radius: 10px;
   border: 1px solid #334155;
@@ -975,11 +975,11 @@
 }
 
 .chatMsgUser {
-  background: #1a1a2e;
+  background: #1e2440;
 }
 
 .chatMsgHermi {
-  background: #0d2818;
+  background: #1a2820;
 }
 
 .chatMsgHeader {

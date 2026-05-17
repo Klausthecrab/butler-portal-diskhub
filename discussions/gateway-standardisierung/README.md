@@ -7,5 +7,3 @@ Sollten wir für alle externen API-Calls einen einheitlichen Reverse-Proxy setze
 
 **Erledigt:** ✅ Traefik-Entscheidung · ✅ API-Key-Handling  
 **Offen:** ● Docker-Label-Kompatibilität
-
-→ [Zur Diskussion](index.md)
