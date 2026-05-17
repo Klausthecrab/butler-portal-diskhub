@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import styles from './Page.module.css'
 
 const API = '/api/diskhub'
@@ -318,13 +318,41 @@ function renderMessageContent(text) {
     .filter(Boolean)
 }
 
+// ─── Diff-Algorithmus (LCS-basiert) ─────────────────────────────────────────────
+function computeDiff(oldText, newText) {
+  const oldLines = (oldText || '').split('\n')
+  const newLines = (newText || '').split('\n')
+  const m = oldLines.length, n = newLines.length
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0))
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = oldLines[i - 1] === newLines[j - 1]
+        ? dp[i - 1][j - 1] + 1
+        : Math.max(dp[i - 1][j], dp[i][j - 1])
+  const result = []
+  let i = m, j = n
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && oldLines[i - 1] === newLines[j - 1]) {
+      result.unshift({ type: 'unchanged', text: oldLines[i - 1] })
+      i--; j--
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      result.unshift({ type: 'added', text: newLines[j - 1] })
+      j--
+    } else {
+      result.unshift({ type: 'removed', text: oldLines[i - 1] })
+      i--
+    }
+  }
+  return result
+}
+
 // ─── Readme Update Modal ──────────────────────────────────────────────────────
 
 function ReadmeModal({ discussionId, onClose, onUpdate, isSub, subId }) {
   const [loading, setLoading] = useState(false)
   const [current, setCurrent] = useState('')
   const [suggested, setSuggested] = useState('')
-  const [editing, setEditing] = useState(false)
+  const [preview, setPreview] = useState(false) // false = Editing mode (I.5), true = Diff-Preview (I.2)
   const [editText, setEditText] = useState('')
 
   useEffect(() => {
@@ -348,6 +376,12 @@ function ReadmeModal({ discussionId, onClose, onUpdate, isSub, subId }) {
       })
       .catch(() => { setLoading(false); setSuggested('Fehler beim Laden') })
   }, [discussionId, isSub, subId])
+
+  // compute diff for preview mode
+  const diff = useMemo(() => {
+    if (!preview || !current || !suggested) return null
+    return computeDiff(current, suggested)
+  }, [current, suggested, preview])
 
   const handleOverlay = (e) => {
     if (e.target === e.currentTarget) onClose()
@@ -373,26 +407,49 @@ function ReadmeModal({ discussionId, onClose, onUpdate, isSub, subId }) {
             <div className={styles.readmeCompare}>
               <div className={styles.readmeCol}>
                 <div className={styles.readmeColLabel}>Aktuelle README</div>
-                <pre className={styles.readmePre}>{current}</pre>
+                {diff ? (
+                  <div className={styles.readmeDiffPre}>
+                    {diff.filter(l => l.type !== 'added').map((line, i) => (
+                      <div key={i} className={
+                        line.type === 'removed' ? styles.diffRemovedLine : ''
+                      }>
+                        <span className={styles.diffMarker}>{line.type === 'removed' ? '−' : ' '}</span>
+                        {line.text}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <pre className={styles.readmePre}>{current}</pre>
+                )}
               </div>
               <div className={styles.readmeCol}>
                 <div className={styles.readmeColLabel}>Vorschlag</div>
-                {editing ? (
+                {preview && diff ? (
+                  <div className={styles.readmeDiffPre}>
+                    {diff.filter(l => l.type !== 'removed').map((line, i) => (
+                      <div key={i} className={
+                        line.type === 'added' ? styles.diffAddedLine : ''
+                      }>
+                        <span className={styles.diffMarker}>{line.type === 'added' ? '+' : ' '}</span>
+                        {line.text}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
                   <textarea
                     className={styles.readmeTextarea}
                     value={editText}
                     onChange={e => setEditText(e.target.value)}
                   />
-                ) : (
-                  <pre className={styles.readmePre}>{suggested}</pre>
                 )}
               </div>
             </div>
+            <p className={styles.readmeHint}>Der Vorschlag kommt von Hermes. Prüfe ob die Änderung sinnvoll ist — du musst sie nicht übernehmen.</p>
             <div className={styles.readmeActions}>
-              <button className={styles.previewBtn} onClick={() => { setEditing(!editing); if (!editing) setEditText(suggested) }}>
-                {editing ? '📖 Vorschau' : '✏️ Bearbeiten'}
+              <button className={styles.previewBtn} onClick={() => setPreview(!preview)}>
+                {preview ? '✏️ Bearbeiten' : '📖 Vorschau (Diff)'}
               </button>
-              <button className={styles.previewBtnPrimary} onClick={() => onUpdate(editing ? editText : suggested)}>
+              <button className={styles.previewBtnPrimary} onClick={() => onUpdate(editText)}>
                 ✅ Übernehmen
               </button>
             </div>
@@ -965,13 +1022,17 @@ function SplitViewModal({ discussion, onClose }) {
                         </div>
                       )}
                       {data.readme_body ? (
-                        <div className={styles.markdownContent}
-                          dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme_body) }}
-                        />
+                        <div className={styles.readmeBodySection}>
+                          <div className={styles.markdownContent}
+                            dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme_body) }}
+                          />
+                        </div>
                       ) : data.readme ? (
-                        <div className={styles.markdownContent}
-                          dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme) }}
-                        />
+                        <div className={styles.readmeBodySection}>
+                          <div className={styles.markdownContent}
+                            dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme) }}
+                          />
+                        </div>
                       ) : null}
                       {data.index && (
                         <div className={styles.markdownContent}
