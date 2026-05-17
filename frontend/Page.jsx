@@ -227,13 +227,16 @@ function renderIndexMd(md) {
   // TOC generieren (aus allen Blöcken)
   if (blocks.length > 0) {
     result += '<div class="miniToc">'
+    result += '<div class="tocHeading">📋 Inhaltsverzeichnis</div>'
     for (const block of blocks) {
       const isSub = block.heading.startsWith('### Sub:')
       const title = block.heading.replace(/^###\s+/, '').replace(/^Sub:\s*/, '').trim()
+      const hasResult = !!block.result || block.heading.includes('(✓ erledigt)')
+      const statusIcon = hasResult ? '✅' : '●'
       if (isSub) {
-        result += `<div class="tocSub">• ${title}</div>`
+        result += `<div class="tocSub">${statusIcon} ${title}</div>`
       } else {
-        result += `<div class="tocBlock">• ${title}</div>`
+        result += `<div class="tocBlock">${statusIcon} ${title}</div>`
       }
     }
     result += '</div>'
@@ -1024,13 +1027,17 @@ function SplitViewModal({ discussion, onClose }) {
                       {data.readme_body ? (
                         <div className={styles.readmeBodySection}>
                           <div className={styles.markdownContent}
-                            dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme_body) }}
+                            dangerouslySetInnerHTML={{ __html: renderMarkdown(
+                              data.readme_body.split('\n').filter(l => !l.startsWith('**Erledigt:') && !l.startsWith('**Offen:')).join('\n').trim()
+                            ) }}
                           />
                         </div>
                       ) : data.readme ? (
                         <div className={styles.readmeBodySection}>
                           <div className={styles.markdownContent}
-                            dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme) }}
+                            dangerouslySetInnerHTML={{ __html: renderMarkdown(
+                              data.readme.split('\n').filter(l => !l.startsWith('**Erledigt:') && !l.startsWith('**Offen:')).join('\n').trim()
+                            ) }}
                           />
                         </div>
                       ) : null}
