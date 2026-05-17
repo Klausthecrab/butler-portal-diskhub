@@ -1219,6 +1219,49 @@
   font-family: monospace;
 }
 
+/* ─── Diff-Ansicht (I.2) ─── */
+.readmeDiffPre {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.readmeDiffPre > div {
+  padding: 1px 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.diffRemovedLine {
+  background: rgba(220, 38, 38, 0.2);
+  border-left: 3px solid #dc2626;
+}
+.diffAddedLine {
+  background: rgba(76, 175, 80, 0.2);
+  border-left: 3px solid #4CAF50;
+}
+.diffMarker {
+  display: inline-block;
+  width: 12px;
+  color: #64748b;
+  user-select: none;
+}
+
+/* ─── README Hinweis (I.4) ─── */
+.readmeHint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(99, 102, 241, 0.08);
+  border-radius: 6px;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  line-height: 1.5;
+}
+
 .readmeTextarea {
   width: 100%;
   min-height: 300px;
@@ -1238,6 +1281,14 @@
   gap: 8px;
   margin-top: 16px;
   justify-content: flex-end;
+}
+
+.readmeBodySection {
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: #1a1f35;
+  border-radius: 10px;
+  border: 1px solid #2d3f52;
 }
 
 /* Markdown rendered in doc */
