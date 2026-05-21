@@ -703,6 +703,7 @@ function SplitViewModal({ discussion, onClose }) {
   const [activeSubView, setActiveSubView] = useState(null)
   const [subViewData, setSubViewData] = useState(null)
   const [subViewLoading, setSubViewLoading] = useState(false)
+  const [expandedSubs, setExpandedSubs] = useState(new Set())
 
   // SSE Streaming
   const lastTsRef = useRef(0)
@@ -1389,21 +1390,51 @@ function SplitViewModal({ discussion, onClose }) {
                               dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index) }}
                             />
                           )}
-                          {data.subs && data.subs.map(sub => (
-                            <div key={sub.id} className={styles.subDocBlock}
-                              onClick={() => { window.history.pushState({subViewMode: true}, ''); setActiveSubView(sub.id) }}
-                              role="button" tabIndex={0}
-                              onKeyDown={e => { if (e.key === 'Enter') { window.history.pushState({subViewMode: true}, ''); setActiveSubView(sub.id) } }}
-                            >
-                              <h3 className={styles.subDocTitle}>📂 {sub.name}</h3>
-                              <div className={styles.subCardSummary}>
-                                {sub.readme && (
-                                  <div className={styles.subCardReadme}>{sub.readme.slice(0, 200).replace(/^#.*\n?/, '').trim()}</div>
+                          {data.subs && data.subs.map(sub => {
+                            const isExpanded = expandedSubs.has(sub.id)
+                            return (
+                              <div key={sub.id} className={styles.subDocBlock}>
+                                <div className={styles.subDocHeader}
+                                  onClick={() => {
+                                    setExpandedSubs(prev => {
+                                      const next = new Set(prev)
+                                      if (next.has(sub.id)) next.delete(sub.id); else next.add(sub.id)
+                                      return next
+                                    })
+                                  }}
+                                  role="button" tabIndex={0}
+                                  onKeyDown={e => { if (e.key === 'Enter') {
+                                    setExpandedSubs(prev => {
+                                      const next = new Set(prev)
+                                      if (next.has(sub.id)) next.delete(sub.id); else next.add(sub.id)
+                                      return next
+                                    })
+                                  }}}
+                                >
+                                  <h3 className={styles.subDocTitle}>📂 {sub.name}</h3>
+                                  <span className={styles.subDocArrow}>{isExpanded ? '▾' : '▸'}</span>
+                                </div>
+                                {isExpanded && (
+                                  <div className={styles.subDocBody}>
+                                    {sub.readme ? (
+                                      <div className={styles.markdownContent}
+                                        dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.readme) }}
+                                      />
+                                    ) : (
+                                      <div className={styles.subDocEmpty}>Keine README</div>
+                                    )}
+                                    <div className={styles.subDocViewLink}
+                                      onClick={e => { e.stopPropagation(); window.history.pushState({subViewMode: true}, ''); setActiveSubView(sub.id) }}
+                                      role="button" tabIndex={0}
+                                      onKeyDown={e => { if (e.key === 'Enter') { window.history.pushState({subViewMode: true}, ''); setActiveSubView(sub.id) } }}
+                                    >
+                                      → Vollständige Ansicht
+                                    </div>
+                                  </div>
                                 )}
-                                <span className={styles.subCardOpen}>▶ Öffnen</span>
                               </div>
-                            </div>
-                          ))}
+                            )
+                          })}
                         </>
                       )}
                     </>
