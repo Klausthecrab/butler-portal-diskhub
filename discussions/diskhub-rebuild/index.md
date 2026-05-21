@@ -13,9 +13,3 @@ Hier sind die sechs Kernpunkte aus der Diskussion mit Max dokumentiert. Jeder Pu
 ---
 
 💬 **Haupt-Diskussion fortsetzen**
-
-### Sub: Test Format
-
-*— · 21.05.2026*
-
-> **Ergebnis:** Promoted from block
