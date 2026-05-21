@@ -169,6 +169,23 @@ function renderMarkdown(md) {
   return wrapped
 }
 
+function parseBlocksMd(md) {
+  if (!md) return []
+  const lines = md.split('\n')
+  const blocks = []
+  let current = null
+  for (const line of lines) {
+    if (line.startsWith('### ')) {
+      if (current) blocks.push(current)
+      current = { heading: line, content: [] }
+    } else if (current) {
+      current.content.push(line)
+    }
+  }
+  if (current) blocks.push(current)
+  return blocks
+}
+
 function renderBlocksMd(md) {
   /** Einfacher Renderer für blocks.md:
    *  Jedes ### = Akkordeon-Block, Inhalt = Markdown, kein TOC/Status.
@@ -587,6 +604,40 @@ function ReadmeModal({ discussionId, onClose, onUpdate, isSub, subId }) {
   )
 }
 
+// ─── Blocks Section (mit Promote-Button) ──────────────────────────
+
+function BlocksSection({ md, discussionId, isSub, subId, onPromote }) {
+  const blocks = useMemo(() => parseBlocksMd(md), [md])
+
+  if (!blocks.length) {
+    if (md) return <div className={styles.markdownContent} dangerouslySetInnerHTML={{ __html: renderMarkdown(md) }} />
+    return null
+  }
+
+  return (
+    <div className={styles.blocksList}>
+      {blocks.map((block, idx) => {
+        const headingText = block.heading.replace(/^###\s+/, '').trim()
+        const content = block.content.join('\n').trim()
+        return (
+          <details key={idx} className={styles.blockAccordion}>
+            <summary className={styles.blockSummary}>{headingText}</summary>
+            <div className={styles.blockBody}
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
+            />
+            <button
+              className={styles.promoteBtn}
+              onClick={() => onPromote(headingText, content)}
+            >
+              ⬆️ Als Sub übernehmen
+            </button>
+          </details>
+        )
+      })}
+    </div>
+  )
+}
+
 // ─── Discussion Card ─────────────────────────────────────────────────────────
 
 function DiscussionCard({ discussion, onClick }) {
@@ -668,13 +719,15 @@ function SplitViewModal({ discussion, onClose }) {
   const splitRatioRef = useRef(splitRatio)
 
   // Lade Diskussionsdaten
-  useEffect(() => {
+  const fetchDiscussionData = useCallback(() => {
     setLoading(true)
     fetch(`${API}/${discussion.id}`)
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
   }, [discussion.id])
+
+  useEffect(() => { fetchDiscussionData() }, [fetchDiscussionData])
 
   // Lade Sub-Diskussionsdaten bei Zoom
   useEffect(() => {
@@ -1108,6 +1161,37 @@ function SplitViewModal({ discussion, onClose }) {
     try { localStorage.removeItem(`diskhub-draft-${discussion.id}`) } catch (e) {}
   }
 
+  // Block zur Sub-Diskussion promovieren
+  const handlePromoteBlock = (title, content) => {
+    const prevState = previewState
+    setPreviewState('adopting')
+    fetch(`${API}/promote-block`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        discussion_id: discussion.id,
+        block_title: title,
+        block_content: content,
+        is_sub: !!activeSubView,
+        sub_id: activeSubView || undefined,
+      }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        setPreviewState(prevState === 'idle' ? 'idle' : 'active')
+        if (d.status === 'ok') {
+          setErrorMsg('✅ Sub-Diskussion erstellt: ' + (d.sub_name || d.sub_id))
+          fetchDiscussionData()
+        } else {
+          setErrorMsg('❌ ' + (d.error || 'Promotion fehlgeschlagen'))
+        }
+      })
+      .catch(() => {
+        setPreviewState(prevState === 'idle' ? 'idle' : 'active')
+        setErrorMsg('❌ Netzwerkfehler')
+      })
+  }
+
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) onClose()
   }
@@ -1217,8 +1301,12 @@ function SplitViewModal({ discussion, onClose }) {
                             {subViewData.blocks && (
                               <div className={styles.blocksSection}>
                                 <div className={styles.sectionLabel}>📝 Blöcke</div>
-                                <div className={styles.markdownContent}
-                                  dangerouslySetInnerHTML={{ __html: renderBlocksMd(subViewData.blocks) }}
+                                <BlocksSection
+                                  md={subViewData.blocks}
+                                  discussionId={discussion.id}
+                                  isSub={true}
+                                  subId={activeSubView}
+                                  onPromote={handlePromoteBlock}
                                 />
                               </div>
                             )}
@@ -1289,8 +1377,10 @@ function SplitViewModal({ discussion, onClose }) {
                           {data.blocks && (
                             <div className={styles.blocksSection}>
                               <div className={styles.sectionLabel}>📝 Blöcke</div>
-                              <div className={styles.markdownContent}
-                                dangerouslySetInnerHTML={{ __html: renderBlocksMd(data.blocks) }}
+                              <BlocksSection
+                                md={data.blocks}
+                                discussionId={discussion.id}
+                                onPromote={handlePromoteBlock}
                               />
                             </div>
                           )}

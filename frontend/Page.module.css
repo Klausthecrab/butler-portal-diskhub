@@ -624,7 +624,7 @@
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid #334155;
-  background: #1e293b;
+  background: #1a2433;
   flex: 1;
 }
 
@@ -684,6 +684,26 @@
 .blockCard[data-hot="true"] .blockHeader,
 .blockCardSub[data-hot="true"] .blockHeader {
   background: #991b1b !important;
+}
+
+/* ─── Block-Promote-Button ──────────────────────────────────────── */
+
+.promoteBtn {
+  display: block;
+  width: 100%;
+  padding: 6px 16px;
+  background: transparent;
+  border: none;
+  border-top: 1px solid #334155;
+  color: #64748b;
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s;
+}
+.promoteBtn:hover {
+  background: #334155;
+  color: #e2e8f0;
 }
 
 .blockHeader {

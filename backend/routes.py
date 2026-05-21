@@ -1266,3 +1266,120 @@ def start_sub_discussion():
         'session_title': session_title,
         'webhook_statuses': statuses,
     })
+
+
+@diskhub.route('/diskhub/promote-block', methods=['POST'])
+def promote_block():
+    """Promoted einen Block aus blocks.md zu einer Sub-Diskussion."""
+    data = request.get_json(silent=True) or {}
+    discussion_id = data.get('discussion_id', '')
+    block_title = data.get('block_title', '')
+    block_content = data.get('block_content', '')
+    is_sub = data.get('is_sub', False)
+    sub_id = data.get('sub_id', '')
+
+    if not discussion_id or not block_title:
+        return jsonify({'error': 'discussion_id und block_title erforderlich'}), 400
+
+    if is_sub and sub_id:
+        parent_dir = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id)
+    else:
+        parent_dir = os.path.join(DISCUSSIONS_DIR, discussion_id)
+
+    if not os.path.isdir(parent_dir):
+        return jsonify({'error': 'Eltern-Diskussion nicht gefunden'}), 404
+
+    sub_folder_id = re.sub(r'[^a-z0-9]+', '-', block_title.lower()).strip('-')
+    if not sub_folder_id:
+        sub_folder_id = 'block-' + str(int(time.time()))
+
+    sub_dir = os.path.join(parent_dir, sub_folder_id)
+    if os.path.isdir(sub_dir):
+        return jsonify({'error': 'Sub-Diskussion existiert bereits: ' + sub_folder_id}), 409
+
+    try:
+        os.makedirs(sub_dir)
+        today = datetime.now(timezone.utc).strftime('%d.%m.%Y')
+
+        # 1. README.md
+        readme = (
+            '# ' + block_title + '\n\n'
+            '**Erstellt:** ' + today + ' · **Status:** ● offen\n\n'
+            'Promoted from block.\n\n'
+            + block_content + '\n'
+        )
+        with open(os.path.join(sub_dir, 'README.md'), 'w') as f:
+            f.write(readme)
+
+        # 2. index.md
+        index = (
+            '# ' + block_title + '\n\n'
+            + block_content + '\n\n'
+            '---\n\n'
+            '💬 **Sub-Diskussion fortsetzen**\n'
+        )
+        with open(os.path.join(sub_dir, 'index.md'), 'w') as f:
+            f.write(index)
+
+        # 3. blocks.md
+        blocks = '# Blöcke - ' + discussion_id + '/' + sub_folder_id + '\n\n---\n'
+        with open(os.path.join(sub_dir, 'blocks.md'), 'w') as f:
+            f.write(blocks)
+
+        # 4. Block aus blocks.md entfernen
+        blocks_path = os.path.join(parent_dir, 'blocks.md')
+        if os.path.isfile(blocks_path):
+            with open(blocks_path, 'r') as f:
+                lines = f.readlines()
+            new_lines = []
+            skip = False
+            in_block = False
+            for line in lines:
+                stripped = line.lstrip()
+                if stripped.startswith('### ') and block_title in line:
+                    in_block = True
+                    skip = True
+                    continue
+                elif stripped.startswith('### ') and in_block:
+                    in_block = False
+                    skip = False
+                if not skip:
+                    new_lines.append(line)
+            with open(blocks_path, 'w') as f:
+                f.writelines(new_lines)
+
+        # 5. Eintrag in Haupt-index.md
+        index_path = os.path.join(parent_dir, 'index.md')
+        entry = (
+            '\n### Sub: ' + block_title + '\n\n'
+            '*--- · ' + today + '*\n\n'
+            '> **Ergebnis:** Promoted from block\n'
+        )
+        if os.path.isfile(index_path):
+            with open(index_path, 'a') as f:
+                f.write(entry)
+
+        # 6. Git commit
+        try:
+            subprocess.run(
+                ['git', 'add', '-A'],
+                capture_output=True, text=True, timeout=10, cwd=REPO_DIR
+            )
+            subprocess.run(
+                ['git', 'commit', '-m', 'disc: ' + discussion_id + ': promoted block -> ' + sub_folder_id],
+                capture_output=True, text=True, timeout=10, cwd=REPO_DIR
+            )
+        except Exception:
+            pass
+
+        _log_activity('promote-block', {
+            'discussion': discussion_id,
+            'block_title': block_title,
+            'sub_id': sub_folder_id,
+            'is_sub': is_sub,
+        })
+
+        return jsonify({'status': 'ok', 'sub_id': sub_folder_id, 'sub_name': block_title})
+
+    except Exception as e:
+        return jsonify({'error': 'Promotion fehlgeschlagen: ' + str(e)}), 500
