@@ -18,9 +18,11 @@
 
 > **Ergebnis:** Browser-History-API + TOC in Sub-View + Technisch-Tab respektiert Subs
 
-### Sub: Blöcke vs. Sub-Diskussionen || Klare Trennung einführen
+### Sub: Blöcke vs. Sub-Diskussionen (✓ erledigt) || Klare Trennung einführen
 
 *— · 21.05.2026*
+
+> **Ergebnis:** Promotion-UI + visuelle Unterscheidung + Block-Status verworfen
 
 ### Sub: Single Source of Truth || Gleicher Text in Akkordeon und Detail-Ansicht
 
