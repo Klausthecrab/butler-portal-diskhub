@@ -478,6 +478,30 @@ function renderMessageContent(text) {
     .filter(Boolean)
 }
 
+// ─── Extrahiert die README-Präambel (alles zwischen H1 und erstem ---/###) ───
+function extractPreamble(readme) {
+  if (!readme) return ''
+  const lines = readme.split('\n')
+  let start = -1
+  let end = -1
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim()
+    if (line.startsWith('# ')) {
+      start = i + 1
+      continue
+    }
+    if (start >= 0 && end < 0) {
+      if (line === '---' || line === '___' || line.startsWith('###')) {
+        end = i
+        break
+      }
+    }
+  }
+  if (start < 0) return ''
+  if (end < 0) end = lines.length
+  return lines.slice(start, end).map(l => l.trim()).filter(Boolean).join('\n').trim()
+}
+
 // ─── Diff-Algorithmus (LCS-basiert) ─────────────────────────────────────────────
 function computeDiff(oldText, newText) {
   const oldLines = (oldText || '').split('\n')
@@ -1450,13 +1474,24 @@ function SplitViewModal({ discussion, onClose }) {
                                 </div>
                                 {isExpanded && (
                                   <div className={styles.subDocBody}>
-                                    {sub.readme ? (
-                                      <div className={styles.markdownContent}
-                                        dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.readme) }}
-                                      />
-                                    ) : (
-                                      <div className={styles.subDocEmpty}>Keine README</div>
-                                    )}
+                                    {(() => {
+                                      const preamble = extractPreamble(sub.readme)
+                                      if (preamble) {
+                                        return (
+                                          <div className={styles.markdownContent}
+                                            dangerouslySetInnerHTML={{ __html: renderMarkdown(preamble) }}
+                                          />
+                                        )
+                                      }
+                                      if (sub.readme) {
+                                        return (
+                                          <div className={styles.markdownContent}
+                                            dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.readme) }}
+                                          />
+                                        )
+                                      }
+                                      return <div className={styles.subDocEmpty}>Keine README</div>
+                                    })()}
                                     <div className={styles.subDocViewLink}
                                       onClick={e => { e.stopPropagation(); window.history.pushState({subViewMode: true}, ''); setActiveSubView(sub.id) }}
                                       role="button" tabIndex={0}
