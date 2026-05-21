@@ -169,6 +169,82 @@ function renderMarkdown(md) {
   return wrapped
 }
 
+function renderBlocksMd(md) {
+  /** Einfacher Renderer für blocks.md:
+   *  Jedes ### = Akkordeon-Block, Inhalt = Markdown, kein TOC/Status.
+   */
+  if (!md) return ''
+
+  const lines = md.split('\n')
+  const blocks = []
+  let current = null
+
+  for (const line of lines) {
+    if (line.startsWith('### ')) {
+      if (current) blocks.push(current)
+      current = { heading: line, content: [] }
+    } else if (current) {
+      current.content.push(line)
+    }
+  }
+  if (current) blocks.push(current)
+
+  if (blocks.length === 0) {
+    // Fallback: kein ###-Kopf → als normalen Markdown rendern
+    return renderMarkdown(md)
+  }
+
+  let html = '<div class="blocksList">'
+  for (const block of blocks) {
+    const title = block.heading.replace(/^###\s+/, '').trim()
+    const content = block.content.join('\n').trim()
+    html += '<details class="blockAccordion">'
+    html += `<summary class="blockSummary">${title}</summary>`
+    html += `<div class="blockBody">${renderMarkdown(content)}</div>`
+    html += '</details>'
+  }
+  html += '</div>'
+  return html
+}
+
+function generateToc(blocksMd, indexMd) {
+  /** Generiert Mini-TOC aus blocks.md + index.md (nur ###-Überschriften) */
+  if (!blocksMd && !indexMd) return ''
+
+  const items = [] // { type: 'block'|'sub', title }
+
+  // Aus blocks.md
+  if (blocksMd) {
+    for (const line of blocksMd.split('\n')) {
+      if (line.startsWith('### ')) {
+        const title = line.replace(/^###\s+/, '').replace(/\s*\|\|.*/, '').trim()
+        if (title) items.push({ type: 'block', title })
+      }
+    }
+  }
+
+  // Aus index.md (nur Sub:-Einträge)
+  if (indexMd) {
+    for (const line of indexMd.split('\n')) {
+      if (line.startsWith('### Sub:')) {
+        const title = line.replace(/^###\s+Sub:\s*/, '').replace(/\s*\|\|.*/, '').trim()
+        if (title) items.push({ type: 'sub', title })
+      }
+    }
+  }
+
+  if (items.length === 0) return ''
+
+  let html = '<div class="miniToc">'
+  html += '<div class="tocHeading">📋 Inhaltsverzeichnis</div>'
+  for (const item of items) {
+    const prefix = item.type === 'sub' ? '🗂️ ' : '📝 '
+    html += `<div class="tocItem">├── ${prefix}${item.title}</div>`
+  }
+  html += '</div>'
+  return html
+}
+
 // Block-aware rendering for index.md — drei Zonen: Header, Content, Footer
 function renderIndexMd(md) {
   if (!md) return ''
@@ -224,24 +300,6 @@ function renderIndexMd(md) {
     blocks.push(currentBlock)
   }
 
-  // TOC generieren (aus allen Blöcken)
-  if (blocks.length > 0) {
-    result += '<div class="miniToc">'
-result += '<div class="tocHeading">📋 Inhaltsverzeichnis</div>'
-    for (const block of blocks) {
-      const isSub = block.heading.startsWith('### Sub:')
-      const title = block.heading.replace(/^###\s+/, '').replace(/^Sub:\s*/, '').replace(/\s*\|\|.*/, '').trim()
-      const hasResult = !!block.result || block.heading.includes('(✓ erledigt)')
-      const statusChar = hasResult ? '✅' : '●'
-      if (isSub) {
-        result += `<div class="tocSub">└── ${statusChar} ${title}</div>`
-      } else {
-        result += `<div class="tocBlock">├── ${statusChar} ${title}</div>`
-      }
-    }
-    result += '</div>'
-  }
-
   // Letzten offenen Block finden für Rot-Akzent (L.7)
   let latestOpenIndex = -1
   for (let bIdx = blocks.length - 1; bIdx >= 0; bIdx--) {
@@ -281,6 +339,26 @@ function renderBlock(block, isHot) {
   // Prüfen ob Block erledigt (Ergebnis-Zeile vorhanden oder alter Status)
   const hasResult = !!block.result || heading.includes('(✓ erledigt)')
 
+  // Datum aus Fussnote extrahieren fuer Connector (E.6)
+  let footnoteDate = ''
+  if (footnote) {
+    const cleanF = footnote.replace(/^\*|\*$/g, '').trim()
+    // Direktes Datums-Pattern: DD.MM.YYYY
+    let m = cleanF.match(/(\d{2}\.\d{2}\.\d{2,4})/)
+    if (m) {
+      footnoteDate = m[1]
+    } else {
+      // Fallback: YYYYMMDD aus Session-ID extrahieren
+      m = cleanF.match(/(\d{4})(\d{2})(\d{2})/)
+      if (m) {
+        const y = parseInt(m[1]), mo = parseInt(m[2]), d = parseInt(m[3])
+        if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) {
+          footnoteDate = `${String(d).padStart(2,'0')}.${String(mo).padStart(2,'0')}.${y}`
+        }
+      }
+    }
+  }
+
   // Inline-Escaping für den Heading-Text
   const escapedHeading = cleanHeading
     .replace(/&/g, '&amp;')
@@ -304,7 +382,18 @@ function renderBlock(block, isHot) {
     ? `<span class="${styles.blockSubBadge}">Sub</span>`
     : ''
 
-  let html = `<div class="${isSub ? styles.blockCardSub : styles.blockCard}" data-status="${hasResult ? 'done' : 'open'}"${isHot ? ' data-hot="true"' : ''}>`
+  let html = `<div class="${styles.blockWrapper}">`
+  // Connector: Dot + horizontale Linie an Oberkante, Datum darunter (E.6)
+  html += `<div class="${styles.blockConnector}">`
+  html += `<div class="${styles.connectorTop}">`
+  html += `<span class="${styles.connectorDot}"></span>`
+  html += `<span class="${styles.connectorLine}"></span>`
+  html += `</div>`
+  if (footnoteDate) {
+    html += `<div class="${styles.connectorDate}">${footnoteDate}</div>`
+  }
+  html += `</div>`
+  html += `<div class="${isSub ? styles.blockCardSub : styles.blockCard}" data-status="${hasResult ? 'done' : 'open'}"${isHot ? ' data-hot="true"' : ''}>`
   // Accordion-Titel mit Frage↔Aussage (L.6)
   let summaryTitle
   if (hasSeparator) {
@@ -337,7 +426,8 @@ function renderBlock(block, isHot) {
     html += `<div class="${styles.blockFooter}"><em>${escapedFootnote}</em></div>`
   }
   html += `</details>`
-  html += `</div>`
+  html += `</div>`  // close card
+  html += `</div>`  // close blockWrapper
   return html
 }
 
@@ -626,6 +716,18 @@ function SplitViewModal({ discussion, onClose }) {
     return () => window.removeEventListener('keydown', handleKey)
   }, [onClose])
 
+  // Popstate für Browser-Back-Button — schließt Sub-View
+  useEffect(() => {
+    const handler = () => {
+      if (activeSubView) {
+        setActiveSubView(null)
+        window.history.replaceState(null, '')
+      }
+    }
+    window.addEventListener('popstate', handler)
+    return () => window.removeEventListener('popstate', handler)
+  }, [activeSubView])
+
   // Cleanup Polling
   useEffect(() => {
     return () => {
@@ -676,15 +778,17 @@ function SplitViewModal({ discussion, onClose }) {
     }
   }, [isDragging])
 
-  // Git-Log laden bei Tab-Wechsel
+  // Git-Log laden bei Tab-Wechsel (respektiert Sub-View)
   useEffect(() => {
     if (activeTab !== 'technical' || !discussion?.id) return
     setGitLogLoading(true)
-    fetch(`${API}/git-log/${discussion.id}`)
+    let url = `${API}/git-log/${discussion.id}`
+    if (activeSubView) url += `?sub_id=${encodeURIComponent(activeSubView)}`
+    fetch(url)
       .then(r => r.json())
       .then(d => { setGitLog(d); setGitLogLoading(false) })
       .catch(() => { setGitLog(null); setGitLogLoading(false) })
-  }, [activeTab, discussion?.id])
+  }, [activeTab, discussion?.id, activeSubView])
   
   // Session-Polling
   useEffect(() => {
@@ -1022,7 +1126,7 @@ function SplitViewModal({ discussion, onClose }) {
               <>
                 <button
                   className={styles.backBtn}
-                  onClick={() => setActiveSubView(null)}
+                  onClick={() => { window.history.replaceState(null, ''); setActiveSubView(null) }}
                   title="Zurück zur Hauptdiskussion"
                 >
                   ← Zurück
@@ -1066,7 +1170,7 @@ function SplitViewModal({ discussion, onClose }) {
                       {/* Sub-View Breadcrumb */}
                       {activeSubView && subViewData ? (
                         <div className={styles.subViewBreadcrumb}>
-                          <span className={styles.subViewBreadcrumbLink} onClick={() => setActiveSubView(null)}>
+                          <span className={styles.subViewBreadcrumbLink} onClick={() => { window.history.replaceState(null, ''); setActiveSubView(null) }}>
                             {discussion.name}
                           </span>
                           <span className={styles.subViewBreadcrumbSep}> ▶ </span>
@@ -1110,6 +1214,19 @@ function SplitViewModal({ discussion, onClose }) {
                                 />
                               </div>
                             ) : null}
+                            {subViewData.blocks && (
+                              <div className={styles.blocksSection}>
+                                <div className={styles.sectionLabel}>📝 Blöcke</div>
+                                <div className={styles.markdownContent}
+                                  dangerouslySetInnerHTML={{ __html: renderBlocksMd(subViewData.blocks) }}
+                                />
+                              </div>
+                            )}
+                            {generateToc(subViewData.blocks, subViewData.index) && (
+                              <div className={styles.markdownContent}
+                                dangerouslySetInnerHTML={{ __html: generateToc(subViewData.blocks, subViewData.index) }}
+                              />
+                            )}
                             {subViewData.index && (
                               <div className={styles.markdownContent}
                                 dangerouslySetInnerHTML={{ __html: renderIndexMd(subViewData.index) }}
@@ -1163,6 +1280,20 @@ function SplitViewModal({ discussion, onClose }) {
                               />
                             </div>
                           ) : null}
+                          {/* TOC */}
+                          {generateToc(data.blocks, data.index) && (
+                            <div className={styles.markdownContent}
+                              dangerouslySetInnerHTML={{ __html: generateToc(data.blocks, data.index) }}
+                            />
+                          )}
+                          {data.blocks && (
+                            <div className={styles.blocksSection}>
+                              <div className={styles.sectionLabel}>📝 Blöcke</div>
+                              <div className={styles.markdownContent}
+                                dangerouslySetInnerHTML={{ __html: renderBlocksMd(data.blocks) }}
+                              />
+                            </div>
+                          )}
                           {data.index && (
                             <div className={styles.markdownContent}
                               dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index) }}
@@ -1170,21 +1301,17 @@ function SplitViewModal({ discussion, onClose }) {
                           )}
                           {data.subs && data.subs.map(sub => (
                             <div key={sub.id} className={styles.subDocBlock}
-                              onClick={() => { setActiveSubView(null); setTimeout(() => setActiveSubView(sub.id), 0) }}
+                              onClick={() => { window.history.pushState({subViewMode: true}, ''); setActiveSubView(sub.id) }}
                               role="button" tabIndex={0}
-                              onKeyDown={e => { if (e.key === 'Enter') { setActiveSubView(null); setTimeout(() => setActiveSubView(sub.id), 0) } }}
+                              onKeyDown={e => { if (e.key === 'Enter') { window.history.pushState({subViewMode: true}, ''); setActiveSubView(sub.id) } }}
                             >
                               <h3 className={styles.subDocTitle}>📂 {sub.name}</h3>
-                              {sub.readme && (
-                                <div className={styles.markdownContent}
-                                  dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.readme) }}
-                                />
-                              )}
-                              {sub.index && (
-                                <div className={styles.markdownContent}
-                                  dangerouslySetInnerHTML={{ __html: renderIndexMd(sub.index) }}
-                                />
-                              )}
+                              <div className={styles.subCardSummary}>
+                                {sub.readme && (
+                                  <div className={styles.subCardReadme}>{sub.readme.slice(0, 200).replace(/^#.*\n?/, '').trim()}</div>
+                                )}
+                                <span className={styles.subCardOpen}>▶ Öffnen</span>
+                              </div>
                             </div>
                           ))}
                         </>

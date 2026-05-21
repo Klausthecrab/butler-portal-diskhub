@@ -422,7 +422,7 @@
   background: #1e293b;
   border-radius: 10px;
   border: 1px solid #334155;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* ─── Diskussions-Header (E.3) ─── */
@@ -572,48 +572,69 @@
 
 /* ─── Block Cards (Dreiteilung) ─────────────────────────────────── */
 
-.blockCard {
-  position: relative;
+.blockWrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
   margin-bottom: 14px;
-  margin-left: 22px;
+  margin-left: -24px;
+}
+
+.blockConnector {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  min-width: 24px;
+  padding-top: 4px;
+}
+
+.connectorTop {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.connectorDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #6366f1;
+  flex-shrink: 0;
+}
+
+.connectorDate {
+  font-size: 0.55rem;
+  font-style: italic;
+  color: #f1f5f9;
+  white-space: nowrap;
+  font-family: monospace;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.connectorLine {
+  flex: 1;
+  height: 2px;
+  background: #475569;
+  min-width: 4px;
+}
+
+.blockCard {
+  margin-bottom: 14px;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid #334155;
   background: #1e293b;
-}
-
-.blockCard::before {
-  content: '';
-  position: absolute;
-  left: -22px;
-  top: 0;
-  width: 18px;
-  height: 20px;
-  border-left: 2px solid #475569;
-  border-top: 2px solid #475569;
-  border-radius: 4px 0 0 0;
+  flex: 1;
 }
 
 .blockCardSub {
-  position: relative;
   margin-bottom: 14px;
-  margin-left: 22px;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid #334155;
   background: #1c1917;
-}
-
-.blockCardSub::before {
-  content: '';
-  position: absolute;
-  left: -22px;
-  top: 0;
-  width: 18px;
-  height: 20px;
-  border-left: 2px solid #475569;
-  border-top: 2px solid #475569;
-  border-radius: 4px 0 0 0;
+  flex: 1;
 }
 
 .blockCardSub .blockHeader {
@@ -629,10 +650,6 @@
 .blockCard[data-status="done"] .blockHeader {
   background: #166534;
 }
-.blockCard[data-status="done"]::before {
-  border-left-color: #22c55e;
-  border-top-color: #22c55e;
-}
 
 /* Offene Box (Gelb) */
 .blockCard[data-status="open"] {
@@ -640,10 +657,6 @@
 }
 .blockCard[data-status="open"] .blockHeader {
   background: #92400e;
-}
-.blockCard[data-status="open"]::before {
-  border-left-color: #f59e0b;
-  border-top-color: #f59e0b;
 }
 
 /* Offene Sub-Diskussion (Orange) */
@@ -653,10 +666,6 @@
 .blockCardSub[data-status="open"] .blockHeader {
   background: #9a3412;
 }
-.blockCardSub[data-status="open"]::before {
-  border-left-color: #ea580c;
-  border-top-color: #ea580c;
-}
 
 /* Gelöste Sub-Diskussion (Dunkel-Grün) */
 .blockCardSub[data-status="done"] {
@@ -664,10 +673,6 @@
 }
 .blockCardSub[data-status="done"] .blockHeader {
   background: #065f46;
-}
-.blockCardSub[data-status="done"]::before {
-  border-left-color: #059669;
-  border-top-color: #059669;
 }
 
 /* ─── Rot-Akzent: Neueste offene Sub/Box (L.7) ──────────────────── */
@@ -679,11 +684,6 @@
 .blockCard[data-hot="true"] .blockHeader,
 .blockCardSub[data-hot="true"] .blockHeader {
   background: #991b1b !important;
-}
-.blockCard[data-hot="true"]::before,
-.blockCardSub[data-hot="true"]::before {
-  border-left-color: #dc2626 !important;
-  border-top-color: #dc2626 !important;
 }
 
 .blockHeader {
@@ -1580,4 +1580,108 @@ details[open] .titleOpen {
   font-size: 0.75rem;
   color: #64748b;
   line-height: 1.5;
+}
+
+/* ─── Blocks Section ─── */
+.blocksSection {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #334155;
+}
+.sectionLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+.blocksSection .blockAccordion {
+  background: #1a2332;
+  border: 1px solid #2d3a4e;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+.blocksSection .blockSummary {
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.blocksSection .blockSummary::before {
+  content: '▶';
+  font-size: 0.65rem;
+  color: #6366f1;
+  transition: transform 0.15s;
+}
+.blocksSection .blockAccordion[open] .blockSummary::before {
+  transform: rotate(90deg);
+}
+.blocksSection .blockSummary::-webkit-details-marker {
+  display: none;
+}
+.blocksSection .blockSummary:hover {
+  background: #1e2a3d;
+}
+.blocksSection .blockBody {
+  padding: 0 14px 12px;
+  border-top: 1px solid #2d3a4e;
+  padding-top: 10px;
+}
+.blocksSection .blockBody .markdownContent p {
+  font-size: 0.8125rem;
+  color: #94a3b8;
+}
+
+/* ─── TOC ─── */
+.markdownContent .miniToc {
+  background: #1a2332;
+  border: 1px solid #2d3a4e;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 0;
+}
+.markdownContent .tocHeading {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.markdownContent .tocItem {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  padding: 2px 0;
+  line-height: 1.5;
+}
+
+/* ─── Simplified Sub Cards ─── */
+.subCardSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.subCardReadme {
+  font-size: 0.8125rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.subCardOpen {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #818cf8;
+  align-self: flex-start;
 }

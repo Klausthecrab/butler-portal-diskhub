@@ -473,6 +473,12 @@ def get_discussion(discussion_id):
         result['parsed'] = header
         result['readme_body'] = body
 
+    # Blöcke (blocks.md) — flache Notizen ohne eigene Kinder
+    blocks_path = os.path.join(folder, 'blocks.md')
+    if os.path.isfile(blocks_path):
+        with open(blocks_path, 'r') as f:
+            result['blocks'] = f.read()
+
     index_path = os.path.join(folder, 'index.md')
     if os.path.isfile(index_path):
         with open(index_path, 'r') as f:
@@ -485,6 +491,7 @@ def get_discussion(discussion_id):
         if os.path.isdir(sub_folder) and not sub_name.startswith('.') and sub_name != 'assets':
             sub_index = os.path.join(sub_folder, 'index.md')
             sub_readme = os.path.join(sub_folder, 'README.md')
+            sub_blocks = os.path.join(sub_folder, 'blocks.md')
             sub_data = {'id': sub_name, 'name': sub_name.replace('-', ' ').title()}
             if os.path.isfile(sub_index):
                 with open(sub_index, 'r') as f:
@@ -492,6 +499,9 @@ def get_discussion(discussion_id):
             if os.path.isfile(sub_readme):
                 with open(sub_readme, 'r') as f:
                     sub_data['readme'] = f.read()
+            if os.path.isfile(sub_blocks):
+                with open(sub_blocks, 'r') as f:
+                    sub_data['blocks'] = f.read()
             subs.append(sub_data)
     result['subs'] = subs
 
@@ -631,11 +641,15 @@ def start_session():
     if is_sub and sub_id:
         session_title = f'disc-{discussion_id}-{sub_id}-{date_str}-{time_str}'
 
-    # Datei-Pfad für Kontext-Prompt
+    # Datei-Pfad für Kontext-Prompt — bevorzugt index.md, Fallback blocks.md
     if is_sub and sub_id:
         target_file = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id, 'index.md')
+        if not os.path.isfile(target_file):
+            target_file = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id, 'blocks.md')
     else:
         target_file = os.path.join(DISCUSSIONS_DIR, discussion_id, 'index.md')
+        if not os.path.isfile(target_file):
+            target_file = os.path.join(DISCUSSIONS_DIR, discussion_id, 'blocks.md')
 
     context_prompt = (
         f"Lies die Datei {target_file} vollständig. "
@@ -912,14 +926,23 @@ def adopt_block():
     else:
         target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id)
 
-    index_path = os.path.join(target_dir, 'index.md')
+    blocks_path = os.path.join(target_dir, 'blocks.md')
 
-    if not os.path.isfile(index_path):
-        return jsonify({'error': 'index.md nicht gefunden'}), 404
+    if not os.path.isfile(blocks_path):
+        # blocks.md existiert noch nicht — anlegen mit Header
+        header_lines = [f'# Blöcke — {discussion_id}\n']
+        if is_sub and sub_id:
+            header_lines = [f'# Blöcke — {discussion_id}/{sub_id}\n']
+        header_lines.append('\n---\n\n')
+        try:
+            with open(blocks_path, 'w') as f:
+                f.writelines(header_lines)
+        except Exception as e:
+            return jsonify({'error': f'blocks.md anlegen fehlgeschlagen: {e}'}), 500
 
     # Prompt für Hermes bauen
     prompt_parts = [
-        f"Schreibe folgenden Block in die Datei {index_path}.",
+        f"Schreibe folgenden Block in die Datei {blocks_path}.",
     ]
 
     if position:
@@ -1208,6 +1231,8 @@ def start_sub_discussion():
 
     session_title = f'disc-{discussion_id}-{sub_id}'
     target_file = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id, 'index.md')
+    if not os.path.isfile(target_file):
+        target_file = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id, 'blocks.md')
 
     context_prompt = (
         f"Lies die Datei {target_file} vollständig. "
