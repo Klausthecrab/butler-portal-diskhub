@@ -457,6 +457,13 @@ function renderBlock(block, isHot) {
   return html
 }
 
+// Lese den ersten H1-Titel aus Markdown (für konsistente Titelzeile)
+function readmeTitle(md) {
+  if (!md) return ''
+  const match = md.match(/^# (.+)$/m)
+  return match ? match[1].trim() : ''
+}
+
 // Discord-CDN-URLs im Chat als Bilder rendern
 function renderMessageContent(text) {
   if (!text) return text
@@ -1420,7 +1427,7 @@ function SplitViewModal({ discussion, onClose }) {
                                     })
                                   }}}
                                 >
-                                  <h3 className={styles.subDocTitle}>📂 {sub.name}</h3>
+                                  <h3 className={styles.subDocTitle}>📂 {readmeTitle(sub.readme) || sub.name}</h3>
                                   <span className={styles.subDocArrow}>{isExpanded ? '▾' : '▸'}</span>
                                 </div>
                                 {isExpanded && (
