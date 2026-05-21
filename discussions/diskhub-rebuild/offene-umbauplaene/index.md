@@ -82,11 +82,11 @@
 
 > **Ergebnis:** `.discHeader` auf pastell Terracotta (#f0dbd1), border-radius: 10px, Textfarben auf warme Dunkeltöne umgestellt. `.discStats` mit border-top: 1px solid rgba(0,0,0,0.08) vom Titel getrennt. Stats-Separator-Farbe an neuen Hintergrund angepasst (#a09080).
 
-### #14: Weißes Überbleibsel entfernen
+### #14: Weißes Überbleibsel entfernen (✓ erledigt)
 
 *— · 21.05.2026*
 
-Neben der Header-Box existiert noch ein zweites weißes Element ("Pille") aus Altbestand — entfernen oder anpassen.
+> **Ergebnis:** `.readmeBodySection` (background: #f8fafc, border-radius: 10px) entfernt — die vier JSX-Wrapper in main+sub view durch direktes `.markdownContent` ersetzt, CSS-Regel gelöscht. README-Content läuft jetzt nahtlos im dunklen Theme.
 
 ### #15: Trennlinien um Inhaltsverzeichnis
 

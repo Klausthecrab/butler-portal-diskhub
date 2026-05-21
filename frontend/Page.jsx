@@ -1330,24 +1330,20 @@ function SplitViewModal({ discussion, onClose }) {
                               </div>
                             )}
                             {subViewData.readme_body ? (
-                              <div className={styles.readmeBodySection}>
-                                <div className={styles.markdownContent}
-                                  dangerouslySetInnerHTML={{
-                                    __html: renderMarkdown(
-                                      subViewData.readme_body.split('\n').filter(line => {
-                                        const t = line.trim()
-                                        return !t.startsWith('**Erledigt:**') && !t.startsWith('**Offen:**')
-                                      }).join('\n')
-                                    )
-                                  }}
-                                />
-                              </div>
+                              <div className={styles.markdownContent}
+                                dangerouslySetInnerHTML={{
+                                  __html: renderMarkdown(
+                                    subViewData.readme_body.split('\n').filter(line => {
+                                      const t = line.trim()
+                                      return !t.startsWith('**Erledigt:**') && !t.startsWith('**Offen:**')
+                                    }).join('\n')
+                                  )
+                                }}
+                              />
                             ) : subViewData.readme ? (
-                              <div className={styles.readmeBodySection}>
-                                <div className={styles.markdownContent}
-                                  dangerouslySetInnerHTML={{ __html: renderMarkdown(subViewData.readme) }}
-                                />
-                              </div>
+                              <div className={styles.markdownContent}
+                                dangerouslySetInnerHTML={{ __html: renderMarkdown(subViewData.readme) }}
+                              />
                             ) : null}
                             {subViewData.blocks && (
                               <div className={styles.blocksSection}>
@@ -1400,24 +1396,20 @@ function SplitViewModal({ discussion, onClose }) {
                             </div>
                           )}
                           {data.readme_body ? (
-                            <div className={styles.readmeBodySection}>
-                              <div className={styles.markdownContent}
-                                dangerouslySetInnerHTML={{
-                                  __html: renderMarkdown(
-                                    data.readme_body.split('\n').filter(line => {
-                                      const t = line.trim()
-                                      return !t.startsWith('**Erledigt:**') && !t.startsWith('**Offen:**')
-                                    }).join('\n')
-                                  )
-                                }}
-                              />
-                            </div>
+                            <div className={styles.markdownContent}
+                              dangerouslySetInnerHTML={{
+                                __html: renderMarkdown(
+                                  data.readme_body.split('\n').filter(line => {
+                                    const t = line.trim()
+                                    return !t.startsWith('**Erledigt:**') && !t.startsWith('**Offen:**')
+                                  }).join('\n')
+                                )
+                              }}
+                            />
                           ) : data.readme ? (
-                            <div className={styles.readmeBodySection}>
-                              <div className={styles.markdownContent}
-                                dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme) }}
-                              />
-                            </div>
+                            <div className={styles.markdownContent}
+                              dangerouslySetInnerHTML={{ __html: renderMarkdown(data.readme) }}
+                            />
                           ) : null}
                           {/* TOC */}
                           {generateToc(data.blocks, data.index) && (

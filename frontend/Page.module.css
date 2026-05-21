@@ -1553,33 +1553,6 @@ details[open] .titleOpen {
   justify-content: flex-end;
 }
 
-.readmeBodySection {
-  margin-bottom: 20px;
-  padding: 16px 20px;
-  background: #f8fafc;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-.readmeBodySection .markdownContent h1,
-.readmeBodySection .markdownContent h2,
-.readmeBodySection .markdownContent h3 { color: #1e293b; }
-.readmeBodySection .markdownContent p { color: #334155; }
-.readmeBodySection .markdownContent strong { color: #0f172a; }
-.readmeBodySection .markdownContent em { color: #475569; }
-.readmeBodySection .markdownContent a { color: #6366f1; }
-.readmeBodySection .markdownContent hr { border-top-color: #d1d5db; }
-.readmeBodySection .markdownContent blockquote { border-left-color: #6366f1; color: #475569; }
-.readmeBodySection .markdownContent code { background: #e2e8f0; color: #6366f1; }
-.readmeBodySection .markdownContent pre { background: #f1f5f9; border-color: #d1d5db; color: #1e293b; }
-.readmeBodySection .markdownContent th { background: #f1f5f9; color: #6366f1; border-color: #d1d5db; }
-.readmeBodySection .markdownContent table td { border-color: #d1d5db; color: #334155; }
-.readmeBodySection .markdownContent tr:nth-child(even) td { background: #f8fafc; }
-.readmeBodySection .markdownContent ul,
-.readmeBodySection .markdownContent ol { color: #334155; }
-.readmeBodySection .markdownContent img { border-color: #d1d5db; }
-
 /* Markdown rendered in doc */
 .markdownContent {
   line-height: 1.7;
