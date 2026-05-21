@@ -1,6 +1,6 @@
 # Offene Umbaupläne
 
-**Erstellt:** 21.05.2026 · 10 Sub-Diskussionen · 0 Blöcke
+**Erstellt:** 21.05.2026 · 12 Sub-Diskussionen · 0 Blöcke
 
 ---
 
@@ -55,6 +55,12 @@
 ### #10: Header-Box mit weißem Hintergrund + Trennlinien
 
 *— · 21.05.2026*
+
+### #11: Standardmäßig eingeklappte Subs fixen
+
+*— · 21.05.2026*
+
+### #12: Kurzbeschreibung im aufgeklappten Akkordeon
 
 ---
 
