@@ -1428,7 +1428,14 @@ function SplitViewModal({ discussion, onClose }) {
                                     })
                                   }}}
                                 >
-                                  <h3 className={styles.subDocTitle}>📂 #{subNum}: {readmeTitle(sub.readme) || sub.name}</h3>
+                                  <h3 className={styles.subDocTitle}>📂 #{subNum}: {readmeTitle(sub.readme) || sub.name}
+                                    {sub.status?.erledigt > 0 && sub.status?.offen === 0 && (
+                                      <span className={`${styles.badge} ${styles.badgeDone}`}>✓ {sub.status.erledigt} erledigt</span>
+                                    )}
+                                    {sub.status?.offen > 0 && (
+                                      <span className={`${styles.badge} ${styles.badgeOpen}`}>● {sub.status.offen} offen</span>
+                                    )}
+                                  </h3>
                                   <span className={styles.subDocArrow}>{isExpanded ? '▾' : '▸'}</span>
                                 </div>
                                 {isExpanded && (
