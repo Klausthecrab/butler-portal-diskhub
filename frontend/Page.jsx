@@ -1406,7 +1406,8 @@ function SplitViewModal({ discussion, onClose }) {
                               dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, 'footer-only') }}
                             />
                           )}
-                          {data.subs && data.subs.map(sub => {
+                          {data.subs && data.subs.map((sub, idx) => {
+                            const subNum = String(idx + 1).padStart(2, '0')
                             const isExpanded = expandedSubs.has(sub.id)
                             return (
                               <div key={sub.id} className={styles.subDocBlock}>
@@ -1427,7 +1428,7 @@ function SplitViewModal({ discussion, onClose }) {
                                     })
                                   }}}
                                 >
-                                  <h3 className={styles.subDocTitle}>📂 {readmeTitle(sub.readme) || sub.name}</h3>
+                                  <h3 className={styles.subDocTitle}>📂 #{subNum}: {readmeTitle(sub.readme) || sub.name}</h3>
                                   <span className={styles.subDocArrow}>{isExpanded ? '▾' : '▸'}</span>
                                 </div>
                                 {isExpanded && (

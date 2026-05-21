@@ -46,9 +46,11 @@
 
 > **Ergebnis:** `readmeTitle()` parst H1 aus README — Header zeigt echten Titel statt `sub.name`. Single Source, kein `.title()`-Bug mehr. Fallback auf `sub.name` bei fehlender README.
 
-### #08: Sub-Diskussionen nummerieren
+### #08: Sub-Diskussionen nummerieren (✓ erledigt) || Sub-Akkordeon mit Nummer-Prefix
 
 *— · 21.05.2026*
+
+> **Ergebnis:** `data.subs.map()` bekommt `idx`-Parameter, Titel wird `#01:`, `#02:`, etc. via `padStart(2, '0')` vorangestellt.
 
 ### #09: Status-Auslese in Sub-Akkordeon fixen
 
