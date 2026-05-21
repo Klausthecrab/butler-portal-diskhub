@@ -1,40 +1,60 @@
 # Offene Umbaupläne
 
-**Erstellt:** 21.05.2026 · 6 Sub-Diskussionen · 0 Blöcke
+**Erstellt:** 21.05.2026 · 10 Sub-Diskussionen · 0 Blöcke
 
 ---
 
-### Sub: Datei-Struktur || Neue Ordner-Struktur festlegen
+### #01: Datei-Struktur (✓ erledigt) || Neue Ordner-Struktur festlegen
 
 *— · 21.05.2026*
 
-### Sub: UI-Struktur || Header-Body-Aufbau definieren
+> **Ergebnis:** Grundstruktur durch spätere Implementierungen abgedeckt — README.md + index.md + blocks.md + Sub-Ordner sind etabliert. Keine aktiven offenen Punkte mehr.
+
+### #02: UI-Struktur (✓ erledigt) || Header-Body-Aufbau definieren
 
 *— · 21.05.2026*
 
-### Sub: Detail-Ansicht (✓ erledigt) || Zoom in Sub-Diskussionen
+> **Ergebnis:** Vollständig durch Punkte 3–6 implementiert (Detail-Ansicht, Blocks vs Subs, Single Source of Truth, Duplikate entfernt).
+
+### #03: Detail-Ansicht (✓ erledigt) || Zoom in Sub-Diskussionen
 
 *— · 21.05.2026*
 
 > **Ergebnis:** Browser-History-API + TOC in Sub-View + Technisch-Tab respektiert Subs
 
-### Sub: Blöcke vs. Sub-Diskussionen (✓ erledigt) || Klare Trennung einführen
+### #04: Blöcke vs. Sub-Diskussionen (✓ erledigt) || Klare Trennung einführen
 
 *— · 21.05.2026*
 
 > **Ergebnis:** Promotion-UI + visuelle Unterscheidung + Block-Status verworfen
 
-### Sub: Single Source of Truth (✓ erledigt) || Gleicher Text in Akkordeon und Detail-Ansicht
+### #05: Single Source of Truth (✓ erledigt) || Gleicher Text in Akkordeon und Detail-Ansicht
 
 *— · 21.05.2026*
 
 > **Ergebnis:** Sub-Karten zu Akkordeon umgebaut — volle README via renderMarkdown(), kein slice(0,200) mehr. "→ Vollständige Ansicht"-Link für Index/Blocks.
 
-### Sub: Doppelte Elemente entfernen (✓ erledigt) || Titel, Datum, ausgeklappte Subs
+### #06: Doppelte Elemente entfernen (✓ erledigt) || Titel, Datum, ausgeklappte Subs
 
 *— · 21.05.2026*
 
 > **Ergebnis:** `renderIndexMd()` bekommt `mode='footer-only'` — Main-View rendert nur Footer (💬 Sub-Diskussion fortsetzen) ohne Preamble/### Sub: Blöcke. Sub-View bleibt voll.
+
+### #07: Titelzeile im Akkordeon vereinheitlichen
+
+*— · 21.05.2026*
+
+### #08: Sub-Diskussionen nummerieren
+
+*— · 21.05.2026*
+
+### #09: Status-Auslese in Sub-Akkordeon fixen
+
+*— · 21.05.2026*
+
+### #10: Header-Box mit weißem Hintergrund + Trennlinien
+
+*— · 21.05.2026*
 
 ---
 
