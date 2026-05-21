@@ -263,8 +263,17 @@ function generateToc(blocksMd, indexMd) {
 }
 
 // Block-aware rendering for index.md — drei Zonen: Header, Content, Footer
-function renderIndexMd(md) {
+function renderIndexMd(md, mode) {
   if (!md) return ''
+
+  if (mode === 'footer-only') {
+    // Nur den Footer rendern (alles nach der letzten ---)
+    const parts = md.split('\n---\n')
+    if (parts.length < 2) return ''
+    const footer = parts[parts.length - 1].trim()
+    if (!footer) return ''
+    return renderMarkdown(footer)
+  }
 
   const lines = md.split('\n')
   let result = ''
@@ -1387,7 +1396,7 @@ function SplitViewModal({ discussion, onClose }) {
                           )}
                           {data.index && (
                             <div className={styles.markdownContent}
-                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index) }}
+                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, 'footer-only') }}
                             />
                           )}
                           {data.subs && data.subs.map(sub => {

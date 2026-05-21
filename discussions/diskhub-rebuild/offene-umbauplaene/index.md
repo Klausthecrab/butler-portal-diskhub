@@ -30,9 +30,11 @@
 
 > **Ergebnis:** Sub-Karten zu Akkordeon umgebaut — volle README via renderMarkdown(), kein slice(0,200) mehr. "→ Vollständige Ansicht"-Link für Index/Blocks.
 
-### Sub: Doppelte Elemente entfernen || Titel, Datum, ausgeklappte Subs
+### Sub: Doppelte Elemente entfernen (✓ erledigt) || Titel, Datum, ausgeklappte Subs
 
 *— · 21.05.2026*
+
+> **Ergebnis:** `renderIndexMd()` bekommt `mode='footer-only'` — Main-View rendert nur Footer (💬 Sub-Diskussion fortsetzen) ohne Preamble/### Sub: Blöcke. Sub-View bleibt voll.
 
 ---
 
