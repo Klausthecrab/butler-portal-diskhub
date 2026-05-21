@@ -64,9 +64,11 @@
 
 > **Ergebnis:** `.discHeader` von dunklem Gradient auf `#f8fafc` umgestellt, Textfarben invertiert (dunkel auf hell), `border-bottom: 2px solid #d1d5db` als Trennlinie.
 
-### #11: Standardmäßig eingeklappte Subs fixen
+### #11: Standardmäßig eingeklappte Subs fixen (✓ erledigt) || Ersten offenen Sub auto-expand
 
 *— · 21.05.2026*
+
+> **Ergebnis:** `useEffect` auf `data`: findet `data.subs.find(sub => sub.status?.offen > 0)` und setzt `expandedSubs = new Set([firstOpen.id])`. Alle anderen bleiben zu.
 
 ### #12: Kurzbeschreibung im aufgeklappten Akkordeon
 

@@ -746,6 +746,16 @@ function SplitViewModal({ discussion, onClose }) {
 
   useEffect(() => { fetchDiscussionData() }, [fetchDiscussionData])
 
+  // Standardmäßig ersten offenen Sub expandieren (#11)
+  useEffect(() => {
+    if (data?.subs) {
+      const firstOpen = data.subs.find(sub => sub.status?.offen > 0)
+      if (firstOpen) {
+        setExpandedSubs(new Set([firstOpen.id]))
+      }
+    }
+  }, [data])
+
   // Lade Sub-Diskussionsdaten bei Zoom
   useEffect(() => {
     if (!activeSubView || !discussion?.id) return
