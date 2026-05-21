@@ -1,6 +1,6 @@
-# Test Promotion
+# Test Format
 
-Ein Test-Block-Inhalt.
+Test.
 
 ---
 

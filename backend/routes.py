@@ -1352,7 +1352,7 @@ def promote_block():
         index_path = os.path.join(parent_dir, 'index.md')
         entry = (
             '\n### Sub: ' + block_title + '\n\n'
-            '*--- · ' + today + '*\n\n'
+            '*\u2014 \u00b7 ' + today + '*\n\n'
             '> **Ergebnis:** Promoted from block\n'
         )
         if os.path.isfile(index_path):
