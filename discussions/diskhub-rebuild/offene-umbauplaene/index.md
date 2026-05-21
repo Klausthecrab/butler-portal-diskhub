@@ -76,6 +76,36 @@
 
 > **Ergebnis:** `extractPreamble()` extrahiert alles zwischen H1 und erstem `---`/`###` aus `sub.readme`. Akkordeon zeigt diese Präambel + "→ Vollständige Ansicht"-Link — Single Source, kein separater Feld.
 
+### #13: Header-Box Terracotta + Abgrenzung
+
+*— · 21.05.2026*
+
+Header-Box heller machen (pastell Terracotta), Ecken abrunden, Titel und Fußzeile dezent voneinander trennen.
+
+### #14: Weißes Überbleibsel entfernen
+
+*— · 21.05.2026*
+
+Neben der Header-Box existiert noch ein zweites weißes Element ("Pille") aus Altbestand — entfernen oder anpassen.
+
+### #15: Trennlinien um Inhaltsverzeichnis
+
+*— · 21.05.2026*
+
+Vor und nach dem TOC dezente Linien einziehen.
+
+### #16: "Box hinzufügen"-Formular
+
+*— · 21.05.2026*
+
+Template/Formular ganz unten in der Diskussion: Titelzeile + Textfeld, um eine neue Box anzulegen.
+
+### #17: "Zu Sub ändern"-Button + Session-Spawn
+
+*— · 21.05.2026*
+
+In jeder Box ein Button, der eine Session startet. Die KI durchgeht den Box-Inhalt mit dem User und leitet 1-n Sub-Diskussionen ab + legt sie automatisch an.
+
 ---
 
 💬 **Sub-Diskussion fortsetzen**
