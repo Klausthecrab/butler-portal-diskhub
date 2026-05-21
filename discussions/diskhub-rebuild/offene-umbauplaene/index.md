@@ -58,9 +58,11 @@
 
 > **Ergebnis:** `sub.status` aus API-Daten im Header gerendert: grüner Badge bei `erledigt > 0 && offen === 0`, gelber Badge bei `offen > 0`. CSS-Klassen `.badgeDone`/`.badgeOpen` wiederverwendet.
 
-### #10: Header-Box mit weißem Hintergrund + Trennlinien
+### #10: Header-Box mit weißem Hintergrund + Trennlinien (✓ erledigt) || CSS für hellen Header
 
 *— · 21.05.2026*
+
+> **Ergebnis:** `.discHeader` von dunklem Gradient auf `#f8fafc` umgestellt, Textfarben invertiert (dunkel auf hell), `border-bottom: 2px solid #d1d5db` als Trennlinie.
 
 ### #11: Standardmäßig eingeklappte Subs fixen
 
