@@ -76,11 +76,11 @@
 
 > **Ergebnis:** `extractPreamble()` extrahiert alles zwischen H1 und erstem `---`/`###` aus `sub.readme`. Akkordeon zeigt diese Präambel + "→ Vollständige Ansicht"-Link — Single Source, kein separater Feld.
 
-### #13: Header-Box Terracotta + Abgrenzung
+### #13: Header-Box Terracotta + Abgrenzung (✓ erledigt)
 
 *— · 21.05.2026*
 
-Header-Box heller machen (pastell Terracotta), Ecken abrunden, Titel und Fußzeile dezent voneinander trennen.
+> **Ergebnis:** `.discHeader` auf pastell Terracotta (#f0dbd1), border-radius: 10px, Textfarben auf warme Dunkeltöne umgestellt. `.discStats` mit border-top: 1px solid rgba(0,0,0,0.08) vom Titel getrennt. Stats-Separator-Farbe an neuen Hintergrund angepasst (#a09080).
 
 ### #14: Weißes Überbleibsel entfernen
 
