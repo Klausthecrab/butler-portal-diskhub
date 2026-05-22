@@ -116,11 +116,11 @@ Vor und nach dem TOC dezente Linien einziehen.
 > - **Sub-Akkordeons:** Jeder Sub jetzt mit blockWrapper, Datum wird aus README `**Erstellt:** DD.MM.YYYY` geparst.
 > - Helfer: `parseBlockDate()` (für blocks.md) und `parseCreatedDate()` (für README).
 
-### #19: "Zuletzt aktualisiert" dynamisch aus Git-Log
+### #19: "Zuletzt aktualisiert" dynamisch aus Git-Log (✓ erledigt)
 
 *— · 22.05.2026*
 
-Im aufgeklappten Sub-Akkordeon (z.B. "Offene Umbaupläne") wird "Zuletzt aktualisiert" angezeigt. Das soll automatisch das Datum der letzten Änderung im Sub-Ordner anzeigen (Git-Log), nicht hartcodiert sein.
+> **Ergebnis:** `_parse_discussion_header()`-Aufruf in `get_discussion()` um Git-Log-Logik ergänzt: nach dem Parsen wird `header['updated_at']` durch das tatsächliche Änderungsdatum aus `git log -1 --format=%ct -- .` im Diskussions-Ordner ersetzt. Fallback auf hartcodiertes README-Datum bei Fehlern. Frontend rendert `updated_at` bereits via `discStats` — keine Frontend-Änderung nötig. Build OK.
 
 ### #20: Status-Zähler dynamisch aus index.md parsen
 

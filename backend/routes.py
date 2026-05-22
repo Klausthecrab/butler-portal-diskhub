@@ -470,6 +470,18 @@ def get_discussion(discussion_id):
             readme_content = f.read()
         result['readme'] = readme_content
         header, body = _parse_discussion_header(readme_content)
+        # #19: Dynamisches "Zuletzt aktualisiert" aus Git-Log
+        # Überschreibt hartcodiertes README-Datum durch tatsächliches Änderungsdatum
+        try:
+            git_result = subprocess.run(
+                ['git', 'log', '-1', '--format=%ct', '--', '.'],
+                capture_output=True, text=True, cwd=folder, timeout=5
+            )
+            if git_result.returncode == 0 and git_result.stdout.strip():
+                timestamp = int(git_result.stdout.strip())
+                header['updated_at'] = datetime.fromtimestamp(timestamp).strftime('%d.%m.%Y')
+        except Exception:
+            pass  # Fallback: hartcodiertes README-Datum bleibt erhalten
         result['parsed'] = header
         result['readme_body'] = body
 
