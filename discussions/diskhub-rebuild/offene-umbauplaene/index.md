@@ -158,11 +158,11 @@
 
 > **Ergebnis:** Zwei neue Buttons pro Textbox — ✏️ Bearbeiten (schaltet in Edit-Modus mit Titel-Input + Content-Textarea + ✅ Speichern / ❌ Abbrechen) und 🗑️ Löschen (Doppelklick-Bestätigung: erster Klick zeigt "⚠️ Sicher?", zweiter Klick löscht). Backend: neue Endpoints `POST /diskhub/edit-block` und `POST /diskhub/delete-block` (block_index-basiertes Parsen/Ersetzen/Entfernen in blocks.md + Git-Commit). Beide Endpoints respektieren `is_sub`/`sub_id` für Sub-Diskussionen. Edit-Formular im Dark-Theme mit Labeln, Input-Feldern und Indigo-Save-Button. Delete mit Danger-Stil (rot). Dead Code-Entfernung: alter `convertBtn`-CSS-Duplikat. Build OK, Health-Check bestanden. API-Tests: edit-block (Titel+Content-Änderung) + delete-block (Entfernung) erfolgreich verifiziert — Formatierung korrekt (Leerzeilen zwischen Blöcken).
 
-### #26: Textbox-Referenz (Pfad/Identifikator)
+### #26: Textbox-Referenz (Pfad/Identifikator) (✓ erledigt)
 
 *— · 22.05.2026*
 
-Ein "Pfad"/Identifikator fehlt, um in einer offenen Diskussion auf eine bestimmte Textbox verweisen/linken zu können.
+> **Ergebnis:** Jede Textbox bekommt eine sichtbare ID `#box-<index>` im Header (rechtsbündig, monospace, dezent). Ein 🔗-Button in der Action-Bar kopiert `#box-<idx>` in die Zwischenablage (wechselt auf ✅ Kopiert für 2s). Die `<details>`-Box hat die HTML-ID `box-<idx>`, sodass `#box-3` in der URL direkt zur Box scrollt (Auto-Scroll via `useEffect` + `scrollIntoView` beim Laden). Nutzung: in einer Sub-Diskussion einfach `#box-1` schreiben, um auf eine bestimmte Textbox in derselben Diskussion zu verweisen. Nur Frontend-Änderung (kein Backend nötig). Build OK, Health-Check bestanden.
 
 ---
 

@@ -762,13 +762,14 @@
   color: #e2e8f0;
 }
 
-/* ─── Actions-Bar-Buttons (✏️ bearbeiten / 🗑️ löschen, #25) ─── */
+/* ─── Actions-Bar-Buttons (✏️ bearbeiten / 🗑️ löschen / 🔗 kopieren, #25+#26) ─── */
 .blockActions {
   display: flex;
   border-top: 1px solid #334155;
 }
 .editBlockActionBtn,
-.deleteBlockActionBtn {
+.deleteBlockActionBtn,
+.copyLinkBtn {
   padding: 6px 12px;
   background: transparent;
   border: none;
@@ -780,7 +781,8 @@
   transition: all 0.12s;
   line-height: 1;
 }
-.editBlockActionBtn:hover {
+.editBlockActionBtn:hover,
+.copyLinkBtn:hover {
   background: #334155;
   color: #e2e8f0;
 }
@@ -891,6 +893,27 @@
   padding: 10px 16px;
   cursor: pointer;
   list-style: none;
+}
+.blockHeader h3 {
+  display: inline;
+  margin: 0;
+}
+.blockHeader .boxAnchorLabel {
+  float: right;
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1px 7px;
+  border-radius: 4px;
+  line-height: 1.6;
+  font-family: monospace;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.blockHeader .boxAnchorLabel:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.35);
 }
 .blockHeader::-webkit-details-marker {
   display: none;

@@ -671,6 +671,7 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
   const [editContent, setEditContent] = useState('')
   const [editLoading, setEditLoading] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(null)
+  const [copiedIndex, setCopiedIndex] = useState(null)
 
   if (!blocks.length) {
     if (md) return <div className={styles.markdownContent} dangerouslySetInnerHTML={{ __html: renderMarkdown(md) }} />
@@ -711,6 +712,25 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
     }
   }
 
+  const copyBoxLink = (idx, headingText) => {
+    const hash = '#box-' + idx
+    navigator.clipboard.writeText(hash)
+    setCopiedIndex(idx)
+    setTimeout(() => setCopiedIndex(null), 2000)
+  }
+
+  // Auto-Scroll zu Textbox beim Laden per URL-Hash
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash && hash.startsWith('#box-')) {
+      const id = hash.slice(1)
+      requestAnimationFrame(() => {
+        const el = document.getElementById(id)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+    }
+  }, [])
+
   return (
     <div>
       {blocks.map((block, idx) => {
@@ -734,9 +754,10 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                 <div className={styles.connectorDate}>{dateInfo.date}</div>
               )}
             </div>
-            <details className={styles.blockCard} data-status="open">
+            <details id={'box-' + idx} className={styles.blockCard} data-status="open">
               <summary className={styles.blockHeader}>
                 <h3>{editingIndex === idx ? '✏️ ' + editTitle : headingText}</h3>
+                <span className={styles.boxAnchorLabel}>#box-{idx}</span>
               </summary>
 
               {/* Edit-Modus: Input-Felder statt gerendertem Content */}
@@ -787,6 +808,13 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                   title="💬 Startet eine Discord-Session mit dem Inhalt dieser Textbox. Die Session wird im rechten Preview-Panel geöffnet — Hermes geht den Text Schritt für Schritt mit dir durch, diskutiert Ideen, sammelt Feedback und leitet konkrete Vorschläge für neue Sub-Diskussionen ab. Diese können später übernommen werden."
                 >
                   💬 In Sub entwickeln
+                </button>
+                <button
+                  className={styles.copyLinkBtn}
+                  onClick={() => copyBoxLink(idx, headingText)}
+                  title={'#box-' + idx + ' — Link kopieren (in Diskussion einfügen: #box-' + idx + ')'}
+                >
+                  {copiedIndex === idx ? '✅' : '🔗'}
                 </button>
                 <button
                   className={styles.editBlockActionBtn}
