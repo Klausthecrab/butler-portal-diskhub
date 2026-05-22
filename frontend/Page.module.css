@@ -1747,8 +1747,9 @@ details[open] .titleOpen {
 /* ─── Box hinzufügen Formular (#16) ─── */
 .addBoxSection {
   margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid #334155;
+  padding: 16px;
+  border: 1px solid #475569;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   gap: 10px;

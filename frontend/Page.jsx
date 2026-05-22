@@ -1501,7 +1501,7 @@ function SplitViewModal({ discussion, onClose }) {
                             )}
                             {/* Box hinzufügen — Sub-View */}
                             <div className={styles.addBoxSection}>
-                              <div className={styles.sectionLabel}>➕ Neue Box</div>
+                              <div className={styles.sectionLabel}>➕ Neue Textbox</div>
                               <input
                                 className={styles.addBoxInput}
                                 type="text"
@@ -1679,7 +1679,7 @@ function SplitViewModal({ discussion, onClose }) {
                           })}
                           {/* Box hinzufügen — Main-View */}
                           <div className={styles.addBoxSection}>
-                            <div className={styles.sectionLabel}>➕ Neue Box</div>
+                            <div className={styles.sectionLabel}>➕ Neue Textbox</div>
                             <input
                               className={styles.addBoxInput}
                               type="text"

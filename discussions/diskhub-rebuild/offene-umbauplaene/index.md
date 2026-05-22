@@ -140,11 +140,11 @@
 
 > **Ergebnis:** Expanded Body der Sub-Akkordeons (Main-View) zeigt jetzt `generateToc(sub.blocks, sub.index)` statt der README-Präambel. Der TOC zeigt 📝-Einträge aus `blocks.md` und 🗂️-Subs aus `index.md` im ├── Einzeiler-Stil — inkl. Sub-Sub-Diskussionen. Fallback auf README-Präambel/README wenn weder blocks noch index vorhanden. `generateToc()` war bereits vorhanden — musste nur im Akkordeon-Kontext aufgerufen werden. Build OK.
 
-### #23: Box hinzufügen-Formular eingerahmt + Label-Änderung
+### #23: Box-Formular eingerahmt + Label-Änderung (✓ erledigt)
 
 *— · 22.05.2026*
 
-Das "+ Neue Box"-Formular soll einen sichtbaren Rahmen (border) um die gesamte Gruppe bekommen. Label von "+ Neue Box" auf "+ Neue Textbox" ändern.
+> **Ergebnis:** "➕ Neue Box" → "➕ Neue Textbox" in Main-View + Sub-View. `.addBoxSection` von `border-top` auf vollständigen `border: 1px solid #475569` + `border-radius: 8px` + `padding: 16px` umgestellt. Sichtbarer Rahmen um das gesamte Formular. Build OK, Health-Check bestanden.
 
 ---
 
