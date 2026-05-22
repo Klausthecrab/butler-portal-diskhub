@@ -146,6 +146,24 @@
 
 > **Ergebnis:** "➕ Neue Box" → "➕ Neue Textbox" in Main-View + Sub-View. `.addBoxSection` von `border-top` auf vollständigen `border: 1px solid #475569` + `border-radius: 8px` + `padding: 16px` umgestellt. Sichtbarer Rahmen um das gesamte Formular. Build OK, Health-Check bestanden.
 
+### #24: Button-Unterscheidbarkeit für Textboxen
+
+*— · 22.05.2026*
+
+Die zwei Buttons pro Textbox ("Zu Sub ändern" / "Als Sub übernehmen") sind im Unterschied unklar. Möglichkeit: Hover-Text/Tooltip zur Erklärung, oder auf einen Button reduzieren. Der verbleibende Button soll eine Discord-Session starten (im rechten Preview-Panel sichtbar) mit Prompt: "Lass uns aus dieser Textbox-Notiz eine Sub-Diskussion entwickeln. Mache Vorschläge für das Anlegen"
+
+### #25: Textbox-Operationen: Bearbeiten + Löschen
+
+*— · 22.05.2026*
+
+Es fehlen Bearbeiten- und Löschen-Buttons für Textboxen.
+
+### #26: Textbox-Referenz (Pfad/Identifikator)
+
+*— · 22.05.2026*
+
+Ein "Pfad"/Identifikator fehlt, um in einer offenen Diskussion auf eine bestimmte Textbox verweisen/linken zu können.
+
 ---
 
 💬 **Sub-Diskussion fortsetzen**
