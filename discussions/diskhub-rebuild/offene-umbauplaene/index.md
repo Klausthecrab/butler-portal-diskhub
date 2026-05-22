@@ -164,12 +164,11 @@
 
 > **Ergebnis:** Jede Textbox bekommt eine sichtbare ID `#box-<index>` im Header (rechtsbündig, monospace, dezent). Ein 🔗-Button in der Action-Bar kopiert `#box-<idx>` in die Zwischenablage (wechselt auf ✅ Kopiert für 2s). Die `<details>`-Box hat die HTML-ID `box-<idx>`, sodass `#box-3` in der URL direkt zur Box scrollt (Auto-Scroll via `useEffect` + `scrollIntoView` beim Laden). Nutzung: in einer Sub-Diskussion einfach `#box-1` schreiben, um auf eine bestimmte Textbox in derselben Diskussion zu verweisen. Nur Frontend-Änderung (kein Backend nötig). Build OK, Health-Check bestanden.
 
-### #27: Chronologische Sortierung per Datum/Uhrzeit || Einträge in korrekter Reihenfolge
+### #27: Chronologische Sortierung per Datei-Position || Einträge in korrekter Reihenfolge (✓ erledigt)
 
 *— · 22.05.2026*
 
-> **Quelle:** "feedback"-Textbox in blocks.md
-> Diskussions-Einträge (Boxen) werden aktuell nicht zwingend in chronologischer Reihenfolge dargestellt. Es braucht eine Spezifikation der Reihenfolge mittels Datum+Uhrzeit — entweder aus Datei-Metadaten, Git-Commit-Timestamps oder explizitem Zeitstempel-Feld in der Box.
+> **Ergebnis:** Kein Timestamp-Tracking nötig. Neue Boxen werden via `add-box` immer ans Ende von `blocks.md` angehängt — Datei-Position = Erstellungs-Reihenfolge. `BlocksSection` reversed die Liste per `useMemo` (`reversedBlocks` mit `originalIdx`-Mapping), sodass die neueste Box oben, die älteste unten erscheint. Foolproof: egal ob via Textfeld, Prompt oder API angelegt — `add-box` hängt immer unten an. Bearbeiten ändert die Position nicht (korrekt: chronologisch ≠ letzte Aktivität). Backend-Operationen (edit/delete/copy) nutzen `originalIdx` für korrekte Datei-Indizes. Build OK, Health-Check bestanden.
 
 ### #28: Bild-Upload in Diskussionen || Modal mit STRG+V/Dateiauswahl → Diskussions-Ordner
 

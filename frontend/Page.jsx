@@ -666,6 +666,10 @@ function parseCreatedDate(readme) {
 
 function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditBlock, onDeleteBlock }) {
   const blocks = useMemo(() => parseBlocksMd(md), [md])
+  // #27: Neu = unten angehängt → chronologisch reversen (neueste zuerst)
+  const reversedBlocks = useMemo(() => {
+    return blocks.map((block, i) => ({ block, originalIdx: i })).reverse()
+  }, [blocks])
   const [editingIndex, setEditingIndex] = useState(null)
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
@@ -733,7 +737,7 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
 
   return (
     <div>
-      {blocks.map((block, idx) => {
+      {reversedBlocks.map(({ block, originalIdx }, displayIdx) => {
         const headingText = block.heading.replace(/^###\s+/, '').trim()
 
         // Datum aus Content parsen und aus sichtbarem Inhalt entfernen
@@ -744,7 +748,7 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
         const content = filteredContent.join('\n').trim()
 
         return (
-          <div key={idx} className={styles.blockWrapper}>
+          <div key={displayIdx} className={styles.blockWrapper}>
             <div className={styles.blockConnector}>
               <div className={styles.connectorTop}>
                 <span className={styles.connectorDot}></span>
@@ -754,14 +758,14 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                 <div className={styles.connectorDate}>{dateInfo.date}</div>
               )}
             </div>
-            <details id={'box-' + idx} className={styles.blockCard} data-status="open">
+            <details id={'box-' + originalIdx} className={styles.blockCard} data-status="open">
               <summary className={styles.blockHeader}>
-                <h3>{editingIndex === idx ? '✏️ ' + editTitle : headingText}</h3>
-                <span className={styles.boxAnchorLabel}>#box-{idx}</span>
+                <h3>{editingIndex === originalIdx ? '✏️ ' + editTitle : headingText}</h3>
+                <span className={styles.boxAnchorLabel}>#box-{originalIdx}</span>
               </summary>
 
               {/* Edit-Modus: Input-Felder statt gerendertem Content */}
-              {editingIndex === idx ? (
+              {editingIndex === originalIdx ? (
                 <div className={styles.editBlockForm}>
                   <label className={styles.editBlockLabel}>Titel</label>
                   <input
@@ -811,24 +815,24 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                 </button>
                 <button
                   className={styles.copyLinkBtn}
-                  onClick={() => copyBoxLink(idx, headingText)}
-                  title={'#box-' + idx + ' — Link kopieren (in Diskussion einfügen: #box-' + idx + ')'}
+                  onClick={() => copyBoxLink(originalIdx, headingText)}
+                  title={'#box-' + originalIdx + ' — Link kopieren (in Diskussion einfügen: #box-' + originalIdx + ')'}
                 >
-                  {copiedIndex === idx ? '✅' : '🔗'}
+                  {copiedIndex === originalIdx ? '✅' : '🔗'}
                 </button>
                 <button
                   className={styles.editBlockActionBtn}
-                  onClick={() => startEditing(idx, headingText, content)}
+                  onClick={() => startEditing(originalIdx, headingText, content)}
                   title="Diese Textbox bearbeiten"
                 >
                   ✏️
                 </button>
                 <button
-                  className={`${styles.deleteBlockActionBtn} ${confirmingDelete === idx ? styles.deleteBlockActionBtnDanger : ''}`}
-                  onClick={() => handleDelete(idx)}
-                  title={confirmingDelete === idx ? 'Erneut klicken zum Löschen' : 'Diese Textbox löschen'}
+                  className={`${styles.deleteBlockActionBtn} ${confirmingDelete === originalIdx ? styles.deleteBlockActionBtnDanger : ''}`}
+                  onClick={() => handleDelete(originalIdx)}
+                  title={confirmingDelete === originalIdx ? 'Erneut klicken zum Löschen' : 'Diese Textbox löschen'}
                 >
-                  {confirmingDelete === idx ? '⚠️ Sicher?' : '🗑️'}
+                  {confirmingDelete === originalIdx ? '⚠️ Sicher?' : '🗑️'}
                 </button>
               </div>
             </details>
