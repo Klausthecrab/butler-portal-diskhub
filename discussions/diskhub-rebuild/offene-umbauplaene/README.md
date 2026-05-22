@@ -1,8 +1,8 @@
 # Offene Umbaupläne
 
-**Erstellt:** 21.05.2026 · **Zuletzt aktualisiert:** 21.05.2026  
-**Status:** 0 erledigt · 6 offen
+**Erstellt:** 21.05.2026 · **Zuletzt aktualisiert:** 22.05.2026  
+**Status:** 19 erledigt · 4 offen
 
 Sechs Kernpunkte aus der Architektur-Diskussion mit Max. Jeder Punkt beschreibt eine konkrete Änderung an der Datei-Struktur oder UI-Logik von DiskHub.
 
-**Offen:** ● Datei-Struktur · ● UI-Struktur · ● Detail-Ansicht · ● Blöcke vs. Sub-Diskussionen · ● Single Source of Truth · ● Doppelte Elemente entfernen
+**Offen:** ● #20 Status dynamisch · ● #21 Status-Trennung · ● #22 TOC im Sub-Akkordeon · ● #23 Box-Formular eingerahmt
