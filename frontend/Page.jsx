@@ -252,13 +252,15 @@ function generateToc(blocksMd, indexMd) {
 
   if (items.length === 0) return ''
 
-  let html = '<div class="miniToc">'
+  let html = '<hr style="border:none;border-top:1px solid #2d3a4e;margin:24px 0 16px 0;opacity:0.5">'
+  html += '<div class="miniToc">'
   html += '<div class="tocHeading">📋 Inhaltsverzeichnis</div>'
   for (const item of items) {
     const prefix = item.type === 'sub' ? '🗂️ ' : '📝 '
     html += `<div class="tocItem">├── ${prefix}${item.title}</div>`
   }
   html += '</div>'
+  html += '<hr style="border:none;border-top:1px solid #2d3a4e;margin:16px 0 24px 0;opacity:0.5">'
   return html
 }
 
