@@ -164,6 +164,69 @@
 
 > **Ergebnis:** Jede Textbox bekommt eine sichtbare ID `#box-<index>` im Header (rechtsbündig, monospace, dezent). Ein 🔗-Button in der Action-Bar kopiert `#box-<idx>` in die Zwischenablage (wechselt auf ✅ Kopiert für 2s). Die `<details>`-Box hat die HTML-ID `box-<idx>`, sodass `#box-3` in der URL direkt zur Box scrollt (Auto-Scroll via `useEffect` + `scrollIntoView` beim Laden). Nutzung: in einer Sub-Diskussion einfach `#box-1` schreiben, um auf eine bestimmte Textbox in derselben Diskussion zu verweisen. Nur Frontend-Änderung (kein Backend nötig). Build OK, Health-Check bestanden.
 
+### #27: Chronologische Sortierung per Datum/Uhrzeit || Einträge in korrekter Reihenfolge
+
+*— · 22.05.2026*
+
+> **Quelle:** "feedback"-Textbox in blocks.md
+> Diskussions-Einträge (Boxen) werden aktuell nicht zwingend in chronologischer Reihenfolge dargestellt. Es braucht eine Spezifikation der Reihenfolge mittels Datum+Uhrzeit — entweder aus Datei-Metadaten, Git-Commit-Timestamps oder explizitem Zeitstempel-Feld in der Box.
+
+### #28: Bild-Upload in Diskussionen || Modal mit STRG+V/Dateiauswahl → Diskussions-Ordner
+
+*— · 22.05.2026*
+
+> **Quelle:** "feedback"-Textbox in blocks.md
+> Modal öffnet sich bei Klick auf Bild-Button. STRG+V (Zwischenablage) oder Dateiauswahl möglich. Bild wird als Datei im Diskussions-Ordner gespeichert und chronologisch in die Diskussion integriert: Eintrag im Inhaltsverzeichnis mit 📷-Icon, eigener Block mit denselben Buttons/Action-Bar wie Textboxen.
+
+### #29: UI-Layout: Preview auf 30-35 % || Diskussionsbereich verbreitern
+
+*— · 22.05.2026*
+
+> **Quelle:** "feedback"-Textbox in blocks.md
+> Rechte Preview-Spalte auf 30-35 % reduzieren, Diskussionselement links entsprechend vergrößern, Außenrand links/rechts verkleinern. Die Datumanzeige im Connector soll optisch besser zwischen Punkt und Textbox-Element passen.
+
+### #30: Zwei-Phasen-Button "In Sub entwickeln" || Bestätigung + Prompt in Zwischenablage
+
+*— · 22.05.2026*
+
+> **Quelle:** "feedback zu '+Textbox'" in blocks.md
+> Erster Klick auf "💬 In Sub entwickeln": Button wechselt auf "Chat starten?" (Bestätigungsanzeige) und kopiert den Session-Prompt automatisch in die Zwischenablage. Zweiter Klick startet die Discord-Session. Der Prompt selbst als Single Source of Truth definieren (nicht hartcodiert im Frontend).
+
+### #31: Technisch korrekte Referenz im Pfad-Button || Vollständiger Diskussionspfad
+
+*— · 22.05.2026*
+
+> **Quelle:** "feedback zu '+Textbox'" in blocks.md
+> Der 🔗-Pfad-Button (#26) soll nicht nur `#box-<idx>` kopieren, sondern den technisch korrekten Referenzbegriff — z. B. den vollständigen Diskussionspfad inkl. Sub-ID. Ziel: in einer laufenden KI-Session den genauen Bezugspunkt einer Box referenzieren können.
+
+### #32: Prompt-Vorlagen bei "+ Neue Textbox" || Dynamische Templates
+
+*— · 22.05.2026*
+
+> **Quelle:** "Feedback unsortiert"-Textbox in blocks.md
+> Vorschläge/Templates unterhalb der "+ Neue Textbox"-Eingabefelder. Dynamisch basierend auf erkannten offenen Punkten in der Diskussion? Startprompt-Idee: "Starte mit dem nächsten offenen Punkt — lies alles dazu und diskutiere mit mir."
+
+### #33: Sticky-Header-Overlap fixen || Header schließt nicht bündig ab
+
+*— · 22.05.2026*
+
+> **Quelle:** "Feedback unsortiert"-Textbox in blocks.md
+> Der "Diskussion und Technisch"-Header (sticky) überlappt beim Scrollen den Diskussions-Content nicht sauber — es entsteht ein "Schlitz", durch den der Terracotta-Hintergrund durchscheint. Header muss bündig abschließen oder das Layout anpassen.
+
+### #34: Diskussions-Struktur-Konzept / Archiv || README als Single Source ausbauen
+
+*— · 22.05.2026*
+
+> **Quelle:** "Feedback unsortiert"-Textbox in blocks.md
+> Vollständiges Konzept für Diskussions-Struktur:
+> 1. Titel / Grundsätzliche Fragestellung
+> 2. Status quo (aktueller Stand)
+> 3. Offene Punkte
+> 4. Entscheidungen / Archiv (ausgelagert für schlanke KI-Sessions)
+> 5. Erklärung / Anleitung (Human- + Machine-Readable)
+>
+> Prüfen ob README diesen Kern bereits abdeckt und wie die Struktur für KI-Sessions optimiert werden kann (nur 1+2+3 laden, Archiv auslagern).
+
 ---
 
 💬 **Sub-Diskussion fortsetzen**
