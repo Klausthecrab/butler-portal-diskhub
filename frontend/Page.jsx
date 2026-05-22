@@ -744,6 +744,10 @@ function SplitViewModal({ discussion, onClose }) {
   const [subViewData, setSubViewData] = useState(null)
   const [subViewLoading, setSubViewLoading] = useState(false)
   const [expandedSubs, setExpandedSubs] = useState(new Set())
+  // Box-Add Form
+  const [boxTitle, setBoxTitle] = useState('')
+  const [boxContent, setBoxContent] = useState('')
+  const [boxLoading, setBoxLoading] = useState(false)
 
   // SSE Streaming
   const lastTsRef = useRef(0)
@@ -1243,6 +1247,39 @@ function SplitViewModal({ discussion, onClose }) {
       })
   }
 
+  // Box hinzufügen (in blocks.md)
+  const handleAddBox = () => {
+    if (!boxTitle.trim()) return
+    setBoxLoading(true)
+    fetch(`${API}/add-box`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        discussion_id: discussion.id,
+        title: boxTitle.trim(),
+        content: boxContent.trim(),
+        is_sub: !!activeSubView,
+        sub_id: activeSubView || undefined,
+      }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        setBoxLoading(false)
+        if (d.status === 'ok') {
+          setBoxTitle('')
+          setBoxContent('')
+          fetchDiscussionData()
+          setErrorMsg('✅ Box hinzugefügt: ' + (d.sha || 'ok'))
+        } else {
+          setErrorMsg('❌ ' + (d.error || 'Fehler'))
+        }
+      })
+      .catch(() => {
+        setBoxLoading(false)
+        setErrorMsg('❌ Netzwerkfehler')
+      })
+  }
+
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) onClose()
   }
@@ -1367,6 +1404,30 @@ function SplitViewModal({ discussion, onClose }) {
                                 dangerouslySetInnerHTML={{ __html: renderIndexMd(subViewData.index) }}
                               />
                             )}
+                            {/* Box hinzufügen — Sub-View */}
+                            <div className={styles.addBoxSection}>
+                              <div className={styles.sectionLabel}>➕ Neue Box</div>
+                              <input
+                                className={styles.addBoxInput}
+                                type="text"
+                                placeholder="Titel der Box..."
+                                value={boxTitle}
+                                onChange={e => setBoxTitle(e.target.value)}
+                              />
+                              <textarea
+                                className={styles.addBoxTextarea}
+                                placeholder="Inhalt (Markdown)..."
+                                value={boxContent}
+                                onChange={e => setBoxContent(e.target.value)}
+                              />
+                              <button
+                                className={styles.previewBtnPrimary}
+                                onClick={handleAddBox}
+                                disabled={boxLoading || !boxTitle.trim()}
+                              >
+                                {boxLoading ? '⏳ Speichern...' : '➕ Box hinzufügen'}
+                              </button>
+                            </div>
                           </>
                         ) : (
                           <div className={styles.loading}>Fehler beim Laden</div>
@@ -1496,6 +1557,30 @@ function SplitViewModal({ discussion, onClose }) {
                               </div>
                             )
                           })}
+                          {/* Box hinzufügen — Main-View */}
+                          <div className={styles.addBoxSection}>
+                            <div className={styles.sectionLabel}>➕ Neue Box</div>
+                            <input
+                              className={styles.addBoxInput}
+                              type="text"
+                              placeholder="Titel der Box..."
+                              value={boxTitle}
+                              onChange={e => setBoxTitle(e.target.value)}
+                            />
+                            <textarea
+                              className={styles.addBoxTextarea}
+                              placeholder="Inhalt (Markdown)..."
+                              value={boxContent}
+                              onChange={e => setBoxContent(e.target.value)}
+                            />
+                            <button
+                              className={styles.previewBtnPrimary}
+                              onClick={handleAddBox}
+                              disabled={boxLoading || !boxTitle.trim()}
+                            >
+                              {boxLoading ? '⏳ Speichern...' : '➕ Box hinzufügen'}
+                            </button>
+                          </div>
                         </>
                       )}
                     </>

@@ -1713,3 +1713,53 @@ details[open] .titleOpen {
 }
 
 /* ─── (entfernt: subCardSummary/Readme/Open — ersetzt durch subDocBlock-Akkordeon) ─── */
+
+/* ─── Box hinzufügen Formular (#16) ─── */
+.addBoxSection {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.addBoxInput {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.addBoxInput:focus {
+  border-color: #6366f1;
+}
+.addBoxInput::placeholder {
+  color: #475569;
+}
+.addBoxTextarea {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #e2e8f0;
+  font-size: 0.8125rem;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 80px;
+  max-height: 200px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+.addBoxTextarea:focus {
+  border-color: #6366f1;
+}
+.addBoxTextarea::placeholder {
+  color: #475569;
+}

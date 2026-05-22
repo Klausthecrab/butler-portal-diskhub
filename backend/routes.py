@@ -1383,3 +1383,77 @@ def promote_block():
 
     except Exception as e:
         return jsonify({'error': 'Promotion fehlgeschlagen: ' + str(e)}), 500
+
+
+@diskhub.route('/diskhub/add-box', methods=['POST'])
+def add_box():
+    """
+    'Box hinzufügen' — Hängt einen neuen ###-Block an blocks.md an + git commit.
+
+    Body:
+      discussion_id (str)
+      title (str) — Titel der Box
+      content (str, optional) — Markdown-Inhalt
+      is_sub (bool, optional)
+      sub_id (str, optional)
+    """
+    data = request.get_json(silent=True) or {}
+    discussion_id = data.get('discussion_id', '')
+    title = data.get('title', '').strip()
+    content = data.get('content', '').strip()
+    is_sub = data.get('is_sub', False)
+    sub_id = data.get('sub_id', '')
+
+    if not discussion_id or not title:
+        return jsonify({'error': 'discussion_id und title erforderlich'}), 400
+
+    if is_sub and sub_id:
+        target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id)
+    else:
+        target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id)
+
+    if not os.path.isdir(target_dir):
+        return jsonify({'error': 'Diskussion nicht gefunden'}), 404
+
+    blocks_path = os.path.join(target_dir, 'blocks.md')
+
+    # blocks.md existiert nicht → mit Header anlegen
+    if not os.path.isfile(blocks_path):
+        name = f'{discussion_id}/{sub_id}' if is_sub and sub_id else discussion_id
+        with open(blocks_path, 'w') as f:
+            f.write(f'# Blöcke — {name}\n\n---\n\n')
+
+    # Neuen Block anhängen
+    today = datetime.now(timezone.utc).strftime('%d.%m.%Y')
+    block_md = f'\n### {title}\n*— · {today}*\n\n{content}\n' if content else f'\n### {title}\n*— · {today}*\n'
+
+    with open(blocks_path, 'a') as f:
+        f.write(block_md)
+
+    # Git commit
+    sha = ''
+    try:
+        subprocess.run(['git', 'add', '-A'], capture_output=True, text=True, timeout=10, cwd=REPO_DIR)
+        commit_msg = f'disc: {discussion_id}: neue Box — {title}'
+        if is_sub and sub_id:
+            commit_msg = f'disc: {discussion_id}/{sub_id}: neue Box — {title}'
+        result = subprocess.run(
+            ['git', 'commit', '-m', commit_msg],
+            capture_output=True, text=True, timeout=10, cwd=REPO_DIR
+        )
+        if result.returncode == 0:
+            sha_match = re.search(r'\[master [a-f0-9]+\) ([a-f0-9]+)', result.stdout)
+            if sha_match:
+                sha = sha_match.group(1)
+    except Exception as e:
+        sha = f'commit fehlgeschlagen: {e}'
+
+    _log_activity('add-box', {
+        'discussion': discussion_id,
+        'title': title,
+        'sha': sha,
+        'is_sub': is_sub,
+        'sub_id': sub_id,
+    })
+
+    return jsonify({'status': 'ok', 'sha': sha})

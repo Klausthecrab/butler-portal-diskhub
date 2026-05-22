@@ -95,11 +95,11 @@
 
 Vor und nach dem TOC dezente Linien einziehen.
 
-### #16: "Box hinzufügen"-Formular
+### #16: "Box hinzufügen"-Formular (✓ erledigt)
 
 *— · 21.05.2026*
 
-Template/Formular ganz unten in der Diskussion: Titelzeile + Textfeld, um eine neue Box anzulegen.
+> **Ergebnis:** Formular am Ende jeder Diskussion (main-view + sub-view): Titel-Eingabefeld + Textarea + Button. POST an `/api/diskhub/add-box` hängt `### <titel>`-Block an blocks.md (anlegen falls fehlend) + git commit. Daten werden nach Erfolg automatisch neu geladen.
 
 ### #17: "Zu Sub ändern"-Button + Session-Spawn
 
