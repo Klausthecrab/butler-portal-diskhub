@@ -744,6 +744,33 @@
 
 /* ─── Block-Promote-Button ──────────────────────────────────────── */
 
+/* ─── Block-Action-Buttons (neben Promote) (#17) ─── */
+.blockActions {
+  display: flex;
+  border-top: 1px solid #334155;
+}
+.blockActions .promoteBtn {
+  flex: 1;
+  border-top: none;
+}
+
+.convertBtn {
+  flex: 1;
+  padding: 6px 16px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid #334155;
+  color: #64748b;
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s;
+}
+.convertBtn:hover {
+  background: #334155;
+  color: #e2e8f0;
+}
+
 .promoteBtn {
   display: block;
   width: 100%;

@@ -101,11 +101,11 @@ Vor und nach dem TOC dezente Linien einziehen.
 
 > **Ergebnis:** Formular am Ende jeder Diskussion (main-view + sub-view): Titel-Eingabefeld + Textarea + Button. POST an `/api/diskhub/add-box` hängt `### <titel>`-Block an blocks.md (anlegen falls fehlend) + git commit. Daten werden nach Erfolg automatisch neu geladen.
 
-### #17: "Zu Sub ändern"-Button + Session-Spawn
+### #17: "Zu Sub ändern"-Button + Session-Spawn (✓ erledigt)
 
-*— · 21.05.2026*
+*— · 22.05.2026*
 
-In jeder Box ein Button, der eine Session startet. Die KI durchgeht den Box-Inhalt mit dem User und leitet 1-n Sub-Diskussionen ab + legt sie automatisch an.
+> **Ergebnis:** Neuer Endpoint `POST /api/diskhub/start-box-to-sub` (3er-Webhook mit Box-Content als Kontext-Prompt). Neuer Button "🗂️ Zu Sub ändern" in jeder Box in `BlocksSection`. Button startet Session mit dem Box-Content — KI durchgeht Inhalt mit User, leitet Sub-Vorschläge ab. Später per Promote-Button übernehmbar. Zwei Buttons nebeneinander im `.blockActions`-Flexbox: links "Zu Sub ändern", rechts "⬆️ Als Sub übernehmen".
 
 ### #18: Connector-Linie + Punkt + Datum für alle Elemente
 

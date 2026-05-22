@@ -646,7 +646,7 @@ function ReadmeModal({ discussionId, onClose, onUpdate, isSub, subId }) {
 
 // ─── Blocks Section (mit Promote-Button) ──────────────────────────
 
-function BlocksSection({ md, discussionId, isSub, subId, onPromote }) {
+function BlocksSection({ md, discussionId, isSub, subId, onPromote, onConvertToSub }) {
   const blocks = useMemo(() => parseBlocksMd(md), [md])
 
   if (!blocks.length) {
@@ -665,12 +665,21 @@ function BlocksSection({ md, discussionId, isSub, subId, onPromote }) {
             <div className={styles.blockBody}
               dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
             />
-            <button
-              className={styles.promoteBtn}
-              onClick={() => onPromote(headingText, content)}
-            >
-              ⬆️ Als Sub übernehmen
-            </button>
+            <div className={styles.blockActions}>
+              <button
+                className={styles.convertBtn}
+                onClick={() => onConvertToSub?.(headingText, content)}
+                title="In Discord diskutieren und als Sub-Diskussion anlegen"
+              >
+                🗂️ Zu Sub ändern
+              </button>
+              <button
+                className={styles.promoteBtn}
+                onClick={() => onPromote(headingText, content)}
+              >
+                ⬆️ Als Sub übernehmen
+              </button>
+            </div>
           </details>
         )
       })}
@@ -1247,6 +1256,38 @@ function SplitViewModal({ discussion, onClose }) {
       })
   }
 
+  // Box zu Sub-Diskussion konvertieren — startet Session mit Box-Content (#17)
+  const handleConvertToSub = (boxTitle, boxContent) => {
+    console.log('[DISKHUB] handleConvertToSub', { boxTitle, discussion_id: discussion.id, t: Math.floor(Date.now() / 1000) })
+    setPreviewState('starting')
+    setTriggeredAt(Math.floor(Date.now() / 1000))
+    fetch(`${API}/start-box-to-sub`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        discussion_id: discussion.id,
+        box_title: boxTitle,
+        box_content: boxContent,
+        is_sub: !!activeSubView,
+        sub_id: activeSubView || undefined,
+      }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === 'triggered' || d.status === 'partial') {
+          setSessionTitle(d.session_title)
+          setPreviewState('polling')
+        } else {
+          setPreviewState('error')
+          setErrorMsg('Webhook-Fehler: ' + JSON.stringify(d))
+        }
+      })
+      .catch(e => {
+        setPreviewState('error')
+        setErrorMsg('Netzwerkfehler: ' + e.message)
+      })
+  }
+
   // Box hinzufügen (in blocks.md)
   const handleAddBox = () => {
     if (!boxTitle.trim()) return
@@ -1391,6 +1432,7 @@ function SplitViewModal({ discussion, onClose }) {
                                   isSub={true}
                                   subId={activeSubView}
                                   onPromote={handlePromoteBlock}
+                                  onConvertToSub={handleConvertToSub}
                                 />
                               </div>
                             )}
@@ -1485,6 +1527,7 @@ function SplitViewModal({ discussion, onClose }) {
                                 md={data.blocks}
                                 discussionId={discussion.id}
                                 onPromote={handlePromoteBlock}
+                                onConvertToSub={handleConvertToSub}
                               />
                             </div>
                           )}

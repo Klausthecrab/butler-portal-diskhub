@@ -1385,6 +1385,80 @@ def promote_block():
         return jsonify({'error': 'Promotion fehlgeschlagen: ' + str(e)}), 500
 
 
+@diskhub.route('/diskhub/start-box-to-sub', methods=['POST'])
+def start_box_to_sub():
+    """
+    'Zu Sub ändern' — Startet Session mit Box-Content als Kontext (3er-Webhook).
+
+    Body:
+      discussion_id (str)
+      box_title (str) — Titel der Box
+      box_content (str) — Content der Box
+      is_sub (bool, optional)
+      sub_id (str, optional)
+    """
+    data = request.get_json(silent=True) or {}
+    discussion_id = data.get('discussion_id', '')
+    box_title = data.get('box_title', '').strip()
+    box_content = data.get('box_content', '').strip()
+    is_sub = data.get('is_sub', False)
+    sub_id = data.get('sub_id', '')
+
+    if not discussion_id or not box_title:
+        return jsonify({'error': 'discussion_id und box_title erforderlich'}), 400
+
+    webhook_url = WEBHOOK_URL
+    bot_mention = BOT_MENTION
+    if not webhook_url:
+        return jsonify({'error': 'Keine Webhook-URL konfiguriert'}), 500
+
+    now = datetime.now(timezone.utc)
+    date_str = now.strftime('%d.%m.%y')
+    time_str = now.strftime('%H.%M')
+    session_title = f'disc-{discussion_id}-convert-{box_title[:20].lower().replace(" ", "-")}-{date_str}-{time_str}'
+
+    context_prompt = (
+        f"📦 **Box: {box_title}** zur Diskussion '{discussion_id}'"
+        + (f"/{sub_id}" if is_sub and sub_id else "")
+        + ".\n\n"
+        f"**Inhalt der Box:**\n{box_content}\n\n"
+        f"**Aufgabe:** Gehe diesen Box-Inhalt mit dem User durch. "
+        f"Diskutiere die Ideen, hinterfrage Annahmen, sammle Feedback. "
+        f"Leite am Ende 1-n konkrete Sub-Diskussions-Vorschläge ab, "
+        f"die automatisch als neue Sub-Diskussionen angelegt werden können. "
+        f"Jeder Vorschlag sollte einen klaren Titel und eine kurze Beschreibung haben."
+    )
+
+    statuses = []
+    s1 = _send_webhook(webhook_url, '/new', bot_mention)
+    statuses.append(s1)
+    if s1 == 204:
+        time.sleep(2)
+    s2 = _send_webhook(webhook_url, f'/title {session_title}', bot_mention)
+    statuses.append(s2)
+    if s2 in (200, 204):
+        time.sleep(1)
+    s3 = _send_webhook(webhook_url, context_prompt, bot_mention)
+    statuses.append(s3)
+
+    _log_activity('start-box-to-sub', {
+        'discussion': discussion_id,
+        'box_title': box_title,
+        'session_title': session_title,
+        'statuses': statuses,
+        'is_sub': is_sub,
+        'sub_id': sub_id,
+    })
+
+    all_ok = all(s == 204 for s in statuses)
+    return jsonify({
+        'status': 'triggered' if all_ok else 'partial',
+        'session_title': session_title,
+        'webhook_statuses': statuses,
+        'summary': '✅ Session gestartet' if all_ok else '⚠️ Teilweise fehlgeschlagen',
+    })
+
+
 @diskhub.route('/diskhub/add-box', methods=['POST'])
 def add_box():
     """
