@@ -205,12 +205,11 @@
 > **Quelle:** "Feedback unsortiert"-Textbox in blocks.md
 > Vorschläge/Templates unterhalb der "+ Neue Textbox"-Eingabefelder. Dynamisch basierend auf erkannten offenen Punkten in der Diskussion? Startprompt-Idee: "Starte mit dem nächsten offenen Punkt — lies alles dazu und diskutiere mit mir."
 
-### #33: Sticky-Header-Overlap fixen || Header schließt nicht bündig ab
+### #33: Sticky-Header-Overlap fixen || Header schließt bündig ab (✓ erledigt)
 
 *— · 22.05.2026*
 
-> **Quelle:** "Feedback unsortiert"-Textbox in blocks.md
-> Der "Diskussion und Technisch"-Header (sticky) überlappt beim Scrollen den Diskussions-Content nicht sauber — es entsteht ein "Schlitz", durch den der Terracotta-Hintergrund durchscheint. Header muss bündig abschließen oder das Layout anpassen.
+> **Ergebnis:** `.docPanel` hatte `padding: 20px 24px` — der sticky `.docTabs` bei `top: 0` saß innerhalb dieser Padding-Lücke. Beim Scrollen wanderte Content (Terracotta-`.discHeader`) hinter die Tabs und schimmerte durch die 20px-Lücke durch. Fix: `.docPanel` padding-top entfernt (`padding: 0 24px 20px`), `.docTabs` mit `margin: 0 -24px` edge-to-edge gespannt und eigenes `padding: 0 24px` für horizontale Innenabstände. Tabs sitzen jetzt bündig am Panel-Top — kein Schlitz mehr. Build OK, Health-Check bestanden.
 
 ### #34: Diskussions-Struktur-Konzept / Archiv || README als Single Source ausbauen
 
