@@ -107,6 +107,42 @@ Vor und nach dem TOC dezente Linien einziehen.
 
 In jeder Box ein Button, der eine Session startet. Die KI durchgeht den Box-Inhalt mit dem User und leitet 1-n Sub-Diskussionen ab + legt sie automatisch an.
 
+### #18: Connector-Linie + Punkt + Datum für alle Elemente
+
+*— · 22.05.2026*
+
+Jedes Listenelement (Textboxen, Sub-Diskussionen, Blöcke) soll linksbündig eine horizontale Linie zum Rand der Diskussionsumrandung bekommen, mit einem Punkt am linken Ende und dem Erstellungsdatum unter der Linie. Das Datum soll dynamisch aus dem Git-Log oder den Datei-Metadaten gelesen werden — replizierbares Muster. Teilweise existieren schon Linien bei Sub-Sub-Elementen, aber es fehlt ein generelles Pattern.
+
+### #19: "Zuletzt aktualisiert" dynamisch aus Git-Log
+
+*— · 22.05.2026*
+
+Im aufgeklappten Sub-Akkordeon (z.B. "Offene Umbaupläne") wird "Zuletzt aktualisiert" angezeigt. Das soll automatisch das Datum der letzten Änderung im Sub-Ordner anzeigen (Git-Log), nicht hartcodiert sein.
+
+### #20: Status-Zähler dynamisch aus index.md parsen
+
+*— · 22.05.2026*
+
+"Status: 0 erledigt · 6 offen" im Sub-Akkordeon ist veraltet — zählt weder neue Sub-Punkte noch erledigte. Soll dynamisch den aktuellen Inhalt der index.md des Sub-Ordners parsen (✅/● zählen, ###-Blöcke zählen).
+
+### #21: Statusfelder optisch vom README-Text trennen
+
+*— · 22.05.2026*
+
+"Erstellt:", "Zuletzt aktualisiert:", "Status:" und die Zähler sollen durch eine Linie oder größeren Abstand vom restlichen README-Text abgesetzt sein.
+
+### #22: Inhaltsverzeichnis (TOC) im Sub-Akkordeon statt offen-Liste
+
+*— · 22.05.2026*
+
+Im aufgeklappten Sub-Akkordeon soll das 📋 Inhaltsverzeichnis (mit ├── Einzeilern) angezeigt werden, nicht die einfache "offen:-Liste". Sub-Sub-Diskussionen als Einzeiler im TOC-Stil.
+
+### #23: Box hinzufügen-Formular eingerahmt + Label-Änderung
+
+*— · 22.05.2026*
+
+Das "+ Neue Box"-Formular soll einen sichtbaren Rahmen (border) um die gesamte Gruppe bekommen. Label von "+ Neue Box" auf "+ Neue Textbox" ändern.
+
 ---
 
 💬 **Sub-Diskussion fortsetzen**
