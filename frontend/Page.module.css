@@ -528,6 +528,10 @@
   overflow: hidden;
   transition: border-color 0.12s;
 }
+.blockWrapper > .subDocBlock {
+  margin-top: 0;
+  flex: 1;
+}
 .subDocBlock:hover {
   border-color: #475569;
 }

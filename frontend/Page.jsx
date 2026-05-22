@@ -644,7 +644,23 @@ function ReadmeModal({ discussionId, onClose, onUpdate, isSub, subId }) {
   )
 }
 
-// ─── Blocks Section (mit Promote-Button) ──────────────────────────
+// ─── Blocks Section (mit Connector #18 + Promote-Button) ──────────
+
+// Parse Datum aus block content: *— · DD.MM.YYYY*
+function parseBlockDate(contentLines) {
+  for (let i = 0; i < Math.min(3, contentLines.length); i++) {
+    const m = contentLines[i].match(/\*\s*—\s*·\s*(\d{2}\.\d{2}\.\d{2,4})\s*\*/)
+    if (m) return { date: m[1], idx: i }
+  }
+  return null
+}
+
+// Parse **Erstellt:** DD.MM.YYYY aus README
+function parseCreatedDate(readme) {
+  if (!readme) return ''
+  const m = readme.match(/\*\*Erstellt:\*\*\s*(\d{2}\.\d{2}\.\d{2,4})/)
+  return m ? m[1] : ''
+}
 
 function BlocksSection({ md, discussionId, isSub, subId, onPromote, onConvertToSub }) {
   const blocks = useMemo(() => parseBlocksMd(md), [md])
@@ -655,32 +671,52 @@ function BlocksSection({ md, discussionId, isSub, subId, onPromote, onConvertToS
   }
 
   return (
-    <div className={styles.blocksList}>
+    <div>
       {blocks.map((block, idx) => {
         const headingText = block.heading.replace(/^###\s+/, '').trim()
-        const content = block.content.join('\n').trim()
+
+        // Datum aus Content parsen und aus sichtbarem Inhalt entfernen
+        const dateInfo = parseBlockDate(block.content)
+        const filteredContent = dateInfo
+          ? block.content.filter((_, i) => i !== dateInfo.idx)
+          : block.content
+        const content = filteredContent.join('\n').trim()
+
         return (
-          <details key={idx} className={styles.blockAccordion}>
-            <summary className={styles.blockSummary}>{headingText}</summary>
-            <div className={styles.blockBody}
-              dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
-            />
-            <div className={styles.blockActions}>
-              <button
-                className={styles.convertBtn}
-                onClick={() => onConvertToSub?.(headingText, content)}
-                title="In Discord diskutieren und als Sub-Diskussion anlegen"
-              >
-                🗂️ Zu Sub ändern
-              </button>
-              <button
-                className={styles.promoteBtn}
-                onClick={() => onPromote(headingText, content)}
-              >
-                ⬆️ Als Sub übernehmen
-              </button>
+          <div key={idx} className={styles.blockWrapper}>
+            <div className={styles.blockConnector}>
+              <div className={styles.connectorTop}>
+                <span className={styles.connectorDot}></span>
+                <span className={styles.connectorLine}></span>
+              </div>
+              {dateInfo && (
+                <div className={styles.connectorDate}>{dateInfo.date}</div>
+              )}
             </div>
-          </details>
+            <details className={styles.blockCard} data-status="open">
+              <summary className={styles.blockHeader}>
+                <h3>{headingText}</h3>
+              </summary>
+              <div className={styles.blockContent}
+                dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
+              />
+              <div className={styles.blockActions}>
+                <button
+                  className={styles.convertBtn}
+                  onClick={() => onConvertToSub?.(headingText, content)}
+                  title="In Discord diskutieren und als Sub-Diskussion anlegen"
+                >
+                  🗂️ Zu Sub ändern
+                </button>
+                <button
+                  className={styles.promoteBtn}
+                  onClick={() => onPromote(headingText, content)}
+                >
+                  ⬆️ Als Sub übernehmen
+                </button>
+              </div>
+            </details>
+          </div>
         )
       })}
     </div>
@@ -1539,8 +1575,19 @@ function SplitViewModal({ discussion, onClose }) {
                           {data.subs && data.subs.map((sub, idx) => {
                             const subNum = String(idx + 1).padStart(2, '0')
                             const isExpanded = expandedSubs.has(sub.id)
+                            const subDate = parseCreatedDate(sub.readme)
                             return (
-                              <div key={sub.id} className={styles.subDocBlock}>
+                              <div key={sub.id} className={styles.blockWrapper}>
+                                <div className={styles.blockConnector}>
+                                  <div className={styles.connectorTop}>
+                                    <span className={styles.connectorDot}></span>
+                                    <span className={styles.connectorLine}></span>
+                                  </div>
+                                  {subDate && (
+                                    <div className={styles.connectorDate}>{subDate}</div>
+                                  )}
+                                </div>
+                                <div className={styles.subDocBlock}>
                                 <div className={styles.subDocHeader}
                                   onClick={() => {
                                     setExpandedSubs(prev => {
@@ -1594,10 +1641,11 @@ function SplitViewModal({ discussion, onClose }) {
                                       onKeyDown={e => { if (e.key === 'Enter') { window.history.pushState({subViewMode: true}, ''); setActiveSubView(sub.id) } }}
                                     >
                                       → Vollständige Ansicht
-                                    </div>
                                   </div>
-                                )}
-                              </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                             )
                           })}
                           {/* Box hinzufügen — Main-View */}
