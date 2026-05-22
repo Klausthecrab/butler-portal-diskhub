@@ -106,6 +106,24 @@ def _parse_readme_status(readme_path):
     return status
 
 
+def _parse_index_status(index_content):
+    """Zählt erledigt/offen aus index.md (### #XX: Title (✓ erledigt)).
+
+    Parst dynamisch den aktuellen Inhalt — zählt ### #XX:-Einträge für
+    Gesamtzahl und (✓ erledigt)-Marker für erledigte Items.
+    """
+    result = {'erledigt': 0, 'offen': 0, 'summary': '', 'question': ''}
+    if not index_content:
+        return result
+    # Alle ### #XX: Einträge
+    items = re.findall(r'^### #(\d+):', index_content, re.MULTILINE)
+    # Davon mit ✓ erledigt
+    done = re.findall(r'^### #\d+:.*\(✓ erledigt\)', index_content, re.MULTILINE)
+    result['erledigt'] = len(done)
+    result['offen'] = len(items) - len(done)
+    return result
+
+
 def _scan_discussions():
     """Scannt discussions/-Ordner und gibt sortierte Liste zurück."""
     entries = []
@@ -139,6 +157,12 @@ def _scan_discussions():
                     break
 
         status = _parse_readme_status(readme_path)
+        # #20: Dynamischer Status aus index.md für Haupt-Diskussion
+        if os.path.isfile(index_path):
+            with open(index_path, 'r') as f:
+                idx_status = _parse_index_status(f.read())
+            if idx_status['erledigt'] + idx_status['offen'] > 0:
+                status = idx_status
 
         # Sub-Diskussionen
         subs = []
@@ -146,7 +170,16 @@ def _scan_discussions():
             sub_folder = os.path.join(folder, sub_name)
             if os.path.isdir(sub_folder) and not sub_name.startswith('.') and sub_name != 'assets':
                 sub_readme = os.path.join(sub_folder, 'README.md')
-                sub_status = _parse_readme_status(sub_readme)
+                sub_index = os.path.join(sub_folder, 'index.md')
+                # #20: Dynamischer Status aus index.md, Fallback auf README
+                sub_status = {'erledigt': 0, 'offen': 0, 'summary': '', 'question': ''}
+                if os.path.isfile(sub_index):
+                    with open(sub_index, 'r') as f:
+                        idx_status = _parse_index_status(f.read())
+                    if idx_status['erledigt'] + idx_status['offen'] > 0:
+                        sub_status = idx_status
+                if sub_status['erledigt'] + sub_status['offen'] == 0:
+                    sub_status = _parse_readme_status(sub_readme)
                 subs.append({
                     'id': sub_name,
                     'name': sub_name.replace('-', ' ').title(),
@@ -495,6 +528,11 @@ def get_discussion(discussion_id):
     if os.path.isfile(index_path):
         with open(index_path, 'r') as f:
             result['index'] = f.read()
+        # #20: Dynamischer Status aus index.md statt hartcodiertem README-Wert
+        index_status = _parse_index_status(result['index'])
+        if index_status['erledigt'] + index_status['offen'] > 0:
+            header['done_count'] = index_status['erledigt']
+            header['open_count'] = index_status['offen']
 
     # Sub-Diskussionen (nur bei Haupt-Ansicht oder wenn Sub selbst welche hat)
     subs = []
@@ -514,6 +552,8 @@ def get_discussion(discussion_id):
             if os.path.isfile(sub_blocks):
                 with open(sub_blocks, 'r') as f:
                     sub_data['blocks'] = f.read()
+            # #20: Dynamischer Status aus Sub-index.md
+            sub_data['status'] = _parse_index_status(sub_data.get('index', ''))
             subs.append(sub_data)
     result['subs'] = subs
 

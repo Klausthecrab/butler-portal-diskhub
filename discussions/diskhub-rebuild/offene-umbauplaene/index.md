@@ -122,11 +122,11 @@ Vor und nach dem TOC dezente Linien einziehen.
 
 > **Ergebnis:** `_parse_discussion_header()`-Aufruf in `get_discussion()` um Git-Log-Logik ergänzt: nach dem Parsen wird `header['updated_at']` durch das tatsächliche Änderungsdatum aus `git log -1 --format=%ct -- .` im Diskussions-Ordner ersetzt. Fallback auf hartcodiertes README-Datum bei Fehlern. Frontend rendert `updated_at` bereits via `discStats` — keine Frontend-Änderung nötig. Build OK.
 
-### #20: Status-Zähler dynamisch aus index.md parsen
+### #20: Status-Zähler dynamisch aus index.md parsen (✓ erledigt)
 
 *— · 22.05.2026*
 
-"Status: 0 erledigt · 6 offen" im Sub-Akkordeon ist veraltet — zählt weder neue Sub-Punkte noch erledigte. Soll dynamisch den aktuellen Inhalt der index.md des Sub-Ordners parsen (✅/● zählen, ###-Blöcke zählen).
+> **Ergebnis:** Neue Hilfsfunktion `_parse_index_status()` zählt `### #XX:`-Einträge und `(✓ erledigt)`-Marker aus index.md. Angewandt in `get_discussion()` (überschreibt README-basierte `done_count`/`open_count` im parsed-Header) und in `_scan_discussions()` (List-Endpoint + Sub-Status). Frontend rendert die Werte bereits via `discStats` und Sub-Badges — keine Frontend-Änderung. Enthüllt dass #15 (Trennlinien) noch nicht als erledigt markiert ist — 18/5 statt 19/4. README-Metadaten beider Diskussionen synchronisiert.
 
 ### #21: Statusfelder optisch vom README-Text trennen
 

@@ -5,4 +5,4 @@
 
 Sechs Kernpunkte aus der Architektur-Diskussion mit Max. Jeder Punkt beschreibt eine konkrete Änderung an der Datei-Struktur oder UI-Logik von DiskHub.
 
-**Offen:** ● #20 Status dynamisch · ● #21 Status-Trennung · ● #22 TOC im Sub-Akkordeon · ● #23 Box-Formular eingerahmt
+**Offen:** ● #15 Trennlinien · ● #21 Status-Trennung · ● #22 TOC im Sub-Akkordeon · ● #23 Box-Formular eingerahmt
