@@ -134,11 +134,11 @@
 
 > **Ergebnis:** `discStats` aus `discHeader` in beiden Views (Main + Sub) herausgezogen — eigenständiger Block zwischen Header und README-Content. `discStats` bekam Dark-Theme-Stil (`color: #94a3b8`, `border-bottom: 1px solid #2d3a4e`, `margin: 0 0 20px 0`) als klare Trennlinie zum Markdown-Content. Sub-View hatte vorher gar keine `discStats` — jetzt identisch zur Main-View. `discHeader` verlor `border-bottom`/`margin-bottom` (unnötig bei getrennten Blöcken). `.statsSep`-Farbe auf `#475569` (Dark-Theme) umgestellt. Build OK.
 
-### #22: Inhaltsverzeichnis (TOC) im Sub-Akkordeon statt offen-Liste
+### #22: Inhaltsverzeichnis (TOC) im Sub-Akkordeon statt README-Präambel (✓ erledigt)
 
 *— · 22.05.2026*
 
-Im aufgeklappten Sub-Akkordeon soll das 📋 Inhaltsverzeichnis (mit ├── Einzeilern) angezeigt werden, nicht die einfache "offen:-Liste". Sub-Sub-Diskussionen als Einzeiler im TOC-Stil.
+> **Ergebnis:** Expanded Body der Sub-Akkordeons (Main-View) zeigt jetzt `generateToc(sub.blocks, sub.index)` statt der README-Präambel. Der TOC zeigt 📝-Einträge aus `blocks.md` und 🗂️-Subs aus `index.md` im ├── Einzeiler-Stil — inkl. Sub-Sub-Diskussionen. Fallback auf README-Präambel/README wenn weder blocks noch index vorhanden. `generateToc()` war bereits vorhanden — musste nur im Akkordeon-Kontext aufgerufen werden. Build OK.
 
 ### #23: Box hinzufügen-Formular eingerahmt + Label-Änderung
 

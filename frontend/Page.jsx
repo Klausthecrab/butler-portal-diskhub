@@ -1637,6 +1637,16 @@ function SplitViewModal({ discussion, onClose }) {
                                 {isExpanded && (
                                   <div className={styles.subDocBody}>
                                     {(() => {
+                                      // TOC aus blocks.md + index.md generieren (#22)
+                                      const toc = generateToc(sub.blocks, sub.index)
+                                      if (toc) {
+                                        return (
+                                          <div className={styles.markdownContent}
+                                            dangerouslySetInnerHTML={{ __html: toc }}
+                                          />
+                                        )
+                                      }
+                                      // Fallback: README-Präambel (wenn kein blocks/index)
                                       const preamble = extractPreamble(sub.readme)
                                       if (preamble) {
                                         return (
@@ -1652,7 +1662,7 @@ function SplitViewModal({ discussion, onClose }) {
                                           />
                                         )
                                       }
-                                      return <div className={styles.subDocEmpty}>Keine README</div>
+                                      return null
                                     })()}
                                     <div className={styles.subDocViewLink}
                                       onClick={e => { e.stopPropagation(); window.history.pushState({subViewMode: true}, ''); setActiveSubView(sub.id) }}
@@ -1660,9 +1670,9 @@ function SplitViewModal({ discussion, onClose }) {
                                       onKeyDown={e => { if (e.key === 'Enter') { window.history.pushState({subViewMode: true}, ''); setActiveSubView(sub.id) } }}
                                     >
                                       → Vollständige Ansicht
+                                    </div>
                                   </div>
-                                </div>
-                              )}
+                                )}
                             </div>
                           </div>
                             )
