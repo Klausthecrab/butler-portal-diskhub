@@ -247,6 +247,34 @@
 >
 > Prüfen ob README diesen Kern bereits abdeckt und wie die Struktur für KI-Sessions optimiert werden kann (nur 1+2+3 laden, Archiv auslagern).
 
+### #35: Lightbox für Bilder || Skalierte Anzeige + Klick auf Originalgröße
+
+*— · 22.05.2026*
+
+> **Quelle:** Max (Diskussion #28 Bild-Upload)
+> Bilder werden aktuell als rohes `<img>` ohne Größenbeschränkung gerendert — große Bilder zerreißen das Layout.
+>
+> Gewünscht:
+> - Bilder im Content automatisch skalieren (z.B. `max-width: 100%`, `max-height: 400px`, `object-fit: contain`, `cursor: zoom-in`)
+> - Klick auf skaliertes Bild öffnet Lightbox-Modal: Bild in Originalgröße, dunkler Hintergrund, zentriert, Close per X oder Klick außerhalb
+> - Nur Frontend (kein Backend) — ändert `renderMarkdown()` + neue `.imageLightbox`-Komponente + CSS
+>
+> **Sub-Punkte:**
+> - [ ] **L.01** — CSS für `.docBody img` / `.markdownContent img`: max-height + zoom-in-Cursor
+> - [ ] **L.02** — Lightbox-Komponente: onClick → Overlay mit Bild in Originalgröße
+> - [ ] **L.03** — Beispielbild in Diskussion eintragen (z.B. Screenshot) um die Lightbox zu demonstrieren
+
+### #36: STRG+V aus Zwischenablage (Screenshots) in Diskussionen
+
+*— · 22.05.2026*
+
+> **Quelle:** Max (Diskussion #28 Bild-Upload)
+> Möglichkeit per STRG+V ein Bild aus der Zwischenablage (z.B. Screenshot) in eine Diskussion einzufügen.
+>
+> ⚠️ **Bereits in #28 F.02 implementiert** — `onPaste`-Handler auf der Textarea in `addBoxSection` erkennt Clipboard-Bilder und speichert sie als `pendingImage`. Das Bild wird beim nächsten "Box hinzufügen" mit hochgeladen.
+>
+> **Offen:** Soll STRG+V auch außerhalb der `addBoxSection` funktionieren? Z.B. direkt in eine Sub-Diskussion oder als eigenständigen Bild-Block ohne Textbox? Oder ist der aktuelle Flow (Textbox mit Bild) ausreichend?
+
 ---
 
 💬 **Sub-Diskussion fortsetzen**
