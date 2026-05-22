@@ -1438,12 +1438,27 @@ function SplitViewModal({ discussion, onClose }) {
                         ) : subViewData ? (
                           <>
                             {subViewData.parsed && (
-                              <div className={styles.discHeader}>
-                                <div className={styles.discTitle}>{subViewData.parsed.title}</div>
-                                {subViewData.parsed.question && (
-                                  <div className={styles.discQuestion}>{subViewData.parsed.question}</div>
-                                )}
-                              </div>
+                              <>
+                                <div className={styles.discHeader}>
+                                  <div className={styles.discTitle}>{subViewData.parsed.title}</div>
+                                  {subViewData.parsed.question && (
+                                    <div className={styles.discQuestion}>{subViewData.parsed.question}</div>
+                                  )}
+                                </div>
+                                <div className={styles.discStats}>
+                                  <span>Erstellt {subViewData.parsed.created_at}</span>
+                                  <span className={styles.statsSep}>·</span>
+                                  <span className={styles.statDone}>{subViewData.parsed.done_count} ✓</span>
+                                  <span className={styles.statsSep}>·</span>
+                                  <span className={styles.statOpen}>{subViewData.parsed.open_count} ●</span>
+                                  {subViewData.parsed.updated_at && (
+                                    <>
+                                      <span className={styles.statsSep}>·</span>
+                                      <span>Zuletzt {subViewData.parsed.updated_at}</span>
+                                    </>
+                                  )}
+                                </div>
+                              </>
                             )}
                             {subViewData.readme_body ? (
                               <div className={styles.markdownContent}
@@ -1516,11 +1531,13 @@ function SplitViewModal({ discussion, onClose }) {
                         /* ── MAIN-VIEW ── */
                         <>
                           {data.parsed && (
-                            <div className={styles.discHeader}>
-                              <div className={styles.discTitle}>{data.parsed.title}</div>
-                              {data.parsed.question && (
-                                <div className={styles.discQuestion}>{data.parsed.question}</div>
-                              )}
+                            <>
+                              <div className={styles.discHeader}>
+                                <div className={styles.discTitle}>{data.parsed.title}</div>
+                                {data.parsed.question && (
+                                  <div className={styles.discQuestion}>{data.parsed.question}</div>
+                                )}
+                              </div>
                               <div className={styles.discStats}>
                                 <span>Erstellt {data.parsed.created_at}</span>
                                 <span className={styles.statsSep}>·</span>
@@ -1534,7 +1551,7 @@ function SplitViewModal({ discussion, onClose }) {
                                   </>
                                 )}
                               </div>
-                            </div>
+                            </>
                           )}
                           {data.readme_body ? (
                             <div className={styles.markdownContent}
