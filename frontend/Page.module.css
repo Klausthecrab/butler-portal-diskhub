@@ -746,10 +746,6 @@
 }
 
 /* ─── Convert-Button (Starte Discord-Session für Textbox, #24) ─── */
-.blockActions {
-  display: flex;
-  border-top: 1px solid #334155;
-}
 .convertBtn {
   width: 100%;
   padding: 8px 16px;
@@ -764,6 +760,129 @@
 .convertBtn:hover {
   background: #334155;
   color: #e2e8f0;
+}
+
+/* ─── Actions-Bar-Buttons (✏️ bearbeiten / 🗑️ löschen, #25) ─── */
+.blockActions {
+  display: flex;
+  border-top: 1px solid #334155;
+}
+.editBlockActionBtn,
+.deleteBlockActionBtn {
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid #334155;
+  color: #64748b;
+  font-size: 0.825rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s;
+  line-height: 1;
+}
+.editBlockActionBtn:hover {
+  background: #334155;
+  color: #e2e8f0;
+}
+.deleteBlockActionBtn:hover {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+.deleteBlockActionBtnDanger {
+  background: #991b1b !important;
+  color: #fecaca !important;
+  font-weight: 600;
+}
+
+/* ─── Edit-Formular (Textbox bearbeiten, #25) ─── */
+.editBlockForm {
+  padding: 14px 16px;
+  background: #0f172a;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.editBlockLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.editBlockInput {
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.editBlockInput:focus {
+  border-color: #6366f1;
+}
+.editBlockTextarea {
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #e2e8f0;
+  font-size: 0.8125rem;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 80px;
+  max-height: 250px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+.editBlockTextarea:focus {
+  border-color: #6366f1;
+}
+.editBlockButtons {
+  display: flex;
+  gap: 8px;
+}
+.editBlockSaveBtn {
+  flex: 1;
+  padding: 8px 16px;
+  background: #6366f1;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.editBlockSaveBtn:hover {
+  background: #4f46e5;
+}
+.editBlockSaveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.editBlockCancelBtn {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.editBlockCancelBtn:hover {
+  background: #334155;
+  color: #e2e8f0;
+}
+.editBlockCancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ─── Block-Header (Indigo) ─── */

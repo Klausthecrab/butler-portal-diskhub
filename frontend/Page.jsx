@@ -664,12 +664,51 @@ function parseCreatedDate(readme) {
   return m ? m[1] : ''
 }
 
-function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub }) {
+function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditBlock, onDeleteBlock }) {
   const blocks = useMemo(() => parseBlocksMd(md), [md])
+  const [editingIndex, setEditingIndex] = useState(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editContent, setEditContent] = useState('')
+  const [editLoading, setEditLoading] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(null)
 
   if (!blocks.length) {
     if (md) return <div className={styles.markdownContent} dangerouslySetInnerHTML={{ __html: renderMarkdown(md) }} />
     return null
+  }
+
+  const startEditing = (idx, headingText, content) => {
+    setEditingIndex(idx)
+    setEditTitle(headingText)
+    setEditContent(content)
+    setConfirmingDelete(null)
+  }
+
+  const cancelEditing = () => {
+    setEditingIndex(null)
+    setEditTitle('')
+    setEditContent('')
+  }
+
+  const saveEdit = (idx) => {
+    if (!editTitle.trim()) return
+    setEditLoading(true)
+    onEditBlock(idx, editTitle.trim(), editContent, () => {
+      setEditingIndex(null)
+      setEditTitle('')
+      setEditContent('')
+      setEditLoading(false)
+    })
+  }
+
+  const handleDelete = (idx) => {
+    if (confirmingDelete === idx) {
+      setConfirmingDelete(null)
+      onDeleteBlock(idx)
+    } else {
+      setConfirmingDelete(idx)
+      setTimeout(() => setConfirmingDelete(null), 4000)
+    }
   }
 
   return (
@@ -697,11 +736,50 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub }) {
             </div>
             <details className={styles.blockCard} data-status="open">
               <summary className={styles.blockHeader}>
-                <h3>{headingText}</h3>
+                <h3>{editingIndex === idx ? '✏️ ' + editTitle : headingText}</h3>
               </summary>
-              <div className={styles.blockContent}
-                dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
-              />
+
+              {/* Edit-Modus: Input-Felder statt gerendertem Content */}
+              {editingIndex === idx ? (
+                <div className={styles.editBlockForm}>
+                  <label className={styles.editBlockLabel}>Titel</label>
+                  <input
+                    className={styles.editBlockInput}
+                    type="text"
+                    value={editTitle}
+                    onChange={e => setEditTitle(e.target.value)}
+                    placeholder="Titel der Textbox..."
+                  />
+                  <label className={styles.editBlockLabel}>Inhalt (Markdown)</label>
+                  <textarea
+                    className={styles.editBlockTextarea}
+                    value={editContent}
+                    onChange={e => setEditContent(e.target.value)}
+                    placeholder="Inhalt (Markdown)..."
+                  />
+                  <div className={styles.editBlockButtons}>
+                    <button
+                      className={styles.editBlockSaveBtn}
+                      onClick={() => saveEdit(idx)}
+                      disabled={editLoading || !editTitle.trim()}
+                    >
+                      {editLoading ? '⏳ Speichern...' : '✅ Speichern'}
+                    </button>
+                    <button
+                      className={styles.editBlockCancelBtn}
+                      onClick={cancelEditing}
+                      disabled={editLoading}
+                    >
+                      ❌ Abbrechen
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.blockContent}
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
+                />
+              )}
+
               <div className={styles.blockActions}>
                 <button
                   className={styles.convertBtn}
@@ -709,6 +787,20 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub }) {
                   title="💬 Startet eine Discord-Session mit dem Inhalt dieser Textbox. Die Session wird im rechten Preview-Panel geöffnet — Hermes geht den Text Schritt für Schritt mit dir durch, diskutiert Ideen, sammelt Feedback und leitet konkrete Vorschläge für neue Sub-Diskussionen ab. Diese können später übernommen werden."
                 >
                   💬 In Sub entwickeln
+                </button>
+                <button
+                  className={styles.editBlockActionBtn}
+                  onClick={() => startEditing(idx, headingText, content)}
+                  title="Diese Textbox bearbeiten"
+                >
+                  ✏️
+                </button>
+                <button
+                  className={`${styles.deleteBlockActionBtn} ${confirmingDelete === idx ? styles.deleteBlockActionBtnDanger : ''}`}
+                  onClick={() => handleDelete(idx)}
+                  title={confirmingDelete === idx ? 'Erneut klicken zum Löschen' : 'Diese Textbox löschen'}
+                >
+                  {confirmingDelete === idx ? '⚠️ Sicher?' : '🗑️'}
                 </button>
               </div>
             </details>
@@ -1289,6 +1381,63 @@ function SplitViewModal({ discussion, onClose }) {
       })
   }
 
+  // Textbox bearbeiten (#25)
+  const handleEditBlock = (blockIndex, title, content, onSuccess) => {
+    fetch(`${API}/edit-block`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        discussion_id: discussion.id,
+        block_index: blockIndex,
+        title,
+        content,
+        is_sub: !!activeSubView,
+        sub_id: activeSubView || undefined,
+      }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === 'ok') {
+          setErrorMsg('✅ Textbox aktualisiert: ' + (d.sha ? d.sha.slice(0, 7) : 'ok'))
+          fetchDiscussionData()
+          onSuccess()
+        } else {
+          setErrorMsg('❌ ' + (d.error || 'Fehler beim Bearbeiten'))
+          onSuccess()
+        }
+      })
+      .catch(e => {
+        setErrorMsg('❌ Netzwerkfehler: ' + e.message)
+        onSuccess()
+      })
+  }
+
+  // Textbox löschen (#25)
+  const handleDeleteBlock = (blockIndex) => {
+    fetch(`${API}/delete-block`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        discussion_id: discussion.id,
+        block_index: blockIndex,
+        is_sub: !!activeSubView,
+        sub_id: activeSubView || undefined,
+      }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === 'ok') {
+          setErrorMsg('🗑️ Textbox gelöscht' + (d.blocks_left !== undefined ? ` (${d.blocks_left} verbleibend)` : ''))
+          fetchDiscussionData()
+        } else {
+          setErrorMsg('❌ ' + (d.error || 'Fehler beim Löschen'))
+        }
+      })
+      .catch(e => {
+        setErrorMsg('❌ Netzwerkfehler: ' + e.message)
+      })
+  }
+
   // Box hinzufügen (in blocks.md)
   const handleAddBox = () => {
     if (!boxTitle.trim()) return
@@ -1448,6 +1597,8 @@ function SplitViewModal({ discussion, onClose }) {
                                   isSub={true}
                                   subId={activeSubView}
                                   onConvertToSub={handleConvertToSub}
+                                  onEditBlock={handleEditBlock}
+                                  onDeleteBlock={handleDeleteBlock}
                                 />
                               </div>
                             )}
@@ -1545,6 +1696,8 @@ function SplitViewModal({ discussion, onClose }) {
                                 discussionId={discussion.id}
                                 isSub={false}
                                 onConvertToSub={handleConvertToSub}
+                                onEditBlock={handleEditBlock}
+                                onDeleteBlock={handleDeleteBlock}
                               />
                             </div>
                           )}

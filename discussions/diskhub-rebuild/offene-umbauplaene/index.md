@@ -152,11 +152,11 @@
 
 > **Ergebnis:** Zwei Buttons ("Zu Sub ändern" + "Als Sub übernehmen") auf einen reduziert: **💬 In Sub entwickeln** mit Sprechblasen-Icon. Ausführlicher Tooltip (title-Attribut) erklärt den gesamten Flow: Discord-Session-Start, Preview-Panel, schrittweises Durchgehen + Sub-Vorschläge. Dead Code entfernt: `handlePromoteBlock()`-Funktion, `promoteBtn`-CSS-Klasse, `onPromote`-Prop aus `BlocksSection`. Build OK, Health-Check bestanden. Webhook-Session-Start verifiziert (3×204).
 
-### #25: Textbox-Operationen: Bearbeiten + Löschen
+### #25: Textbox-Operationen: Bearbeiten + Löschen (✓ erledigt)
 
 *— · 22.05.2026*
 
-Es fehlen Bearbeiten- und Löschen-Buttons für Textboxen.
+> **Ergebnis:** Zwei neue Buttons pro Textbox — ✏️ Bearbeiten (schaltet in Edit-Modus mit Titel-Input + Content-Textarea + ✅ Speichern / ❌ Abbrechen) und 🗑️ Löschen (Doppelklick-Bestätigung: erster Klick zeigt "⚠️ Sicher?", zweiter Klick löscht). Backend: neue Endpoints `POST /diskhub/edit-block` und `POST /diskhub/delete-block` (block_index-basiertes Parsen/Ersetzen/Entfernen in blocks.md + Git-Commit). Beide Endpoints respektieren `is_sub`/`sub_id` für Sub-Diskussionen. Edit-Formular im Dark-Theme mit Labeln, Input-Feldern und Indigo-Save-Button. Delete mit Danger-Stil (rot). Dead Code-Entfernung: alter `convertBtn`-CSS-Duplikat. Build OK, Health-Check bestanden. API-Tests: edit-block (Titel+Content-Änderung) + delete-block (Entfernung) erfolgreich verifiziert — Formatierung korrekt (Leerzeilen zwischen Blöcken).
 
 ### #26: Textbox-Referenz (Pfad/Identifikator)
 

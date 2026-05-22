@@ -1511,6 +1511,167 @@ def start_box_to_sub():
     })
 
 
+@diskhub.route('/diskhub/delete-block', methods=['POST'])
+def delete_block():
+    """'Textbox löschen' — Entfernt einen Block aus blocks.md + git commit."""
+    data = request.get_json(silent=True) or {}
+    discussion_id = data.get('discussion_id', '')
+    block_index = data.get('block_index')
+    is_sub = data.get('is_sub', False)
+    sub_id = data.get('sub_id', '')
+
+    if not discussion_id or block_index is None:
+        return jsonify({'error': 'discussion_id und block_index erforderlich'}), 400
+
+    if is_sub and sub_id:
+        target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id)
+    else:
+        target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id)
+
+    blocks_path = os.path.join(target_dir, 'blocks.md')
+    if not os.path.isfile(blocks_path):
+        return jsonify({'error': 'blocks.md nicht gefunden'}), 404
+
+    with open(blocks_path, 'r') as f:
+        lines = f.readlines()
+
+    # Find ### header boundaries
+    header_indices = [i for i, line in enumerate(lines) if line.startswith('### ')]
+
+    if block_index < 0 or block_index >= len(header_indices):
+        return jsonify({'error': f'block_index {block_index} ungültig (0-{len(header_indices)-1})'}), 400
+
+    start = header_indices[block_index]
+    end = header_indices[block_index + 1] if block_index + 1 < len(header_indices) else len(lines)
+
+    # Sicherheitscheck: Block-Preview für Log
+    deleted_preview = ''.join(lines[start:end])[:100]
+
+    new_lines = lines[:start] + lines[end:]
+
+    with open(blocks_path, 'w') as f:
+        f.writelines(new_lines)
+
+    sha = ''
+    try:
+        subprocess.run(['git', 'add', '-A'], capture_output=True, text=True, timeout=10, cwd=REPO_DIR)
+        result = subprocess.run(
+            ['git', 'commit', '-m', f'disc: {discussion_id}: Block gelöscht (Index {block_index})'],
+            capture_output=True, text=True, timeout=10, cwd=REPO_DIR
+        )
+        if result.returncode == 0:
+            sha_match = re.search(r'\[master [a-f0-9]+\) ([a-f0-9]+)', result.stdout)
+            if sha_match:
+                sha = sha_match.group(1)
+    except Exception as e:
+        sha = f'commit fehlgeschlagen: {e}'
+
+    _log_activity('delete-block', {
+        'discussion': discussion_id,
+        'block_index': block_index,
+        'deleted_preview': deleted_preview,
+        'sha': sha,
+        'is_sub': is_sub,
+        'sub_id': sub_id,
+    })
+
+    return jsonify({'status': 'ok', 'sha': sha, 'blocks_left': len(header_indices) - 1})
+
+
+@diskhub.route('/diskhub/edit-block', methods=['POST'])
+def edit_block():
+    """'Textbox bearbeiten' — Überschreibt Titel + Inhalt eines Blocks in blocks.md + git commit."""
+    data = request.get_json(silent=True) or {}
+    discussion_id = data.get('discussion_id', '')
+    block_index = data.get('block_index')
+    title = data.get('title', '').strip()
+    content = data.get('content', '').strip()
+    is_sub = data.get('is_sub', False)
+    sub_id = data.get('sub_id', '')
+
+    if not discussion_id or block_index is None or not title:
+        return jsonify({'error': 'discussion_id, block_index und title erforderlich'}), 400
+
+    if is_sub and sub_id:
+        target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id)
+    else:
+        target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id)
+
+    blocks_path = os.path.join(target_dir, 'blocks.md')
+    if not os.path.isfile(blocks_path):
+        return jsonify({'error': 'blocks.md nicht gefunden'}), 404
+
+    with open(blocks_path, 'r') as f:
+        lines = f.readlines()
+
+    # Find ### header boundaries
+    header_indices = [i for i, line in enumerate(lines) if line.startswith('### ')]
+
+    if block_index < 0 or block_index >= len(header_indices):
+        return jsonify({'error': f'block_index {block_index} ungültig (0-{len(header_indices)-1})'}), 400
+
+    start = header_indices[block_index]
+    end = header_indices[block_index + 1] if block_index + 1 < len(header_indices) else len(lines)
+
+    # Original-Block-Lines holen
+    old_block = lines[start:end]
+
+    # Prüfen ob eine Datumszeile direkt nach ### existiert
+    date_line = None
+    content_start_offset = 1  # skip ### line
+    if len(old_block) > 1 and old_block[1].strip().startswith('*—'):
+        date_line = old_block[1]
+        content_start_offset = 2
+
+    # Neuen Block bauen: ### + Datum (falls vorhanden) + Leerzeile + Content + abschließende Leerzeile
+    # content kann mehrzeilig sein — als Liste von Zeilen
+    new_block = [f'### {title}\n']
+    if date_line:
+        new_block.append(date_line)
+    # Stelle sicher, dass eine Leerzeile zwischen Datum/### und Content ist
+    if content:
+        if new_block and not new_block[-1].endswith('\n\n') and not new_block[-1].strip() == '':
+            new_block.append('\n')
+        for cl in content.split('\n'):
+            new_block.append(cl + '\n')
+    else:
+        if new_block and not new_block[-1].endswith('\n\n'):
+            new_block.append('\n')
+    # Abschließende Leerzeile als Trenner zum nächsten Block / Dateiende
+    if not new_block[-1].endswith('\n\n'):
+        new_block.append('\n')
+
+    new_lines = lines[:start] + new_block + lines[end:]
+
+    with open(blocks_path, 'w') as f:
+        f.writelines(new_lines)
+
+    sha = ''
+    try:
+        subprocess.run(['git', 'add', '-A'], capture_output=True, text=True, timeout=10, cwd=REPO_DIR)
+        result = subprocess.run(
+            ['git', 'commit', '-m', f'disc: {discussion_id}: Block bearbeitet — {title}'],
+            capture_output=True, text=True, timeout=10, cwd=REPO_DIR
+        )
+        if result.returncode == 0:
+            sha_match = re.search(r'\[master [a-f0-9]+\) ([a-f0-9]+)', result.stdout)
+            if sha_match:
+                sha = sha_match.group(1)
+    except Exception as e:
+        sha = f'commit fehlgeschlagen: {e}'
+
+    _log_activity('edit-block', {
+        'discussion': discussion_id,
+        'block_index': block_index,
+        'title': title,
+        'sha': sha,
+        'is_sub': is_sub,
+        'sub_id': sub_id,
+    })
+
+    return jsonify({'status': 'ok', 'sha': sha})
+
+
 @diskhub.route('/diskhub/add-box', methods=['POST'])
 def add_box():
     """
