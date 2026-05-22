@@ -256,8 +256,10 @@ function generateToc(blocksMd, indexMd) {
   html += '<div class="miniToc">'
   html += '<div class="tocHeading">📋 Inhaltsverzeichnis</div>'
   for (const item of items) {
-    const prefix = item.type === 'sub' ? '🗂️ ' : '📝 '
-    html += `<div class="tocItem">├── ${prefix}${item.title}</div>`
+    const isImage = item.title.startsWith('📷 ')
+    const prefix = item.type === 'sub' ? '🗂️ ' : isImage ? '📷 ' : '📝 '
+    const displayTitle = isImage ? item.title.replace(/^📷\s+/, '') : item.title
+    html += `<div class="tocItem">├── ${prefix}${displayTitle}</div>`
   }
   html += '</div>'
   html += '<hr style="border:none;border-top:1px solid #2d3a4e;margin:16px 0 24px 0;opacity:0.5">'
@@ -905,6 +907,7 @@ function SplitViewModal({ discussion, onClose }) {
   const [subDialogName, setSubDialogName] = useState('')
   const [freitextMode, setFreitextMode] = useState(false)
   const fileInputRef = useRef(null)
+  const boxImageInputRef = useRef(null)
   const [activeSubView, setActiveSubView] = useState(null)
   const [subViewData, setSubViewData] = useState(null)
   const [subViewLoading, setSubViewLoading] = useState(false)
@@ -913,6 +916,7 @@ function SplitViewModal({ discussion, onClose }) {
   const [boxTitle, setBoxTitle] = useState('')
   const [boxContent, setBoxContent] = useState('')
   const [boxLoading, setBoxLoading] = useState(false)
+  const [pendingImage, setPendingImage] = useState(null)
 
   // SSE Streaming
   const lastTsRef = useRef(0)
@@ -1474,33 +1478,52 @@ function SplitViewModal({ discussion, onClose }) {
   const handleAddBox = () => {
     if (!boxTitle.trim()) return
     setBoxLoading(true)
-    fetch(`${API}/add-box`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+
+    const doFetch = (body, headers) => {
+      fetch(`${API}/add-box`, {
+        method: 'POST',
+        headers,
+        body,
+      })
+        .then(r => r.json())
+        .then(d => {
+          setBoxLoading(false)
+          if (d.status === 'ok') {
+            setBoxTitle('')
+            setBoxContent('')
+            setPendingImage(null)
+            fetchDiscussionData()
+            setErrorMsg('✅ Box hinzugefügt: ' + (d.sha || 'ok'))
+          } else {
+            setErrorMsg('❌ ' + (d.error || 'Fehler'))
+          }
+        })
+        .catch(() => {
+          setBoxLoading(false)
+          setErrorMsg('❌ Netzwerkfehler')
+        })
+    }
+
+    if (pendingImage) {
+      // Multipart-FormData mit Bild
+      const formData = new FormData()
+      formData.append('discussion_id', discussion.id)
+      formData.append('title', boxTitle.trim())
+      formData.append('content', boxContent.trim())
+      formData.append('is_sub', activeSubView ? 'true' : 'false')
+      if (activeSubView) formData.append('sub_id', activeSubView)
+      formData.append('image', pendingImage)
+      doFetch(formData, {}) // kein Content-Type — Browser setzt multipart boundary
+    } else {
+      // Klassischer JSON-Request
+      doFetch(JSON.stringify({
         discussion_id: discussion.id,
         title: boxTitle.trim(),
         content: boxContent.trim(),
         is_sub: !!activeSubView,
         sub_id: activeSubView || undefined,
-      }),
-    })
-      .then(r => r.json())
-      .then(d => {
-        setBoxLoading(false)
-        if (d.status === 'ok') {
-          setBoxTitle('')
-          setBoxContent('')
-          fetchDiscussionData()
-          setErrorMsg('✅ Box hinzugefügt: ' + (d.sha || 'ok'))
-        } else {
-          setErrorMsg('❌ ' + (d.error || 'Fehler'))
-        }
-      })
-      .catch(() => {
-        setBoxLoading(false)
-        setErrorMsg('❌ Netzwerkfehler')
-      })
+      }), { 'Content-Type': 'application/json' })
+    }
   }
 
   const handleOverlayClick = (e) => {
@@ -1659,14 +1682,68 @@ function SplitViewModal({ discussion, onClose }) {
                                 placeholder="Inhalt (Markdown)..."
                                 value={boxContent}
                                 onChange={e => setBoxContent(e.target.value)}
+                                onPaste={e => {
+                                  const items = e.clipboardData?.items
+                                  if (!items) return
+                                  for (const item of items) {
+                                    if (item.type.startsWith('image/')) {
+                                      const file = item.getAsFile()
+                                      if (file && file.size <= 5 * 1024 * 1024) {
+                                        setPendingImage(file)
+                                        e.preventDefault()
+                                      }
+                                      break
+                                    }
+                                  }
+                                }}
                               />
-                              <button
-                                className={styles.previewBtnPrimary}
-                                onClick={handleAddBox}
-                                disabled={boxLoading || !boxTitle.trim()}
-                              >
-                                {boxLoading ? '⏳ Speichern...' : '➕ Box hinzufügen'}
-                              </button>
+                              {/* Bild-Vorschau */}
+                              {pendingImage && (
+                                <div className={styles.pendingImagePreview}>
+                                  <img
+                                    src={URL.createObjectURL(pendingImage)}
+                                    alt="Vorschau"
+                                    className={styles.pendingImageThumb}
+                                  />
+                                  <span className={styles.pendingImageName}>{pendingImage.name}</span>
+                                  <button
+                                    className={styles.pendingImageRemove}
+                                    onClick={() => setPendingImage(null)}
+                                    title="Bild entfernen"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              )}
+                              <input
+                                ref={boxImageInputRef}
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={e => {
+                                  const file = e.target.files?.[0]
+                                  if (file && file.size <= 5 * 1024 * 1024) {
+                                    setPendingImage(file)
+                                  }
+                                  e.target.value = ''
+                                }}
+                              />
+                              <div className={styles.addBoxActions}>
+                                <button
+                                  className={styles.previewBtnPrimary}
+                                  onClick={handleAddBox}
+                                  disabled={boxLoading || !boxTitle.trim()}
+                                >
+                                  {boxLoading ? '⏳ Speichern...' : '➕ Box hinzufügen'}
+                                </button>
+                                <button
+                                  className={styles.addBoxImageBtn}
+                                  onClick={() => boxImageInputRef.current?.click()}
+                                  title={pendingImage ? 'Bild ausgewählt' : 'Bild einfügen (STRG+V oder Dateiauswahl)'}
+                                >
+                                  {pendingImage ? '📷✓' : '📷'}
+                                </button>
+                              </div>
                             </div>
                           </>
                         ) : (
@@ -1839,14 +1916,68 @@ function SplitViewModal({ discussion, onClose }) {
                               placeholder="Inhalt (Markdown)..."
                               value={boxContent}
                               onChange={e => setBoxContent(e.target.value)}
+                              onPaste={e => {
+                                const items = e.clipboardData?.items
+                                if (!items) return
+                                for (const item of items) {
+                                  if (item.type.startsWith('image/')) {
+                                    const file = item.getAsFile()
+                                    if (file && file.size <= 5 * 1024 * 1024) {
+                                      setPendingImage(file)
+                                      e.preventDefault()
+                                    }
+                                    break
+                                  }
+                                }
+                              }}
                             />
-                            <button
-                              className={styles.previewBtnPrimary}
-                              onClick={handleAddBox}
-                              disabled={boxLoading || !boxTitle.trim()}
-                            >
-                              {boxLoading ? '⏳ Speichern...' : '➕ Box hinzufügen'}
-                            </button>
+                            {/* Bild-Vorschau */}
+                            {pendingImage && (
+                              <div className={styles.pendingImagePreview}>
+                                <img
+                                  src={URL.createObjectURL(pendingImage)}
+                                  alt="Vorschau"
+                                  className={styles.pendingImageThumb}
+                                />
+                                <span className={styles.pendingImageName}>{pendingImage.name}</span>
+                                <button
+                                  className={styles.pendingImageRemove}
+                                  onClick={() => setPendingImage(null)}
+                                  title="Bild entfernen"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            )}
+                            <input
+                              ref={boxImageInputRef}
+                              type="file"
+                              accept="image/*"
+                              style={{ display: 'none' }}
+                              onChange={e => {
+                                const file = e.target.files?.[0]
+                                if (file && file.size <= 5 * 1024 * 1024) {
+                                  setPendingImage(file)
+                                }
+                                e.target.value = ''
+                              }}
+                            />
+                            <div className={styles.addBoxActions}>
+                              <button
+                                className={styles.previewBtnPrimary}
+                                onClick={handleAddBox}
+                                disabled={boxLoading || !boxTitle.trim()}
+                              >
+                                {boxLoading ? '⏳ Speichern...' : '➕ Box hinzufügen'}
+                              </button>
+                              <button
+                                className={styles.addBoxImageBtn}
+                                onClick={() => boxImageInputRef.current?.click()}
+                                title={pendingImage ? 'Bild ausgewählt' : 'Bild einfügen (STRG+V oder Dateiauswahl)'}
+                              >
+                                {pendingImage ? '📷✓' : '📷'}
+                              </button>
+                            </div>
                           </div>
                         </>
                       )}

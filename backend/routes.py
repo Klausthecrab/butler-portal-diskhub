@@ -26,7 +26,7 @@ import time
 import urllib.request
 import urllib.error
 from datetime import datetime, timezone
-from flask import Blueprint, request, jsonify, Response as FlaskResponse
+from flask import Blueprint, request, jsonify, Response as FlaskResponse, send_from_directory
 
 diskhub = Blueprint('diskhub', __name__)
 
@@ -565,6 +565,35 @@ def get_discussion(discussion_id):
 def health():
     """Health-Check."""
     return jsonify({'status': 'ok', 'discussions_count': len(_scan_discussions())})
+
+
+# ── Bild-Serve ──────────────────────────────────────────────────────────────────
+
+@diskhub.route('/diskhub/assets/<disc_id>/<filename>')
+def serve_diskhub_asset(disc_id, filename):
+    """
+    Servt Bilder aus discussions/<disc_id>/assets/.
+
+    Query-Params:
+      sub_id (str, optional) — Sub-Diskussion
+    """
+    sub_id = request.args.get('sub_id', '').strip()
+    if sub_id:
+        assets_dir = os.path.join(DISCUSSIONS_DIR, disc_id, sub_id, 'assets')
+    else:
+        assets_dir = os.path.join(DISCUSSIONS_DIR, disc_id, 'assets')
+
+    if not os.path.isdir(assets_dir):
+        return jsonify({'error': 'Assets-Ordner nicht gefunden'}), 404
+
+    safe_name = os.path.basename(filename)
+    if not safe_name:
+        return jsonify({'error': 'Ungültiger Dateiname'}), 400
+
+    try:
+        return send_from_directory(assets_dir, safe_name)
+    except FileNotFoundError:
+        return jsonify({'error': 'Datei nicht gefunden'}), 404
 
 
 @diskhub.route('/diskhub/git-log/<discussion_id>', methods=['GET'])
@@ -1676,15 +1705,39 @@ def edit_block():
 def add_box():
     """
     'Box hinzufügen' — Hängt einen neuen ###-Block an blocks.md an + git commit.
+    Unterstützt JSON (alt) und multipart/form-data (neu mit optionalem image-Upload).
 
-    Body:
+    Body (JSON):
       discussion_id (str)
-      title (str) — Titel der Box
-      content (str, optional) — Markdown-Inhalt
+      title (str)
+      content (str, optional)
       is_sub (bool, optional)
       sub_id (str, optional)
+
+    Body (multipart/form-data):
+      discussion_id (str)
+      title (str)
+      content (str, optional)
+      is_sub (str, optional — 'true'/'false')
+      sub_id (str, optional)
+      image (file, optional) — Bild-Datei (max 5MB, png/jpg/jpeg/gif/webp)
     """
+    # ── Request parsen (JSON oder Multipart) ─────────────────────────────────
     data = request.get_json(silent=True) or {}
+    image_file = None
+    is_multipart = False
+
+    if not data.get('discussion_id'):
+        # Fallback auf multipart/form-data
+        data = {}
+        data['discussion_id'] = request.form.get('discussion_id', '')
+        data['title'] = request.form.get('title', '')
+        data['content'] = request.form.get('content', '')
+        data['is_sub'] = request.form.get('is_sub', 'false').lower() == 'true'
+        data['sub_id'] = request.form.get('sub_id', '')
+        image_file = request.files.get('image')
+        is_multipart = True
+
     discussion_id = data.get('discussion_id', '')
     title = data.get('title', '').strip()
     content = data.get('content', '').strip()
@@ -1702,6 +1755,45 @@ def add_box():
     if not os.path.isdir(target_dir):
         return jsonify({'error': 'Diskussion nicht gefunden'}), 404
 
+    # ── Bild verarbeiten ──────────────────────────────────────────────────────
+    saved_image_path = None
+    clean_title = title
+
+    if image_file and image_file.filename:
+        # 5MB-Limit prüfen
+        image_file.seek(0, os.SEEK_END)
+        size = image_file.tell()
+        image_file.seek(0)
+        if size > 5 * 1024 * 1024:
+            return jsonify({'error': 'Bild zu groß — maximal 5 MB erlaubt'}), 413
+
+        # Erlaubte Extensions
+        ext = image_file.filename.rsplit('.', 1)[-1].lower() if '.' in image_file.filename else 'png'
+        if ext not in ('png', 'jpg', 'jpeg', 'gif', 'webp'):
+            ext = 'png'
+
+        # assets/-Ordner anlegen
+        assets_dir = os.path.join(target_dir, 'assets')
+        os.makedirs(assets_dir, exist_ok=True)
+
+        # Kollisionsfreien Dateinamen generieren
+        date_prefix = datetime.now(timezone.utc).strftime('%d%m')
+        counter = 1
+        while True:
+            filename = f'bild-{date_prefix}-{counter}.{ext}'
+            saved_image_path = os.path.join(assets_dir, filename)
+            if not os.path.exists(saved_image_path):
+                break
+            counter += 1
+
+        image_file.save(saved_image_path)
+
+        # 📷-Präfix + Bild-Referenz in Content
+        title = f'📷 {title}'
+        image_md = f'\n![{clean_title}](assets/{filename})'
+        content = content + image_md if content else image_md.strip()
+
+    # ── Block schreiben ──────────────────────────────────────────────────────
     blocks_path = os.path.join(target_dir, 'blocks.md')
 
     # blocks.md existiert nicht → mit Header anlegen
@@ -1721,9 +1813,9 @@ def add_box():
     sha = ''
     try:
         subprocess.run(['git', 'add', '-A'], capture_output=True, text=True, timeout=10, cwd=REPO_DIR)
-        commit_msg = f'disc: {discussion_id}: neue Box — {title}'
+        commit_msg = f'disc: {discussion_id}: neue Box — {clean_title}'
         if is_sub and sub_id:
-            commit_msg = f'disc: {discussion_id}/{sub_id}: neue Box — {title}'
+            commit_msg = f'disc: {discussion_id}/{sub_id}: neue Box — {clean_title}'
         result = subprocess.run(
             ['git', 'commit', '-m', commit_msg],
             capture_output=True, text=True, timeout=10, cwd=REPO_DIR
@@ -1737,10 +1829,11 @@ def add_box():
 
     _log_activity('add-box', {
         'discussion': discussion_id,
-        'title': title,
+        'title': clean_title,
         'sha': sha,
         'is_sub': is_sub,
         'sub_id': sub_id,
+        'has_image': bool(image_file and image_file.filename),
     })
 
     return jsonify({'status': 'ok', 'sha': sha})

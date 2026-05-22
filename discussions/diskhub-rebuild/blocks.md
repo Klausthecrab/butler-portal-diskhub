@@ -52,9 +52,3 @@ erkläre mir das in deinen worten
 Haben wir sowas im Kern schon? "Readme"? und ich muss das nur besser nutzen, einbauen und definieren?
 
 welchen workflow will ich erziehlen:
-
-1) Idee / Konzept / Fragestellung
-2) Status quo
-3) offene Diskussionspunkte
-4) weg dahin / entscheidungen / abgearbeitete "offene Punkte" behalten, aber aus dem load rausnehmen, den eine KI Session laden soll. meine these: 1+2+3 muss ausreichen. Sie beschreiben doch hinreichend oder? zugegeben: vielleicht "entscheidungen" oder so als sonderfall aufnehmen. 
-5) Erklärung / Anleitung
