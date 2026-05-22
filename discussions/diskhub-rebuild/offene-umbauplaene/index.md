@@ -146,11 +146,11 @@
 
 > **Ergebnis:** "➕ Neue Box" → "➕ Neue Textbox" in Main-View + Sub-View. `.addBoxSection` von `border-top` auf vollständigen `border: 1px solid #475569` + `border-radius: 8px` + `padding: 16px` umgestellt. Sichtbarer Rahmen um das gesamte Formular. Build OK, Health-Check bestanden.
 
-### #24: Button-Unterscheidbarkeit für Textboxen
+### #24: Button-Unterscheidbarkeit für Textboxen (✓ erledigt)
 
 *— · 22.05.2026*
 
-Die zwei Buttons pro Textbox ("Zu Sub ändern" / "Als Sub übernehmen") sind im Unterschied unklar. Möglichkeit: Hover-Text/Tooltip zur Erklärung, oder auf einen Button reduzieren. Der verbleibende Button soll eine Discord-Session starten (im rechten Preview-Panel sichtbar) mit Prompt: "Lass uns aus dieser Textbox-Notiz eine Sub-Diskussion entwickeln. Mache Vorschläge für das Anlegen"
+> **Ergebnis:** Zwei Buttons ("Zu Sub ändern" + "Als Sub übernehmen") auf einen reduziert: **💬 In Sub entwickeln** mit Sprechblasen-Icon. Ausführlicher Tooltip (title-Attribut) erklärt den gesamten Flow: Discord-Session-Start, Preview-Panel, schrittweises Durchgehen + Sub-Vorschläge. Dead Code entfernt: `handlePromoteBlock()`-Funktion, `promoteBtn`-CSS-Klasse, `onPromote`-Prop aus `BlocksSection`. Build OK, Health-Check bestanden. Webhook-Session-Start verifiziert (3×204).
 
 ### #25: Textbox-Operationen: Bearbeiten + Löschen
 

@@ -664,7 +664,7 @@ function parseCreatedDate(readme) {
   return m ? m[1] : ''
 }
 
-function BlocksSection({ md, discussionId, isSub, subId, onPromote, onConvertToSub }) {
+function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub }) {
   const blocks = useMemo(() => parseBlocksMd(md), [md])
 
   if (!blocks.length) {
@@ -706,15 +706,9 @@ function BlocksSection({ md, discussionId, isSub, subId, onPromote, onConvertToS
                 <button
                   className={styles.convertBtn}
                   onClick={() => onConvertToSub?.(headingText, content)}
-                  title="In Discord diskutieren und als Sub-Diskussion anlegen"
+                  title="💬 Startet eine Discord-Session mit dem Inhalt dieser Textbox. Die Session wird im rechten Preview-Panel geöffnet — Hermes geht den Text Schritt für Schritt mit dir durch, diskutiert Ideen, sammelt Feedback und leitet konkrete Vorschläge für neue Sub-Diskussionen ab. Diese können später übernommen werden."
                 >
-                  🗂️ Zu Sub ändern
-                </button>
-                <button
-                  className={styles.promoteBtn}
-                  onClick={() => onPromote(headingText, content)}
-                >
-                  ⬆️ Als Sub übernehmen
+                  💬 In Sub entwickeln
                 </button>
               </div>
             </details>
@@ -1263,37 +1257,6 @@ function SplitViewModal({ discussion, onClose }) {
     try { localStorage.removeItem(`diskhub-draft-${discussion.id}`) } catch (e) {}
   }
 
-  // Block zur Sub-Diskussion promovieren
-  const handlePromoteBlock = (title, content) => {
-    const prevState = previewState
-    setPreviewState('adopting')
-    fetch(`${API}/promote-block`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        discussion_id: discussion.id,
-        block_title: title,
-        block_content: content,
-        is_sub: !!activeSubView,
-        sub_id: activeSubView || undefined,
-      }),
-    })
-      .then(r => r.json())
-      .then(d => {
-        setPreviewState(prevState === 'idle' ? 'idle' : 'active')
-        if (d.status === 'ok') {
-          setErrorMsg('✅ Sub-Diskussion erstellt: ' + (d.sub_name || d.sub_id))
-          fetchDiscussionData()
-        } else {
-          setErrorMsg('❌ ' + (d.error || 'Promotion fehlgeschlagen'))
-        }
-      })
-      .catch(() => {
-        setPreviewState(prevState === 'idle' ? 'idle' : 'active')
-        setErrorMsg('❌ Netzwerkfehler')
-      })
-  }
-
   // Box zu Sub-Diskussion konvertieren — startet Session mit Box-Content (#17)
   const handleConvertToSub = (boxTitle, boxContent) => {
     console.log('[DISKHUB] handleConvertToSub', { boxTitle, discussion_id: discussion.id, t: Math.floor(Date.now() / 1000) })
@@ -1479,12 +1442,11 @@ function SplitViewModal({ discussion, onClose }) {
                             {subViewData.blocks && (
                               <div className={styles.blocksSection}>
                                 <div className={styles.sectionLabel}>📝 Blöcke</div>
-                                <BlocksSection
+<BlocksSection
                                   md={subViewData.blocks}
                                   discussionId={discussion.id}
                                   isSub={true}
                                   subId={activeSubView}
-                                  onPromote={handlePromoteBlock}
                                   onConvertToSub={handleConvertToSub}
                                 />
                               </div>
@@ -1581,7 +1543,7 @@ function SplitViewModal({ discussion, onClose }) {
                               <BlocksSection
                                 md={data.blocks}
                                 discussionId={discussion.id}
-                                onPromote={handlePromoteBlock}
+                                isSub={false}
                                 onConvertToSub={handleConvertToSub}
                               />
                             </div>
