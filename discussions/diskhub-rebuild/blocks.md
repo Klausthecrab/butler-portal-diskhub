@@ -70,3 +70,9 @@ Nur Text
 - bild: ich möchte das das bei draufklicken "in einem popup in originalgröße dargestellt wird
 - bild bekommt eigenes "box "typ / vorlage. auch einklappbar. Aber optisch abheben von Textbox
 - schriftzug " Haupt-Diskussion fortsetzen" entfernen
+
+### Feedback neu
+*— · 23.05.2026*
+
+- sub-diskussionen chronologisch einsortieren
+- "bearbeiten und speichern" von Textboxen klappt nicht
