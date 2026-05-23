@@ -62,3 +62,8 @@ welchen workflow will ich erziehlen:
 *— · 23.05.2026*
 
 ![Test Bild](assets/bild-2305-2.png)
+
+### Ohne Bild
+*— · 23.05.2026*
+
+Nur Text
