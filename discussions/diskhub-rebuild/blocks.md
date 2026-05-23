@@ -53,22 +53,12 @@ Haben wir sowas im Kern schon? "Readme"? und ich muss das nur besser nutzen, ein
 
 welchen workflow will ich erziehlen:
 
-### 📷 Screenshot 23.05.2026
-*— · 23.05.2026*
-
-![Screenshot 23.05.2026](assets/bild-2305-1.png)
-
-### 📷 Test Bild
-*— · 23.05.2026*
-
-![Test Bild](assets/bild-2305-2.png)
-
 ### Ohne Bild
 *— · 23.05.2026*
 
 Nur Text
 
-### 📷 test Screenshot 23.05.2026
+### 📷 Bild-Rendering Fix #38
 *— · 23.05.2026*
 
-![test Screenshot 23.05.2026](assets/bild-2305-3.png)
+\n![Bild-Rendering Fix #38](/api/diskhub/assets/diskhub-rebuild/bild-2305-1.png)

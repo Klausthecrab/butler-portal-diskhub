@@ -1794,9 +1794,16 @@ def add_box():
             title = f'Screenshot {now_ts}'
             clean_title = title
 
-        # 📷-Präfix + Bild-Referenz in Content
+# 📷-Präfix + Bild-Referenz in Content
         title = f'📷 {title}'
-        image_md = f'\n![{clean_title}](assets/{filename})'
+
+        # Absoluter API-Pfad: der Serve-Endpoint unter /api/diskhub/assets/<disc_id>/<filename>
+        # Sub-Diskussionen brauchen ?sub_id= damit der Endpoint den richtigen assets/-Ordner findet
+        if is_sub and sub_id:
+            asset_url = f'/api/diskhub/assets/{discussion_id}/{filename}?sub_id={sub_id}'
+        else:
+            asset_url = f'/api/diskhub/assets/{discussion_id}/{filename}'
+        image_md = f'\\n![{clean_title}]({asset_url})'
         content = content + image_md if content else image_md.strip()
 
     # ── Block schreiben ──────────────────────────────────────────────────────
