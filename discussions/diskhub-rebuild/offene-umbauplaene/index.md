@@ -386,6 +386,35 @@
 > - [ ] **T.02** — Textbox ohne Bild funktioniert (JSON-Submit)
 > - [ ] **T.03** — Build fehlerfrei
 
+### #40: Bild-Darstellung in UI — Skalieren + immer sichtbar (kein Akkordeon)
+
+*— · 23.05.2026*
+
+> **Quelle:** Max (Feedback zu #38 — Testbild wird als blauer Kasten dargestellt)
+>
+> Bilder werden aktuell als rohes `<img>` im Block-Content von `renderMarkdown()` dargestellt. Bei großen Bildern fehlt die Skalierung. Zudem sind Bild-Blöcke wie alle anderen Blöcke im Akkordeon (details-Element) versteckt — müssen erst aufgeklappt werden.
+>
+> **Erwartet:**
+> - Bilder im Content automatisch skalieren (z.B. `max-width: 100%`, `max-height: 400px`, `object-fit: contain`, `cursor: zoom-in`)
+> - Bilder **immer sichtbar** — nicht hinter einem Akkordeon. Entweder eigener Block-Typ ohne `<details>` oder spezieller Render-Modus für Bild-Blöcke
+>
+> **Keine Umsetzung — nur Analyse + Plan gewünscht.**
+
+### #41: Chronologie umkehren — Neu = unten (Elemente + Inhaltsverzeichnis)
+
+*— · 23.05.2026*
+
+> **Quelle:** Max (Feedback zu #38 — neue Box erscheint oben, erwartet: unten)
+>
+> Aktuell sortiert `BlocksSection` die Liste via `useMemo` reversed (`reversedBlocks`), sodass die neueste Box oben, die älteste unten erscheint. Gleiches gilt für das Inhaltsverzeichnis (TOC) — neue Einträge erscheinen oben.
+>
+> **Erwartet:**
+> - Neue Elemente (Textboxen, Bild-Blöcke) erscheinen **unten** in der Liste
+> - Inhaltsverzeichnis (TOC) ebenfalls: neueste Einträge unten
+> - Gilt für alle Element-Typen (Textboxen + Bild-Blöcke)
+>
+> **Keine Umsetzung — nur Analyse + Plan gewünscht.**
+
 ---
 
 💬 **Sub-Diskussion fortsetzen**
