@@ -1744,8 +1744,8 @@ def add_box():
     is_sub = data.get('is_sub', False)
     sub_id = data.get('sub_id', '')
 
-    if not discussion_id or not title:
-        return jsonify({'error': 'discussion_id und title erforderlich'}), 400
+    if not discussion_id:
+        return jsonify({'error': 'discussion_id erforderlich'}), 400
 
     if is_sub and sub_id:
         target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id)
@@ -1787,6 +1787,12 @@ def add_box():
             counter += 1
 
         image_file.save(saved_image_path)
+
+        # Default-Titel bei fehlendem title (Bild-Modal ohne Texteingabe)
+        if not title:
+            now_ts = datetime.now(timezone.utc).strftime('%d.%m.%Y')
+            title = f'Screenshot {now_ts}'
+            clean_title = title
 
         # 📷-Präfix + Bild-Referenz in Content
         title = f'📷 {title}'

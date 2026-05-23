@@ -917,6 +917,7 @@ function SplitViewModal({ discussion, onClose }) {
   const [boxContent, setBoxContent] = useState('')
   const [boxLoading, setBoxLoading] = useState(false)
   const [pendingImage, setPendingImage] = useState(null)
+  const [showImageModal, setShowImageModal] = useState(false)
 
   // SSE Streaming
   const lastTsRef = useRef(0)
@@ -1972,6 +1973,13 @@ function SplitViewModal({ discussion, onClose }) {
                               </button>
                               <button
                                 className={styles.addBoxImageBtn}
+                                onClick={() => setShowImageModal(true)}
+                                title="📷 Bild-Modal (STRG+V oder Upload)"
+                              >
+                                🖼️
+                              </button>
+                              <button
+                                className={styles.addBoxImageBtn}
                                 onClick={() => boxImageInputRef.current?.click()}
                                 title={pendingImage ? 'Bild ausgewählt' : 'Bild einfügen (STRG+V oder Dateiauswahl)'}
                               >
@@ -2260,10 +2268,159 @@ function SplitViewModal({ discussion, onClose }) {
             subId={null}
           />
         )}
+        {showImageModal && (
+          <ImageUploadModal
+            discussionId={discussion.id}
+            activeSubView={!!activeSubView}
+            subId={activeSubView}
+            onClose={() => setShowImageModal(false)}
+            onSuccess={() => fetchDiscussionData()}
+          />
+        )}
       </div>
     </div>
   )
 }
+
+// ─── Image Upload Modal (#37) ──────────────────────────────────────────────────
+
+function ImageUploadModal({ discussionId, activeSubView, subId, onClose, onSuccess }) {
+  const [pendingImage, setPendingImage] = useState(null)
+  const [title, setTitle] = useState('')
+  const [loading, setLoading] = useState(false)
+  const fileInputRef = useRef(null)
+
+  // Default title: Screenshot DD.MM.YYYY
+  useEffect(() => {
+    const now = new Date()
+    const d = String(now.getDate()).padStart(2, '0')
+    const m = String(now.getMonth() + 1).padStart(2, '0')
+    const y = now.getFullYear()
+    setTitle(`Screenshot ${d}.${m}.${y}`)
+  }, [])
+
+  // Global paste on modal overlay
+  const handlePaste = useCallback((e) => {
+    const items = e.clipboardData?.items
+    if (!items) return
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile()
+        if (file && file.size <= 5 * 1024 * 1024) {
+          setPendingImage(file)
+          e.preventDefault()
+        }
+        break
+      }
+    }
+  }, [])
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file && file.size <= 5 * 1024 * 1024) {
+      setPendingImage(file)
+    }
+    e.target.value = ''
+  }
+
+  const handleSubmit = () => {
+    if (!pendingImage) return
+    setLoading(true)
+
+    const formData = new FormData()
+    formData.append('discussion_id', discussionId)
+    formData.append('title', title.trim())
+    formData.append('image', pendingImage)
+    formData.append('is_sub', activeSubView ? 'true' : 'false')
+    if (activeSubView && subId) formData.append('sub_id', subId)
+
+    fetch('/api/diskhub/add-box', {
+      method: 'POST',
+      body: formData,
+    })
+      .then(r => r.json())
+      .then(d => {
+        setLoading(false)
+        if (d.status === 'ok') {
+          onSuccess()
+          onClose()
+        }
+      })
+      .catch(() => {
+        setLoading(false)
+      })
+  }
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) onClose()
+  }
+
+  return (
+    <div className={styles.imageModalOverlay} onClick={handleOverlayClick} onPaste={handlePaste}>
+      <div className={styles.imageModalContent}>
+        <button className={styles.imageModalClose} onClick={onClose}>✕</button>
+        <div className={styles.imageModalBody}>
+          {!pendingImage ? (
+            <div className={styles.imageDropzone}>
+              <div className={styles.imageDropzoneIcon}>📷</div>
+              <div className={styles.imageDropzoneText}>STRG+V zum Einfügen</div>
+              <div className={styles.imageDropzoneSub}>oder</div>
+              <button className={styles.imageUploadBtn} onClick={() => fileInputRef.current?.click()}>
+                Datei auswählen
+              </button>
+            </div>
+          ) : (
+            <div className={styles.imagePreviewArea}>
+              <img
+                src={URL.createObjectURL(pendingImage)}
+                alt="Vorschau"
+                className={styles.imagePreview}
+              />
+              <button
+                className={styles.imagePreviewRemove}
+                onClick={() => setPendingImage(null)}
+                title="Bild entfernen"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+          <div className={styles.imageModalFooter}>
+            <input
+              className={styles.imageTitleInput}
+              type="text"
+              placeholder="Titel (optional)"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+            />
+            <button
+              className={styles.imageSubmitBtn}
+              onClick={handleSubmit}
+              disabled={loading || !pendingImage}
+            >
+              {loading ? '⏳' : '✅ Bestätigen'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 

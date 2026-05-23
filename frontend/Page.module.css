@@ -1971,3 +1971,195 @@ details[open] .titleOpen {
   background: #7f1d1d;
   color: #fca5a5;
 }
+
+/* ─── Image Upload Modal (#37) ─── */
+.imageModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  backdrop-filter: blur(2px);
+}
+
+.imageModalContent {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  width: 520px;
+  max-width: 90vw;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.imageModalClose {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: 1px solid #475569;
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+  z-index: 1;
+}
+
+.imageModalClose:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.imageModalBody {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.imageDropzone {
+  width: 100%;
+  min-height: 200px;
+  border: 2px dashed #475569;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  background: #0f172a;
+}
+
+.imageDropzone:hover {
+  border-color: #6366f1;
+}
+
+.imageDropzoneIcon {
+  font-size: 2.5rem;
+}
+
+.imageDropzoneText {
+  font-size: 0.9375rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.imageDropzoneSub {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.imageUploadBtn {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #cbd5e1;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  transition: all 0.12s;
+}
+
+.imageUploadBtn:hover {
+  border-color: #6366f1;
+  color: #f1f5f9;
+}
+
+.imagePreviewArea {
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.imagePreview {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid #334155;
+}
+
+.imagePreviewRemove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #7f1d1d;
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+}
+
+.imagePreviewRemove:hover {
+  background: #991b1b;
+  color: #fff;
+}
+
+.imageModalFooter {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.imageTitleInput {
+  flex: 1;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.imageTitleInput:focus {
+  border-color: #6366f1;
+}
+
+.imageTitleInput::placeholder {
+  color: #64748b;
+}
+
+.imageSubmitBtn {
+  background: #6366f1;
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+
+.imageSubmitBtn:hover {
+  background: #4f46e5;
+}
+
+.imageSubmitBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
