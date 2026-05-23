@@ -67,3 +67,8 @@ welchen workflow will ich erziehlen:
 *— · 23.05.2026*
 
 Nur Text
+
+### 📷 test Screenshot 23.05.2026
+*— · 23.05.2026*
+
+![test Screenshot 23.05.2026](assets/bild-2305-3.png)
