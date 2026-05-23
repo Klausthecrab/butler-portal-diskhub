@@ -52,3 +52,8 @@ erkläre mir das in deinen worten
 Haben wir sowas im Kern schon? "Readme"? und ich muss das nur besser nutzen, einbauen und definieren?
 
 welchen workflow will ich erziehlen:
+
+### 📷 Screenshot 23.05.2026
+*— · 23.05.2026*
+
+![Screenshot 23.05.2026](assets/bild-2305-1.png)
