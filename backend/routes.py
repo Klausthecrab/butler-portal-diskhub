@@ -1803,7 +1803,7 @@ def add_box():
             asset_url = f'/api/diskhub/assets/{discussion_id}/{filename}?sub_id={sub_id}'
         else:
             asset_url = f'/api/diskhub/assets/{discussion_id}/{filename}'
-        image_md = f'\\n![{clean_title}]({asset_url})'
+        image_md = f'\n![{clean_title}]({asset_url})'
         content = content + image_md if content else image_md.strip()
 
     # ── Block schreiben ──────────────────────────────────────────────────────
