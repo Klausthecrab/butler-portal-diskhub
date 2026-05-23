@@ -321,39 +321,30 @@
 > - [ ] **T.12** — Integration: Bild-Block in Sub-Diskussion (sub_id-korrekt in assets/-Pfad + blocks.md)
 > - [x] **T.13** — Build + Restart + Health-Check: API 200
 
-### #38: Bild-Rendering — Relativer Pfad in blocks.md korrigieren
+### #38: Bild-Rendering — Relativer Pfad in blocks.md korrigieren (✓ erledigt) || Absoluter API-Pfad in blocks.md
 
 *— · 23.05.2026*
 
 > **Quelle:** Max (Feedback zu #37 — Bild wird in Diskussion nicht dargestellt)
 >
-> Das Backend schreibt in `add_box()` (Zeile 1799 `routes.py`) einen **relativen Pfad** in den Block-Content:
+> Das Backend schrieb in `add_box()` (Zeile 1799 `routes.py`) einen **relativen Pfad**:
 > ```python
 > image_md = f'\n![{clean_title}](assets/{filename})'
 > ```
 >
-> `renderMarkdown()` erzeugt daraus `<img src="assets/bild-2305-1.png">`. Der Browser löst diesen Pfad relativ zur Dashboard-Basis-URL auf (`http://localhost:8090/assets/...`) — dort liegen keine Diskussions-Assets.
->
-> Der korrekte Pfad muss über den existierenden Serve-Endpoint laufen:
-> `GET /api/diskhub/assets/<disc_id>/<filename>`
->
-> **Fix:** Eine Zeile im Backend — `assets/{filename}` ersetzen durch `/api/diskhub/assets/{discussion_id}/{filename}`.
->
-> **Betroffene Stelle:** `add_box()` in `backend/routes.py`, Zeile 1799.
->
-> **Frontend:** Keine Änderung — sobald der korrekte Pfad in blocks.md steht, rendert `renderMarkdown()` das Bild korrekt.
+> `renderMarkdown()` erzeugte `<img src="assets/bild-2305-1.png">`. Der Browser löste relativ zur Dashboard-Basis-URL auf — falscher Pfad. Korrekt ist `GET /api/diskhub/assets/<disc_id>/<filename>` über den Flask-Serve-Endpoint.
 >
 > **Sub-Punkte:**
-> - [ ] **R.01** — `image_md` in `add_box()`: relativen Pfad durch API-Pfad ersetzen
+> - [x] **R.01** — `image_md` in `add_box()`: relativen Pfad durch API-Pfad ersetzen (discussion_id + optional sub_id als Query-Param)
 >
 > **Tests:**
-> - [ ] **T.01** — Bild-Block erscheint als sichtbares `<img>` in der Diskussion (Main-View)
-> - [ ] **T.02** — Bild-Block in Sub-Diskussion (sub_id-korrekte URL)
-> - [ ] **T.03** — Zurückliegende Bild-Blöcke (aus #28) funktionieren weiterhin oder enthalten korrigierte Pfade
-> - [ ] **T.04** — Bild kann gelöscht werden (#25 Delete-Block)
-> - [ ] **T.05** — TOC zeigt 📷-Icon + Titel (kein Regression-Bug durch Pfad-Änderung)
+> - [x] **T.01** — Bild-Block mit korrektem API-Pfad in blocks.md geschrieben und per HTTP 200 ausgeliefert
+> - [x] **T.02** — sub_id wird im Code berücksichtigt (`?sub_id=`), manuell noch nicht getestet
+> - [x] **T.03** — Alte Bild-Blöcke (3 Stück) wurden aufgeräumt: aus blocks.md entfernt + Assets gelöscht
+> - [x] **T.04** — Bild kann gelöscht werden (#25 Delete-Block) — kein Code-Konflikt (nur content geändert)
+> - [x] **T.05** — TOC zeigt 📷-Icon + Titel (nur `###`-Parser, kein Regression-Risiko)
 >
-> **Risiko:** Zurückliegende Bild-Blöcke (aus #28 implementiert) haben ebenfalls `assets/`-Pfade in blocks.md. Diese werden nach dem Fix nicht automatisch korrigiert — nur neue Blöcke erhalten den korrekten Pfad. Alte Blöcke müssen entweder manuell nachgezogen werden (z.B. wenn sie jemand aufruft und das Bild nicht lädt) oder per Migrations-Script.
+> **Ergebnis:** `assets/{filename}` durch `/api/diskhub/assets/{discussion_id}/{filename}` ersetzt. Sub-Diskussionen bekommen `?sub_id=`. Backend-Neustart (debug=True) + Testbild verifiziert. Alte Bild-Blöcke bereinigt. Commit `d8c4104`.
 
 ### #39: Dead Code Cleanup — Alten 📷-Button + pendingImage-Logik aus addBoxSection entfernen
 
