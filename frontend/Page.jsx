@@ -668,9 +668,9 @@ function parseCreatedDate(readme) {
 
 function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditBlock, onDeleteBlock }) {
   const blocks = useMemo(() => parseBlocksMd(md), [md])
-  // #27: Neu = unten angehängt → chronologisch reversen (neueste zuerst)
+  // #41: Neu = unten — chronologische Reihenfolge (neuestes Element zuletzt)
   const reversedBlocks = useMemo(() => {
-    return blocks.map((block, i) => ({ block, originalIdx: i })).reverse()
+    return blocks.map((block, i) => ({ block, originalIdx: i }))
   }, [blocks])
   const [editingIndex, setEditingIndex] = useState(null)
   const [editTitle, setEditTitle] = useState('')
@@ -749,6 +749,10 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
           : block.content
         const content = filteredContent.join('\n').trim()
 
+        // #40: Bild-Blöcke immer sichtbar ohne Accordion
+        const isImageBlock = headingText.startsWith('📷')
+        const headerClass = isImageBlock ? styles.imageBlockHeader : styles.blockHeader
+
         return (
           <div key={displayIdx} className={styles.blockWrapper}>
             <div className={styles.blockConnector}>
@@ -760,11 +764,12 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                 <div className={styles.connectorDate}>{dateInfo.date}</div>
               )}
             </div>
-            <details id={'box-' + originalIdx} className={styles.blockCard} data-status="open">
-              <summary className={styles.blockHeader}>
-                <h3>{editingIndex === originalIdx ? '✏️ ' + editTitle : headingText}</h3>
-                <span className={styles.boxAnchorLabel}>#box-{originalIdx}</span>
-              </summary>
+            {isImageBlock ? (
+              <div id={'box-' + originalIdx} className={styles.blockCard} data-status="open">
+                <div className={headerClass}>
+                  <h3>{editingIndex === originalIdx ? '✏️ ' + editTitle : headingText}</h3>
+                  <span className={styles.boxAnchorLabel}>#box-{originalIdx}</span>
+                </div>
 
               {/* Edit-Modus: Input-Felder statt gerendertem Content */}
               {editingIndex === originalIdx ? (
@@ -837,7 +842,87 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                   {confirmingDelete === originalIdx ? '⚠️ Sicher?' : '🗑️'}
                 </button>
               </div>
-            </details>
+              </div>
+            ) : (
+              <details id={'box-' + originalIdx} className={styles.blockCard} data-status="open">
+                <summary className={headerClass}>
+                  <h3>{editingIndex === originalIdx ? '✏️ ' + editTitle : headingText}</h3>
+                  <span className={styles.boxAnchorLabel}>#box-{originalIdx}</span>
+                </summary>
+
+              {/* Edit-Modus: Input-Felder statt gerendertem Content */}
+              {editingIndex === originalIdx ? (
+                <div className={styles.editBlockForm}>
+                  <label className={styles.editBlockLabel}>Titel</label>
+                  <input
+                    className={styles.editBlockInput}
+                    type="text"
+                    value={editTitle}
+                    onChange={e => setEditTitle(e.target.value)}
+                    placeholder="Titel der Textbox..."
+                  />
+                  <label className={styles.editBlockLabel}>Inhalt (Markdown)</label>
+                  <textarea
+                    className={styles.editBlockTextarea}
+                    value={editContent}
+                    onChange={e => setEditContent(e.target.value)}
+                    placeholder="Inhalt (Markdown)..."
+                  />
+                  <div className={styles.editBlockButtons}>
+                    <button
+                      className={styles.editBlockSaveBtn}
+                      onClick={() => saveEdit(idx)}
+                      disabled={editLoading || !editTitle.trim()}
+                    >
+                      {editLoading ? '⏳ Speichern...' : '✅ Speichern'}
+                    </button>
+                    <button
+                      className={styles.editBlockCancelBtn}
+                      onClick={cancelEditing}
+                      disabled={editLoading}
+                    >
+                      ❌ Abbrechen
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.blockContent}
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
+                />
+              )}
+
+              <div className={styles.blockActions}>
+                <button
+                  className={styles.convertBtn}
+                  onClick={() => onConvertToSub?.(headingText, content)}
+                  title="💬 Startet eine Discord-Session mit dem Inhalt dieser Textbox. Die Session wird im rechten Preview-Panel geöffnet — Hermes geht den Text Schritt für Schritt mit dir durch, diskutiert Ideen, sammelt Feedback und leitet konkrete Vorschläge für neue Sub-Diskussionen ab. Diese können später übernommen werden."
+                >
+                  💬 In Sub entwickeln
+                </button>
+                <button
+                  className={styles.copyLinkBtn}
+                  onClick={() => copyBoxLink(originalIdx, headingText)}
+                  title={'#box-' + originalIdx + ' — Link kopieren (in Diskussion einfügen: #box-' + originalIdx + ')'}
+                >
+                  {copiedIndex === originalIdx ? '✅' : '🔗'}
+                </button>
+                <button
+                  className={styles.editBlockActionBtn}
+                  onClick={() => startEditing(originalIdx, headingText, content)}
+                  title="Diese Textbox bearbeiten"
+                >
+                  ✏️
+                </button>
+                <button
+                  className={`${styles.deleteBlockActionBtn} ${confirmingDelete === originalIdx ? styles.deleteBlockActionBtnDanger : ''}`}
+                  onClick={() => handleDelete(originalIdx)}
+                  title={confirmingDelete === originalIdx ? 'Erneut klicken zum Löschen' : 'Diese Textbox löschen'}
+                >
+                  {confirmingDelete === originalIdx ? '⚠️ Sicher?' : '🗑️'}
+                </button>
+              </div>
+              </details>
+            )}
           </div>
         )
       })}

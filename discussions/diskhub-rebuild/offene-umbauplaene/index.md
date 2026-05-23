@@ -386,34 +386,35 @@
 > - [ ] **T.02** — Textbox ohne Bild funktioniert (JSON-Submit)
 > - [ ] **T.03** — Build fehlerfrei
 
-### #40: Bild-Darstellung in UI — Skalieren + immer sichtbar (kein Akkordeon)
+### #40: Bild-Darstellung in UI — Skalieren + immer sichtbar (kein Akkordeon) (✓ erledigt) || CSS-Skalierung + no-accordion für 📷-Blöcke
 
 *— · 23.05.2026*
 
 > **Quelle:** Max (Feedback zu #38 — Testbild wird als blauer Kasten dargestellt)
 >
-> Bilder werden aktuell als rohes `<img>` im Block-Content von `renderMarkdown()` dargestellt. Bei großen Bildern fehlt die Skalierung. Zudem sind Bild-Blöcke wie alle anderen Blöcke im Akkordeon (details-Element) versteckt — müssen erst aufgeklappt werden.
+> Bilder wurden als rohes `<img>` im Block-Content gerendert. Große Bilder zerrissen das Layout. Zudem waren Bild-Blöcke wie Textboxen im `<details>`-Accordion versteckt.
 >
-> **Erwartet:**
-> - Bilder im Content automatisch skalieren (z.B. `max-width: 100%`, `max-height: 400px`, `object-fit: contain`, `cursor: zoom-in`)
-> - Bilder **immer sichtbar** — nicht hinter einem Akkordeon. Entweder eigener Block-Typ ohne `<details>` oder spezieller Render-Modus für Bild-Blöcke
+> **Sub-Punkte:**
+> - [x] **B.01** — `.blockContent img`: max-height 400px + object-fit contain + cursor zoom-in
+> - [x] **B.02** — `.markdownContent img`: gleiche Regeln für README-Bild-Content
+> - [x] **B.03** — Neue CSS-Klasse `.imageBlockHeader`: kein cursor pointer + kein ::after-Pfeil
+> - [x] **B.04** — JSX-Detektion: headingText.startsWith('📷') → kein `<details>`-Wrap, stattdessen `<div>` mit `.blockCard`
 >
-> **Keine Umsetzung — nur Analyse + Plan gewünscht.**
+> **Ergebnis:** Bilder werden jetzt skaliert (max-width 100%, max-height 400px, object-fit contain, cursor zoom-in). 📷-Blöcke sind immer sichtbar — kein Accordion-Toggle. Header ohne Pfeil, aber gleiche Optik. Action-Buttons (Edit/Delete/Kopieren/In Sub entwickeln) bleiben erhalten.
 
-### #41: Chronologie umkehren — Neu = unten (Elemente + Inhaltsverzeichnis)
+### #41: Chronologie umkehren — Neu = unten (Elemente + Inhaltsverzeichnis) (✓ erledigt) || reversedBlocks.reverse() entfernt
 
 *— · 23.05.2026*
 
 > **Quelle:** Max (Feedback zu #38 — neue Box erscheint oben, erwartet: unten)
 >
-> Aktuell sortiert `BlocksSection` die Liste via `useMemo` reversed (`reversedBlocks`), sodass die neueste Box oben, die älteste unten erscheint. Gleiches gilt für das Inhaltsverzeichnis (TOC) — neue Einträge erscheinen oben.
+> Aktuell sortierte `BlocksSection` die Liste via `useMemo` reversed (`.reverse()`), sodass die neueste Box oben erschien. Das Inhaltsverzeichnis (TOC) hatte das Problem nicht — es iterierte blocks.md in Datei-Reihenfolge.
 >
-> **Erwartet:**
-> - Neue Elemente (Textboxen, Bild-Blöcke) erscheinen **unten** in der Liste
-> - Inhaltsverzeichnis (TOC) ebenfalls: neueste Einträge unten
-> - Gilt für alle Element-Typen (Textboxen + Bild-Blöcke)
+> **Sub-Punkte:**
+> - [x] **C.01** — `.reverse()` aus `reversedBlocks`-useMemo entfernt
+> - [x] **C.02** — TOC nicht verändert (bereits korrekt: Datei-Reihenfolge = chronologisch)
 >
-> **Keine Umsetzung — nur Analyse + Plan gewünscht.**
+> **Ergebnis:** Neue Elemente erscheinen jetzt unten in der Liste (blocks.md-Datei-Reihenfolge). TOC war bereits korrekt. Keine weiteren Änderungen nötig.
 
 ---
 

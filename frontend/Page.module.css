@@ -933,6 +933,17 @@ details[open] .blockHeader::after {
   transform: rotate(180deg);
 }
 
+/* #40: Bild-Blöcke haben keinen Accordion-Toggle — kein Pfeil, kein Pointer-Cursor */
+.imageBlockHeader {
+  cursor: default;
+}
+.imageBlockHeader::after {
+  content: none;
+}
+.imageBlockHeader:hover {
+  background: #4f46e5;
+}
+
 .blockHeader h3 {
   margin: 0;
   font-size: 0.95rem;
@@ -955,6 +966,9 @@ details[open] .blockHeader::after {
 
 .blockContent img {
   max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  cursor: zoom-in;
   border-radius: 8px;
   border: 1px solid #334155;
   margin: 8px 0;
@@ -1716,6 +1730,15 @@ details[open] .titleOpen {
 .markdownContent code { background: #0f172a; padding: 1px 5px; border-radius: 4px; font-size: 0.8125rem; color: #818cf8; }
 .markdownContent pre { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px; overflow-x: auto; color: #e2e8f0; }
 .markdownContent hr { border: none; border-top: 1px solid #334155; margin: 16px 0; }
+.markdownContent img {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  cursor: zoom-in;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  margin: 8px 0;
+}
 .markdownContent blockquote { border-left: 3px solid #6366f1; padding-left: 12px; color: #94a3b8; margin: 12px 0; }
 .markdownContent ul, .markdownContent ol { padding-left: 20px; color: #cbd5e1; font-size: 0.875rem; }
 .markdownContent li { margin: 3px 0; }
