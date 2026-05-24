@@ -533,7 +533,7 @@
 > - [x] **S.02** — Prüf-Logik: "Sieht der Eintrag aus wie die bestehenden?" vor Commit
 > - [x] **S.03** — Commit-Konventionen: Nachricht enthält Punkt-Nummer + Kurzbeschreibung (`done #49: ...`)
 > - [x] **S.04** — Skill-Doku: Erklärung wann und wie geladen wird
-> - [x] **S.05** — Reihenfolge erzwingen: (1) `(✓ erledigt)` + `*Erledigt: DD.MM.YYYY*` in index.md schreiben, (2) 🤖-Block in blocks.md anhängen, (3) `git add . && git commit -m "done #49: ..." && git push`
+> - [x] **S.05** — Reihenfolge erzwingen: (1) `(✓ erledigt)` + `*Erledigt: DD.MM.YYYY*` in index.md schreiben, (2) Doku-Content an bestehenden Eintrag anhängen, (3) `git add . && git commit -m "done #49: ..." && git push`
 > - [x] **S.06** — Prüfung vor Schritt 1: Existiert `(✓ erledigt)` bereits im Eintrag? → Skill bricht ab mit Warnung "Punkt #49 bereits als erledigt markiert — überschreiben?"
 > - [x] **S.07** — Prüfung vor Commit: Steht `*Erledigt:*` im index.md-Eintrag? → nein → Fehler, nicht committen
 > - [x] **S.08** — Alte Einträge ohne `*Erledigt:*` sind OK (backward compatible) — der Skill setzt `*Erledigt:*` nur bei neuen Einträgen
@@ -545,6 +545,17 @@
 > - [x] **T.03** — Skill warnt bei doppeltem Status: `(✓ erledigt)` existiert bereits → Abbruch
 > - [x] **T.04** — Skill bricht ab wenn `*Erledigt:*` fehlt → kein Commit ohne Datum
 > - [x] **T.05** — Rückkanal: Skill antwortet mit "Eintrag OK" oder "Format-Fehler in Zeile X"
+
+─────────────────────
+
+diskhub-doc Skill erstellt.
+
+Was gemacht:
+- Vorschlag → Bestätigung → Umsetzung als strikter Workflow
+- Zwei Sicherheits-Gates (Skill laden + Vorschlag bestätigen)
+- Bullet-Point-Format statt Wall of Text
+- Zweimal iteriert (Gültigkeitsbereich + Ort-Kontext + Option A)
+- Altlast bereinigt: doppelter 🤖-Block aus blocks.md entfernt
 
 ### #47: Session-interne Verifikation || Check vor Dokumentation
 
