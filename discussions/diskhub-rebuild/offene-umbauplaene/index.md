@@ -469,11 +469,20 @@
 > `📋 Grundfrage + 📌 Stand + 🔜 [genau das eine Element]`
 > Fallback auf volle README bei fehlender Struktur.
 >
+> **Hintergrund (aus Diskussion 24.05.2026):**
+> - Kein separates Archiv nötig — der Prompt-Baukasten filtert erledigte Punkte raus, statt sie umzuziehen
+> - `(✓ erledigt)` ist aktuell ein Hardcoded-String ohne Timestamp — keine Information "seit wann"
+> - Lösung: Der Eintrag bekommt `*Erledigt: DD.MM.YYYY*` vom Skill gesetzt (nicht hardcoded, nicht geraten)
+> - Der Prompt-Baukasten prüft dieses Datum: "erledigt < 3 Tage → optional erwähnen", "erledigt > 3 Tage → nur als 📚-Zahl"
+> - Fallback bei fehlendem `*Erledigt:*`: Volle README laden (backward compatible)
+>
 > **Sub-Punkte:**
 > - [ ] **B.01** — Prompt-Baukasten-Funktion in routes.py: Grundfrage (H1 + Frage), Stand (Zusammenfassung), Element-Kontext
 > - [ ] **B.02** — Element-Typ-Detektion: Box vs. Bild vs. offener Punkt → unterschiedlicher Prompt-Aufbau
 > - [ ] **B.03** — Fallback auf volle README wenn kein spezifisches Element referenziert wird
-> - [ ] **B.04** — Tests: Rückkanal prüft ob Prompt-Inhalt korrekt gebaut wurde
+> - [ ] **B.04** — Statusbewusster Prompt: Erledigt-Punkte mit Datum prüfen (`*Erledigt: DD.MM.YYYY*`), nur als 📚-Zahl in den Prompt übernehmen
+> - [ ] **B.05** — Alte Einträge ohne `*Erledigt:*` → Fallback auf volle README oder komplette Erwähnung
+> - [ ] **B.06** — Tests: Rückkanal prüft ob Prompt-Inhalt korrekt gebaut wurde
 >
 > **Tests:**
 > - [ ] **T.01** — Box-Referenz → Prompt enthält Box-Content + Kontext
@@ -509,17 +518,32 @@
 >
 > Skill der Hermi erklärt wie Einträge in DiskHub korrekt formatiert werden. Enthält blocks.md-Format (`###`-Struktur, Prefix-Regeln), Commit-Konventionen und Prüf-Logik. Manuell ladbar (nicht automatisch) — Max sagt "dokumentiere das" und lädt den Skill dazu.
 >
+> **Hintergrund (aus Diskussion 24.05.2026):**
+> - `(✓ erledigt)` ist ein reiner Text-String — kein System setzt ihn, kein Timestamp existiert
+> - Du sollst ihn nie wieder manuell setzen müssen — Hermi macht das bei der Doku
+> - Aber: "Automatisch nach jeder Session setzen" ist zu risikoreich (Fehler unkontrollierbar)
+> - Lösung: **Kein Automatismus, sondern strukturierte Checkliste im Skill** — Hermi setzt den Status erst nach deinem expliziten "dokumentiere das"
+> - Der Skill zwingt zur Reihenfolge: Status setzen → 🤖-Block → Commit
+> - Vor dem Commit prüft der Skill: "Steht `*Erledigt:*` im Eintrag? → nein → abbrechen"
+> - Schutz gegen Doppel-Eintrag: Existiert `(✓ erledigt)` bereits → Skill warnt und bricht ab
+>
 > **Sub-Punkte:**
 > - [ ] **S.01** — Skill erstellen: blocks.md-Format-Vorgabe, Prefix-Regeln (`🤖`, `📷`), Datums-Format
 > - [ ] **S.02** — Prüf-Logik: "Sieht der Eintrag aus wie die bestehenden?" vor Commit
-> - [ ] **S.03** — Commit-Konventionen: Nachricht enthält Punkt-Nummer + Kurzbeschreibung
+> - [ ] **S.03** — Commit-Konventionen: Nachricht enthält Punkt-Nummer + Kurzbeschreibung (`done #49: ...`)
 > - [ ] **S.04** — Skill-Doku: Erklärung wann und wie geladen wird
-> - [ ] **S.05** — Tests: Skill geladen → korrekter Eintrag in blocks.md
+> - [ ] **S.05** — Reihenfolge erzwingen: (1) `(✓ erledigt)` + `*Erledigt: DD.MM.YYYY*` in index.md schreiben, (2) 🤖-Block in blocks.md anhängen, (3) `git add . && git commit -m "done #49: ..." && git push`
+> - [ ] **S.06** — Prüfung vor Schritt 1: Existiert `(✓ erledigt)` bereits im Eintrag? → Skill bricht ab mit Warnung "Punkt #49 bereits als erledigt markiert — überschreiben?"
+> - [ ] **S.07** — Prüfung vor Commit: Steht `*Erledigt:*` im index.md-Eintrag? → nein → Fehler, nicht committen
+> - [ ] **S.08** — Alte Einträge ohne `*Erledigt:*` sind OK (backward compatible) — der Skill setzt `*Erledigt:*` nur bei neuen Einträgen
+> - [ ] **S.09** — Tests: Skill geladen → korrekter Eintrag in blocks.md inkl. Status+Datum
 >
 > **Tests:**
 > - [ ] **T.01** — Skill geladen → Eintrag folgt Format-Konvention
 > - [ ] **T.02** — Fehlerfall: ungültiges Format → Skill weist zurück mit Erklärung
-> - [ ] **T.03** — Rückkanal: Skill antwortet mit "Eintrag OK" oder "Format-Fehler in Zeile X"
+> - [ ] **T.03** — Skill warnt bei doppeltem Status: `(✓ erledigt)` existiert bereits → Abbruch
+> - [ ] **T.04** — Skill bricht ab wenn `*Erledigt:*` fehlt → kein Commit ohne Datum
+> - [ ] **T.05** — Rückkanal: Skill antwortet mit "Eintrag OK" oder "Format-Fehler in Zeile X"
 
 ### #47: Session-interne Verifikation || Check vor Dokumentation
 
@@ -533,19 +557,30 @@
 > - **Allgemein:** "Ziel war X → wurde X erreicht?"
 > Verifikation läuft in derselben Session (kein externer Check nötig). Schützt gegen Context Rot und stellt sicher dass nur saubere Ergebnisse in DiskHub landen.
 >
+> **Hintergrund (aus Diskussion 24.05.2026):**
+> - Verifikation und Status-Setzen gehören zusammen, sind aber zwei getrennte Schritte
+> - Verifikation prüft "wurde das Ziel erreicht?" — das ist die **Entscheidung**
+> - Status+Datum setzen ist die **Dokumentation** dieser Entscheidung — das macht der Skill (#46)
+> - Fehlgeschlagene Verifikation → kein Status-Setzen, nur Benachrichtigung an Max
+> - Erledigte Verifikation + dein "dokumentiere das" → Skill laden → Status+Datum → 🤖-Block → Commit
+>
 > **Sub-Punkte:**
 > - [ ] **V.01** — Verifikations-Schritt als separater Schritt vor "dokumentieren" (Teil des Session-Ablaufs)
 > - [ ] **V.02** — Code-Verifikation: Tests laufen lassen, Build prüfen, Health-Check aufrufen
 > - [ ] **V.03** — Konzept-Verifikation: Zielbedingung aus Prompt extrahieren + mit Ergebnis abgleichen
-> - [ ] **V.04** — Fehlerfall: Verifikation fehlschlagen → Max benachrichtigen, nichts dokumentieren
-> - [ ] **V.05** — Tests: Rückkanal nach Verifikation funktioniert (OK/NOK erreicht Max)
->
+> - [ ] **V.04** — Verifikation bestanden → Skill #46 laden → Status+Datum setzen → 🤖-Block → Commit
+> - [ ] **V.05** — Verifikation fehlgeschlagen → nichts setzen, Max benachrichtigen mit Grund
+> - [ ] **V.06** — Fehlerfall: Verifikation unklar (kein klares Ja/Nein) → Rückfrage an Max vor Entscheidung
+> - [ ] **V.07** — Tests: Rückkanal nach Verifikation funktioniert (OK/NOK erreicht Max)
+
 > **Tests:**
 > - [ ] **T.01** — Code-Punkt: Tests grün + Build OK → Verifikation bestanden
 > - [ ] **T.02** — Code-Punkt: Tests rot → Verifikation fehlgeschlagen, Max wird informiert
 > - [ ] **T.03** — Konzept-Punkt: Zielbedingung erfüllt → OK
 > - [ ] **T.04** — Konzept-Punkt: Unklarheit → Rückfrage an Max
-> - [ ] **T.05** — Rückkanal: Verifikations-Ergebnis erreicht Max korrekt
+> - [ ] **T.05** — Verifikation bestanden + Skill #46 geladen → Status+Datum in index.md + 🤖-Block in blocks.md
+> - [ ] **T.06** — Verifikation fehlgeschlagen → kein Commit, keine Änderung an index.md/blocks.md
+> - [ ] **T.07** — Rückkanal: Verifikations-Ergebnis erreicht Max korrekt
 
 ---
 
