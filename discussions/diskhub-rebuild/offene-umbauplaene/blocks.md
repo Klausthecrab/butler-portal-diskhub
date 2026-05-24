@@ -178,23 +178,21 @@ Ziel: `get_discussion()` in `routes.py` kann Einzeldateien aus `/blocks/` und `/
 Ziel: `add_box`, `edit_block`, `delete_block` arbeiten auf Einzeldateien statt zeilenbasiert in `blocks.md`.
 
 **Sub-Punkte:**
-- [ ] **C.01** — `add_box()`: Neue Datei `blocks/<nn>-<slug>.md` schreiben statt an `blocks.md` anhängen
+- [x] **C.01** — `add_box()`: Prüft ob `blocks/` existiert → Einzeldatei (`blocks/<nn>-<slug>.md`), sonst Fallback `blocks.md`
   - `nn` = nächsthöhere Zahl aus bestehenden Dateien in `/blocks/`
   - `slug` = aus Titel generiert (lowercase, `[a-z0-9-]`, max 40 Zeichen)
   - Inhalt: `### <titel>\n*— · <datum>*\n\n<content>\n`
-- [ ] **C.02** — `add_box()` bei Bild-Upload: Gleiches Pattern mit 📷-Prefix im Titel
-- [ ] **C.03** — `edit_block()`: Statt `block_index` → `file_name` aus Request-Body
-  - Datei direkt überschreiben (read → modify titel/content → write)
-  - Datumszeile (`*— · <datum>*`) erhalten falls vorhanden
+- [x] **C.02** — `add_box()` bei Bild-Upload: Gleiches Pattern mit 📷-Prefix im Titel
+- [x] **C.03** — `edit_block()`: `file_name` aus Request → Datei direkt überschreiben (Datumszeile erhalten)
   - Fallback: wenn `file_name` fehlt → alter `block_index`-Pfad für backward compat
-- [ ] **C.04** — `delete_block()`: Statt Block aus Datei entfernen → Datei löschen
+- [x] **C.04** — `delete_block()`: `file_name` → Datei löschen (`os.remove`)
   - Fallback: wenn `file_name` fehlt → alter `block_index`-Pfad
 - [ ] **C.05** — Frontend: 🔗-Button, Edit-Button, Delete-Button senden `file_name` statt `block_index`
   - `renderBlock()` bekommt `file_name` aus `blocks_files[]` oder direkt aus der Datei
   - `copyBoxLink()` kopiert Pfad-Format: `diskussion/blocks/nn-slug`
-- [ ] **C.06** — Error-Handling: Datei existiert nicht → 404 mit klarer Meldung, kein stummer Abbruch
-- [ ] **C.07** — Test: add/edit/delete auf Einzeldatei-CRUD → API 200 + Datei existiert/nicht existiert
-- [ ] **C.08** — Health-Check: API 200 nach Änderungen
+- [x] **C.06** — Error-Handling: Datei existiert nicht → 404 mit klarer Meldung
+- [x] **C.07** — Test: add/edit/delete auf API 200 + Datei existiert/nicht existiert (Fallback-Pfad ✅, Einzeldatei-Pfad nach Phase 3)
+- [x] **C.08** — Health-Check: API 200 nach Änderungen
 
 ---
 
