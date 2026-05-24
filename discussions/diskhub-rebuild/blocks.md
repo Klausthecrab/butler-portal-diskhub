@@ -174,7 +174,3 @@ Frage: bringt es was dazu einen (nur für KI lesbar) kommentar zu verfassen: bsp
 Diese muss man dann aber auch pflegen. (automatisch; semi: bei erkennung; monitoring cron)
 
 
-### Phase2-Test
-*— · 24.05.2026*
-
-funktioniert
