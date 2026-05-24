@@ -18,3 +18,8 @@ Der ⬜/✅-Status-Toggle auf index.md-Einträgen funktioniert technisch (API �
 - [x] Build geprüft (Vite, 16s, fehlerfrei)
 - [x] Dashboard läuft auf Port 8090
 - [x] Commit `553cdee` auf origin/master gepusht
+
+**Feedback (25.05.2026) — Toggle-Re-Render:**
+- Hauptdiskussion: Farbwechsel ✅, aber Seite rendert neu → Position springt zurück
+- Sub-Diskussion: Farbwechsel bleibt komplett aus, erst nach Schließen/Öffnen sichtbar
+- Ursache: `setSubViewData()` im success-Pfad triggert Re-Render der Sub-Ansicht. In der Hauptdiskussion überschreibt das den optimistischen DOM-Status weil Daten aus `fetchDiscussionData().index` kommen. In Sub-Diskussionen wird die ganze Sub-Ansicht neu aufgespannt → DOM-Änderung geht verloren.

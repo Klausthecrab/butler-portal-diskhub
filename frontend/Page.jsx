@@ -1821,7 +1821,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                     <div className={styles.discQuestion}>{subViewData.parsed.question}</div>
                                   )}
                                 </div>
-                                <div className={styles.discStats}>
+<div className={styles.discStats}>
                                   <span>Erstellt {subViewData.parsed.created_at}</span>
                                   <span className={styles.statsSep}>·</span>
                                   <span className={styles.statDone}>{subViewData.parsed.done_count} ✓</span>
@@ -1977,7 +1977,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                   <div className={styles.discQuestion}>{data.parsed.question}</div>
                                 )}
                               </div>
-                              <div className={styles.discStats}>
+<div className={styles.discStats}>
                                 <span>Erstellt {data.parsed.created_at}</span>
                                 <span className={styles.statsSep}>·</span>
                                 <span className={styles.statDone}>{data.parsed.done_count} ✓</span>
