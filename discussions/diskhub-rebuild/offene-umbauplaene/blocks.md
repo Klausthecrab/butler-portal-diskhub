@@ -185,10 +185,6 @@ Synthese aus der Diskussion zu #A (Semantik-Regeln) und #E (Sonderrollen). Defin
 
 **Phase 2 — Element-Typen trennen:** Einfache index.md-Einträge → Textboxen migrieren (#D). Verbleibende index.md-Einträge auf Sonderrollen limitieren + visuelle Markierung (#E).
 
-**Phase 3 — Integration:** Session-Starter für alle Element-Typen (#42), Prompt-Baukasten (#44), Auto-Rückkanal (#45), Verifikation (#47), Status-SSoT (#48).
-
-**Phase 4 — Zukunft:** KI-Kommentare (#F), Live-Scan (#G), Einzeldateien (#H), Dead-Code-Cleanup (#39).
-
 **Sonderrollen-Katalog (Phase 0):**
 - README/Header — System-Element, Fixposition Top
 - Inhaltsverzeichnis (TOC) — System-Element, Fixposition nach Header
@@ -202,3 +198,21 @@ Synthese aus der Diskussion zu #A (Semantik-Regeln) und #E (Sonderrollen). Defin
 - ✅ Memory-Verweis gesetzt (alter DiskHub-Eintrag ersetzt)
 - ✅ `diskhub-doc`-Skill um Referenz auf neuen Knowledge-Skill ergänzt
 - 🔜 Nächster Schritt: Phase 1 (Adressierbarkeit #B, #C) — von Kazzle freigeben lassen
+
+### #K: Konzeptblöcke in blocks.md sollen „erledigt"-Status bekommen
+*— · 24.05.2026*
+
+> **Quelle:** Max (Feedback zu #I — Fortschritts-Doku ohne erledigt-Marker)
+
+Aktuell: Nur index.md-Einträge haben `(✓ erledigt)` + `*Erledigt: DD.MM.YYYY*`. Konzeptblöcke in blocks.md haben kein Status-System — sie bleiben ewig "offen" auch wenn alle Teil-Items umgesetzt sind.
+
+**Ziel:** Konzeptblöcke (#A–#K) bekommen ebenfalls einen Status-Mechanismus:
+- Nicht alle Blöcke sollen das brauchen (manche bleiben dauerhaft offen)
+- Aber wenn ein Block "erledigt" ist, soll das sichtbar sein — z.B. `(✓ erledigt)` im Titel wie bei index.md
+- Frontend: 📷-Blöcke haben schon Sonder-Rendering (#40). Könnte man auf erledigt-Blöcke ausweiten (anderes Icon, collapsed by default, dezenterer Stil)
+- Backend: Keine Änderung nötig? `*Erledigt: DD.MM.YYYY*` könnte einfach im Content der Textbox stehen
+
+**Offene Fragen:**
+- Soll ein erledigter Block automatisch collapsed sein (wie 📷-Blöcke)?
+- Soll der `diskhub-doc` Skill (#46) auch blocks.md-Blöcke schließen können?
+- Was passiert mit dem 🔗-Button? Zeigt er weiterhin die Referenz, auch wenn erledigt?

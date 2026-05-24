@@ -267,7 +267,7 @@ function generateToc(blocksMd, indexMd) {
 }
 
 // Block-aware rendering for index.md — drei Zonen: Header, Content, Footer
-function renderIndexMd(md, mode) {
+function renderIndexMd(md, mode, discussionId) {
   if (!md) return ''
 
   if (mode === 'footer-only') {
@@ -344,7 +344,7 @@ function renderIndexMd(md, mode) {
   // Alle Blöcke rendern
   for (let bIdx = 0; bIdx < blocks.length; bIdx++) {
     const block = blocks[bIdx]
-    result += renderBlock(block, bIdx === latestOpenIndex)
+    result += renderBlock(block, bIdx === latestOpenIndex, bIdx, discussionId)
   }
 
   // Rest-Preamble nach allen Blöcken anhängen (Sub-Referenzen, Footer)
@@ -369,7 +369,6 @@ function renderBlock(block, isHot, blockIdx, discussionId) {
   // 🔗 Referenz für index.md-Einträge (#B)
   const entryLabelMatch = cleanHeading.match(/^#(\d+|[A-Z]):?\s*/)
   const entryNr = entryLabelMatch ? entryLabelMatch[1] : String(blockIdx)
-  const escapedRef = discussionId + ' > entry-' + entryNr + ' "' + escapedHeading.replace(/"/g, '&quot;') + '"'
 
   // Prüfen ob Block erledigt (Ergebnis-Zeile vorhanden oder alter Status)
   const hasResult = !!block.result || heading.includes('(✓ erledigt)')
@@ -400,6 +399,9 @@ function renderBlock(block, isHot, blockIdx, discussionId) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
 
+  // 🔗 Referenz für index.md-Einträge (#B) — nach escapedHeading
+  const escapedRef = discussionId + ' > entry-' + entryNr + ' "' + escapedHeading.replace(/"/g, '&quot;') + '"'
+
   // Zwei-Titel-System für Accordion (L.6): "Frage || Aussage"
   let titleQuestion = escapedHeading
   let titleStatement = ''
@@ -428,7 +430,7 @@ function renderBlock(block, isHot, blockIdx, discussionId) {
     html += `<div class="${styles.connectorDate}">${footnoteDate}</div>`
   }
   html += `</div>`
-  html += `<div class="${isSub ? styles.blockCardSub : styles.blockCard}" data-status="${hasResult ? 'done' : 'open'}"${isHot ? ' data-hot="true"' : ''}>`
+  html += `<div id="punkt-${blockIdx}" class="${isSub ? styles.blockCardSub : styles.blockCard}" data-status="${hasResult ? 'done' : 'open'}"${isHot ? ' data-hot="true"' : ''}>`
   // Accordion-Titel mit Frage↔Aussage (L.6)
   let summaryTitle
   if (hasSeparator) {
@@ -437,7 +439,7 @@ function renderBlock(block, isHot, blockIdx, discussionId) {
     summaryTitle = escapedHeading
   }
   html += `<details${hasResult ? ' open' : ''}>`
-  html += `<summary class="${styles.blockHeader}"><h3>${subBadge}${summaryTitle}${statusBadge}</h3></summary>`
+  html += `<summary class="${styles.blockHeader}"><h3>${subBadge}${summaryTitle}${statusBadge}</h3><button class="${styles.copyLinkBtn}" data-copy-entry data-ref="${escapedRef}" title="Referenz kopieren: ${escapedRef}">🔗</button></summary>`
   html += `<div class="${styles.blockContent}">${renderMarkdown(content)}</div>`
   if (result) {
     // Ergebnis-Zeile rendern
@@ -1758,7 +1760,7 @@ function SplitViewModal({ discussion, onClose }) {
                             )}
                             {subViewData.index && (
                               <div className={styles.markdownContent}
-                                dangerouslySetInnerHTML={{ __html: renderIndexMd(subViewData.index) }}
+                                dangerouslySetInnerHTML={{ __html: renderIndexMd(subViewData.index, undefined, discussion.id) }}
                               />
                             )}
                             {/* Box hinzufügen — Sub-View */}
@@ -1907,7 +1909,7 @@ function SplitViewModal({ discussion, onClose }) {
                           )}
                           {data.index && (
                             <div className={styles.markdownContent}
-                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, 'footer-only') }}
+                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, 'footer-only', discussion.id) }}
                             />
                           )}
                           {data.subs && data.subs.map((sub, idx) => {
@@ -1951,6 +1953,17 @@ function SplitViewModal({ discussion, onClose }) {
                                       <span className={`${styles.badge} ${styles.badgeOpen}`}>● {sub.status.offen} offen</span>
                                     )}
                                   </h3>
+                                  <button
+                                    className={styles.copyLinkBtn}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      const ref = discussion.id + '/' + sub.id
+                                      navigator.clipboard.writeText(ref)
+                                      setCopiedSub(sub.id)
+                                      setTimeout(() => setCopiedSub(null), 2000)
+                                    }}
+                                    title={'Referenz kopieren: ' + discussion.id + '/' + sub.id}
+                                  >{copiedSub === sub.id ? '✅' : '🔗'}</button>
                                   <span className={styles.subDocArrow}>{isExpanded ? '▾' : '▸'}</span>
                                 </div>
                                 {isExpanded && (
@@ -2523,6 +2536,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState(null)
+  const [copiedSub, setCopiedSub] = useState(null)
 
   const fetchList = useCallback(() => {
     setLoading(true)
@@ -2534,6 +2548,34 @@ export default function Page() {
   }, [search])
 
   useEffect(() => { fetchList() }, [fetchList])
+
+  // Auto-Scroll zu index.md-Eintrag per #punkt- Hash (#B)
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash && hash.startsWith('#punkt-')) {
+      const id = hash.slice(1)
+      requestAnimationFrame(() => {
+        const el = document.getElementById(id)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+    }
+  }, [selected])
+
+  // Globaler Click-Handler für [data-copy-entry] Buttons (#B)
+  useEffect(() => {
+    const handler = (e) => {
+      const btn = e.target.closest('[data-copy-entry]')
+      if (btn) {
+        const ref = btn.getAttribute('data-ref')
+        if (ref) navigator.clipboard.writeText(ref)
+        const origText = btn.textContent
+        btn.textContent = '✅'
+        setTimeout(() => { btn.textContent = origText }, 2000)
+      }
+    }
+    document.addEventListener('click', handler)
+    return () => document.removeEventListener('click', handler)
+  }, [])
 
   return (
     <div className={styles.diskhubContainer}>
