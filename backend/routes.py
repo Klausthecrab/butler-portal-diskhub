@@ -518,21 +518,73 @@ def get_discussion(discussion_id):
         result['parsed'] = header
         result['readme_body'] = body
 
-    # Blöcke (blocks.md) — flache Notizen ohne eigene Kinder
-    blocks_path = os.path.join(folder, 'blocks.md')
-    if os.path.isfile(blocks_path):
-        with open(blocks_path, 'r') as f:
-            result['blocks'] = f.read()
+    # Blöcke (#H: Einzeldateien aus blocks/ oder Fallback blocks.md)
+    blocks_dir = os.path.join(folder, 'blocks')
+    if os.path.isdir(blocks_dir):
+        md_files = sorted([f for f in os.listdir(blocks_dir) if f.endswith('.md')])
+        blocks_parts = []
+        blocks_files = []
+        for fname in md_files:
+            filepath = os.path.join(blocks_dir, fname)
+            try:
+                with open(filepath, 'r') as f:
+                    content = f.read()
+            except Exception:
+                continue
+            blocks_parts.append(content)
+            title = ''
+            for line in content.split('\n'):
+                if line.startswith('### '):
+                    title = line[4:].strip()
+                    break
+            blocks_files.append({'name': fname.replace('.md', ''), 'title': title})
+        if blocks_parts:
+            result['blocks'] = '\n\n'.join(blocks_parts)
+        result['blocks_files'] = blocks_files
+    else:
+        blocks_path = os.path.join(folder, 'blocks.md')
+        if os.path.isfile(blocks_path):
+            with open(blocks_path, 'r') as f:
+                result['blocks'] = f.read()
 
-    index_path = os.path.join(folder, 'index.md')
-    if os.path.isfile(index_path):
-        with open(index_path, 'r') as f:
-            result['index'] = f.read()
-        # #20: Dynamischer Status aus index.md statt hartcodiertem README-Wert
+    # index/ Ordner (#H) oder Fallback index.md
+    index_dir = os.path.join(folder, 'index')
+    if os.path.isdir(index_dir):
+        md_files = sorted([f for f in os.listdir(index_dir) if f.endswith('.md')])
+        index_parts = []
+        index_files = []
+        for fname in md_files:
+            filepath = os.path.join(index_dir, fname)
+            try:
+                with open(filepath, 'r') as f:
+                    content = f.read()
+            except Exception:
+                continue
+            index_parts.append(content)
+            title = ''
+            for line in content.split('\n'):
+                if line.startswith('### '):
+                    title = line[4:].strip()
+                    break
+            index_files.append({'name': fname.replace('.md', ''), 'title': title})
+        if index_parts:
+            result['index'] = '\n\n'.join(index_parts)
+        result['index_files'] = index_files
+        # #20: Dynamischer Status aus index-Content
         index_status = _parse_index_status(result['index'])
         if index_status['erledigt'] + index_status['offen'] > 0:
             header['done_count'] = index_status['erledigt']
             header['open_count'] = index_status['offen']
+    else:
+        index_path = os.path.join(folder, 'index.md')
+        if os.path.isfile(index_path):
+            with open(index_path, 'r') as f:
+                result['index'] = f.read()
+            # #20: Dynamischer Status aus index.md statt hartcodiertem README-Wert
+            index_status = _parse_index_status(result['index'])
+            if index_status['erledigt'] + index_status['offen'] > 0:
+                header['done_count'] = index_status['erledigt']
+                header['open_count'] = index_status['offen']
 
     # Sub-Diskussionen (nur bei Haupt-Ansicht oder wenn Sub selbst welche hat)
     subs = []
@@ -1546,10 +1598,11 @@ def delete_block():
     data = request.get_json(silent=True) or {}
     discussion_id = data.get('discussion_id', '')
     block_index = data.get('block_index')
+    file_name = data.get('file_name', '').strip()
     is_sub = data.get('is_sub', False)
     sub_id = data.get('sub_id', '')
 
-    if not discussion_id or block_index is None:
+    if not discussion_id or (block_index is None and not file_name):
         return jsonify({'error': 'discussion_id und block_index erforderlich'}), 400
 
     if is_sub and sub_id:
@@ -1557,35 +1610,50 @@ def delete_block():
     else:
         target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id)
 
-    blocks_path = os.path.join(target_dir, 'blocks.md')
-    if not os.path.isfile(blocks_path):
-        return jsonify({'error': 'blocks.md nicht gefunden'}), 404
+    if file_name:
+        # ── Einzeldatei-Modus (blocks/<file_name>.md löschen) ──
+        filepath = os.path.join(target_dir, 'blocks', f'{file_name}.md')
+        if not os.path.isfile(filepath):
+            return jsonify({'error': f'Datei blocks/{file_name}.md nicht gefunden'}), 404
+        os.remove(filepath)
+        deleted_preview = f'blocks/{file_name}.md'
+        blocks_left = len([f for f in os.listdir(os.path.join(target_dir, 'blocks')) if f.endswith('.md')])
+    else:
+        # ── Fallback: block_index auf blocks.md ──
+        blocks_path = os.path.join(target_dir, 'blocks.md')
+        if not os.path.isfile(blocks_path):
+            return jsonify({'error': 'blocks.md nicht gefunden'}), 404
 
-    with open(blocks_path, 'r') as f:
-        lines = f.readlines()
+        with open(blocks_path, 'r') as f:
+            lines = f.readlines()
 
-    # Find ### header boundaries
-    header_indices = [i for i, line in enumerate(lines) if line.startswith('### ')]
+        # Find ### header boundaries
+        header_indices = [i for i, line in enumerate(lines) if line.startswith('### ')]
 
-    if block_index < 0 or block_index >= len(header_indices):
-        return jsonify({'error': f'block_index {block_index} ungültig (0-{len(header_indices)-1})'}), 400
+        if block_index < 0 or block_index >= len(header_indices):
+            return jsonify({'error': f'block_index {block_index} ungültig (0-{len(header_indices)-1})'}), 400
 
-    start = header_indices[block_index]
-    end = header_indices[block_index + 1] if block_index + 1 < len(header_indices) else len(lines)
+        start = header_indices[block_index]
+        end = header_indices[block_index + 1] if block_index + 1 < len(header_indices) else len(lines)
 
-    # Sicherheitscheck: Block-Preview für Log
-    deleted_preview = ''.join(lines[start:end])[:100]
+        # Sicherheitscheck: Block-Preview für Log
+        deleted_preview = ''.join(lines[start:end])[:100]
 
-    new_lines = lines[:start] + lines[end:]
+        new_lines = lines[:start] + lines[end:]
 
-    with open(blocks_path, 'w') as f:
-        f.writelines(new_lines)
+        with open(blocks_path, 'w') as f:
+            f.writelines(new_lines)
 
     sha = ''
     try:
         subprocess.run(['git', 'add', '-A'], capture_output=True, text=True, timeout=10, cwd=REPO_DIR)
+        commit_msg = f'disc: {discussion_id}: Block gelöscht'
+        if file_name:
+            commit_msg += f' ({file_name})'
+        else:
+            commit_msg += f' (Index {block_index})'
         result = subprocess.run(
-            ['git', 'commit', '-m', f'disc: {discussion_id}: Block gelöscht (Index {block_index})'],
+            ['git', 'commit', '-m', commit_msg],
             capture_output=True, text=True, timeout=10, cwd=REPO_DIR
         )
         if result.returncode == 0:
@@ -1602,9 +1670,10 @@ def delete_block():
         'sha': sha,
         'is_sub': is_sub,
         'sub_id': sub_id,
+        'file_name': file_name,
     })
 
-    return jsonify({'status': 'ok', 'sha': sha, 'blocks_left': len(header_indices) - 1})
+    return jsonify({'status': 'ok', 'sha': sha, 'blocks_left': blocks_left})
 
 
 @diskhub.route('/diskhub/edit-block', methods=['POST'])
@@ -1613,73 +1682,104 @@ def edit_block():
     data = request.get_json(silent=True) or {}
     discussion_id = data.get('discussion_id', '')
     block_index = data.get('block_index')
+    file_name = data.get('file_name', '').strip()
     title = data.get('title', '').strip()
     content = data.get('content', '').strip()
     is_sub = data.get('is_sub', False)
     sub_id = data.get('sub_id', '')
 
-    if not discussion_id or block_index is None or not title:
-        return jsonify({'error': 'discussion_id, block_index und title erforderlich'}), 400
+    if not discussion_id or (block_index is None and not file_name) or not title:
+        return jsonify({'error': 'discussion_id, block_index (oder file_name) und title erforderlich'}), 400
 
     if is_sub and sub_id:
         target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id)
     else:
         target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id)
 
-    blocks_path = os.path.join(target_dir, 'blocks.md')
-    if not os.path.isfile(blocks_path):
-        return jsonify({'error': 'blocks.md nicht gefunden'}), 404
+    if file_name:
+        # ── Einzeldatei-Modus (blocks/<file_name>.md) ──
+        filepath = os.path.join(target_dir, 'blocks', f'{file_name}.md')
+        if not os.path.isfile(filepath):
+            return jsonify({'error': f'Datei blocks/{file_name}.md nicht gefunden'}), 404
 
-    with open(blocks_path, 'r') as f:
-        lines = f.readlines()
+        with open(filepath, 'r') as f:
+            old_content = f.read()
 
-    # Find ### header boundaries
-    header_indices = [i for i, line in enumerate(lines) if line.startswith('### ')]
+        old_lines = old_content.split('\n')
+        # Datumszeile finden (Zeile direkt nach ###, startet mit *—)
+        date_line = None
+        for i in range(1, min(3, len(old_lines))):
+            if old_lines[i].strip().startswith('*—'):
+                date_line = old_lines[i]
+                break
 
-    if block_index < 0 or block_index >= len(header_indices):
-        return jsonify({'error': f'block_index {block_index} ungültig (0-{len(header_indices)-1})'}), 400
+        # Neuen Inhalt bauen: ### + Datum (falls vorhanden) + Content
+        new_content = f'### {title}\n'
+        if date_line:
+            new_content += date_line + '\n'
+        if content:
+            new_content += '\n' + content + '\n'
+        else:
+            new_content += '\n'
 
-    start = header_indices[block_index]
-    end = header_indices[block_index + 1] if block_index + 1 < len(header_indices) else len(lines)
-
-    # Original-Block-Lines holen
-    old_block = lines[start:end]
-
-    # Prüfen ob eine Datumszeile direkt nach ### existiert
-    date_line = None
-    content_start_offset = 1  # skip ### line
-    if len(old_block) > 1 and old_block[1].strip().startswith('*—'):
-        date_line = old_block[1]
-        content_start_offset = 2
-
-    # Neuen Block bauen: ### + Datum (falls vorhanden) + Leerzeile + Content + abschließende Leerzeile
-    # content kann mehrzeilig sein — als Liste von Zeilen
-    new_block = [f'### {title}\n']
-    if date_line:
-        new_block.append(date_line)
-    # Stelle sicher, dass eine Leerzeile zwischen Datum/### und Content ist
-    if content:
-        if new_block and not new_block[-1].endswith('\n\n') and not new_block[-1].strip() == '':
-            new_block.append('\n')
-        for cl in content.split('\n'):
-            new_block.append(cl + '\n')
+        with open(filepath, 'w') as f:
+            f.write(new_content)
     else:
-        if new_block and not new_block[-1].endswith('\n\n'):
+        # ── Fallback: block_index auf blocks.md ──
+        blocks_path = os.path.join(target_dir, 'blocks.md')
+        if not os.path.isfile(blocks_path):
+            return jsonify({'error': 'blocks.md nicht gefunden'}), 404
+
+        with open(blocks_path, 'r') as f:
+            lines = f.readlines()
+
+        # Find ### header boundaries
+        header_indices = [i for i, line in enumerate(lines) if line.startswith('### ')]
+
+        if block_index < 0 or block_index >= len(header_indices):
+            return jsonify({'error': f'block_index {block_index} ungültig (0-{len(header_indices)-1})'}), 400
+
+        start = header_indices[block_index]
+        end = header_indices[block_index + 1] if block_index + 1 < len(header_indices) else len(lines)
+
+        # Original-Block-Lines holen
+        old_block = lines[start:end]
+
+        # Prüfen ob eine Datumszeile direkt nach ### existiert
+        date_line = None
+        content_start_offset = 1  # skip ### line
+        if len(old_block) > 1 and old_block[1].strip().startswith('*—'):
+            date_line = old_block[1]
+            content_start_offset = 2
+
+        # Neuen Block bauen: ### + Datum (falls vorhanden) + Leerzeile + Content + abschließende Leerzeile
+        new_block = [f'### {title}\n']
+        if date_line:
+            new_block.append(date_line)
+        if content:
+            if new_block and not new_block[-1].endswith('\n\n') and not new_block[-1].strip() == '':
+                new_block.append('\n')
+            for cl in content.split('\n'):
+                new_block.append(cl + '\n')
+        else:
+            if new_block and not new_block[-1].endswith('\n\n'):
+                new_block.append('\n')
+        if not new_block[-1].endswith('\n\n'):
             new_block.append('\n')
-    # Abschließende Leerzeile als Trenner zum nächsten Block / Dateiende
-    if not new_block[-1].endswith('\n\n'):
-        new_block.append('\n')
 
-    new_lines = lines[:start] + new_block + lines[end:]
+        new_lines = lines[:start] + new_block + lines[end:]
 
-    with open(blocks_path, 'w') as f:
-        f.writelines(new_lines)
+        with open(blocks_path, 'w') as f:
+            f.writelines(new_lines)
 
     sha = ''
     try:
         subprocess.run(['git', 'add', '-A'], capture_output=True, text=True, timeout=10, cwd=REPO_DIR)
+        commit_msg = f'disc: {discussion_id}: Block bearbeitet — {title}'
+        if file_name:
+            commit_msg += f' ({file_name})'
         result = subprocess.run(
-            ['git', 'commit', '-m', f'disc: {discussion_id}: Block bearbeitet — {title}'],
+            ['git', 'commit', '-m', commit_msg],
             capture_output=True, text=True, timeout=10, cwd=REPO_DIR
         )
         if result.returncode == 0:
@@ -1696,9 +1796,10 @@ def edit_block():
         'sha': sha,
         'is_sub': is_sub,
         'sub_id': sub_id,
+        'file_name': file_name,
     })
 
-    return jsonify({'status': 'ok', 'sha': sha})
+    return jsonify({'status': 'ok', 'sha': sha, 'file_name': file_name})
 
 
 @diskhub.route('/diskhub/add-box', methods=['POST'])
@@ -1807,28 +1908,52 @@ def add_box():
         content = content + image_md if content else image_md.strip()
 
     # ── Block schreiben ──────────────────────────────────────────────────────
-    blocks_path = os.path.join(target_dir, 'blocks.md')
+    # #H — Einzeldatei-Modus wenn blocks/ existiert
+    blocks_dir = os.path.join(target_dir, 'blocks')
+    file_name = None
 
-    # blocks.md existiert nicht → mit Header anlegen
-    if not os.path.isfile(blocks_path):
-        name = f'{discussion_id}/{sub_id}' if is_sub and sub_id else discussion_id
-        with open(blocks_path, 'w') as f:
-            f.write(f'# Blöcke — {name}\n\n---\n\n')
-
-    # Neuen Block anhängen
-    today = datetime.now(timezone.utc).strftime('%d.%m.%Y')
-    block_md = f'\n### {title}\n*— · {today}*\n\n{content}\n' if content else f'\n### {title}\n*— · {today}*\n'
-
-    with open(blocks_path, 'a') as f:
-        f.write(block_md)
+    if os.path.isdir(blocks_dir):
+        # Nächste NN finden
+        max_n = -1
+        for f in os.listdir(blocks_dir):
+            m = re.match(r'^(\d+)-', f)
+            if m:
+                n = int(m.group(1))
+                if n > max_n:
+                    max_n = n
+        nn = f'{max_n + 1:02d}'
+        # Slug aus Titel generieren
+        slug = re.sub(r'[^a-z0-9-]', '-', title.lower())
+        slug = re.sub(r'-+', '-', slug).strip('-')[:40]
+        file_name = f'{nn}-{slug}'
+        filepath = os.path.join(blocks_dir, f'{file_name}.md')
+        today = datetime.now(timezone.utc).strftime('%d.%m.%Y')
+        block_md = f'### {title}\n*— · {today}*\n\n{content}\n' if content else f'### {title}\n*— · {today}*\n'
+        with open(filepath, 'w') as f:
+            f.write(block_md)
+    else:
+        # Fallback: blocks.md (Sammeldatei)
+        blocks_path = os.path.join(target_dir, 'blocks.md')
+        if not os.path.isfile(blocks_path):
+            name = f'{discussion_id}/{sub_id}' if is_sub and sub_id else discussion_id
+            with open(blocks_path, 'w') as f:
+                f.write(f'# Blöcke — {name}\n\n---\n\n')
+        today = datetime.now(timezone.utc).strftime('%d.%m.%Y')
+        block_md = f'\n### {title}\n*— · {today}*\n\n{content}\n' if content else f'\n### {title}\n*— · {today}*\n'
+        with open(blocks_path, 'a') as f:
+            f.write(block_md)
 
     # Git commit
     sha = ''
     try:
         subprocess.run(['git', 'add', '-A'], capture_output=True, text=True, timeout=10, cwd=REPO_DIR)
         commit_msg = f'disc: {discussion_id}: neue Box — {clean_title}'
+        if file_name:
+            commit_msg += f' ({file_name})'
         if is_sub and sub_id:
             commit_msg = f'disc: {discussion_id}/{sub_id}: neue Box — {clean_title}'
+            if file_name:
+                commit_msg += f' ({file_name})'
         result = subprocess.run(
             ['git', 'commit', '-m', commit_msg],
             capture_output=True, text=True, timeout=10, cwd=REPO_DIR
@@ -1847,6 +1972,7 @@ def add_box():
         'is_sub': is_sub,
         'sub_id': sub_id,
         'has_image': bool(image_file and image_file.filename),
+        'file_name': file_name,
     })
 
-    return jsonify({'status': 'ok', 'sha': sha})
+    return jsonify({'status': 'ok', 'sha': sha, 'file_name': file_name})

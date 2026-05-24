@@ -163,13 +163,13 @@ offene-umbauplaene/
 Ziel: `get_discussion()` in `routes.py` kann Einzeldateien aus `/blocks/` und `/index/` lesen. Fallback auf alte Sammeldatei für Rückwärtskompatibilität.
 
 **Sub-Punkte:**
-- [ ] **B.01** — `get_discussion()`: Prüfe ob Ordner `blocks/` existiert → wenn ja, lese alle `.md`-Dateien, sortiert, konkateniert zu einem String für `result['blocks']`  
+- [x] **B.01** — `get_discussion()`: Prüfe ob Ordner `blocks/` existiert → wenn ja, lese alle `.md`-Dateien, sortiert, konkateniert zu einem String für `result['blocks']`  
   + sammle `blocks_files[]: [{name, title}]` aus dem Heading der ersten Zeile jeder Datei
-- [ ] **B.02** — Gleiches Pattern für `index/`-Ordner: `result['index']` + `result['index_files']`
-- [ ] **B.03** — Fallback: Wenn `blocks/` nicht existiert, lies wie bisher `blocks.md` → backward compatible
-- [ ] **B.04** — `_parse_index_status()` muss auch den `/index/`-Ordner parsen können (oder bleibt auf dem String)
-- [ ] **B.05** — Test: GET /diskhub/offene-umbauplaene liefert gleichen Response wie vorher (rein String), zusätzlich `blocks_files[]`
-- [ ] **B.06** — Health-Check: API 200 nach Änderung
+- [x] **B.02** — Gleiches Pattern für `index/`-Ordner: `result['index']` + `result['index_files']`
+- [x] **B.03** — Fallback: Wenn `blocks/` nicht existiert, lies wie bisher `blocks.md` → backward compatible
+- [x] **B.04** — `_parse_index_status()` muss auch den `/index/`-Ordner parsen können (oder bleibt auf dem String) — **keine Änderung nötig**, concatenated String wird gleich geparst
+- [x] **B.05** — Test: GET /diskhub/offene-umbauplaene liefert gleichen Response wie vorher (rein String), zusätzlich `blocks_files[]`
+- [x] **B.06** — Health-Check: API 200 nach Änderung
 
 ---
 
