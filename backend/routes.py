@@ -1914,6 +1914,26 @@ def edit_index_title():
     return jsonify({'status': 'ok', 'sha': sha})
 
 
+def _auto_format_content(content: str) -> str:
+    """
+    Formatiert rohen Text in das Problem → Lösung → Status-Schema um.
+    Erkennt bereits strukturierten Content an den Markern
+    **Problem**, **Lösung**, **Status** und lässt ihn unverändert.
+    """
+    if not content or not content.strip():
+        return ''
+
+    key_markers = ['**Problem**', '**Lösung**', '**Status**']
+    if any(m in content for m in key_markers):
+        return content
+
+    return (
+        f"**Problem**\n{content}\n\n"
+        f"**Lösung**\n—\n\n"
+        f"**Status**\n🔜 offen"
+    )
+
+
 @diskhub.route('/diskhub/add-box', methods=['POST'])
 def add_box():
     """

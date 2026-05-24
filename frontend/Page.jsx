@@ -1203,12 +1203,8 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
         .then(d => {
           if (d.status === 'ok') {
             setErrorMsg('✅ Status aktualisiert' + (d.sha ? ' (' + d.sha.slice(0, 7) + ')' : ''))
-            // Sub-Diskussion im Hintergrund reloaden (nur falls in Sub-Ansicht)
-            if (activeSubView && discussion?.id) {
-              fetch(`${API}/${discussion.id}?sub_id=${encodeURIComponent(activeSubView)}`)
-                .then(r => r.json())
-                .then(sd => setSubViewData(sd))
-            }
+            // Kein fetchDiscussionData / setSubViewData — optimistisches UI hat DOM bereits aktualisiert.
+            // Re-Render würde den optimistischen Zustand überschreiben und Position zurückspringen lassen.
           } else {
             // Fehler → Rollback
             card.setAttribute('data-status', wasDone ? 'done' : 'open')
