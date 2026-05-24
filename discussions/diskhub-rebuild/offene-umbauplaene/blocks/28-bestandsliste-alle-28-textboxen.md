@@ -8,7 +8,7 @@ Liste aller Textboxen in `offene-umbauplaene/blocks/`, erstellt 25.05.2026 als A
 | 1 | 00-49-neue-offene-punkte-werden-unformatiert | #49 neue "offene Punkte" werden unformatiert angelegt | offen | |
 | 2 | 01-a-semantik-regeln-f-r-textbox-vs-sub-dis | #A: Semantik-Regeln für Textbox vs. Sub-Diskussion definieren | erledigt | |
 | 3 | 02-b-index-md-eintr-ge-adressierbar-machen- | #B: Index.md-Einträge adressierbar machen (🔗-Button) | ⬜ | |
-| 4 | 03-c-sub-diskussionen-adressierbar-machen-b | #C: Sub-Diskussionen adressierbar machen (🔗-Button) | ⬜ | |
+| 4 | 03-c-sub-diskussionen-adressierbar-machen-b | #C: Sub-Diskussionen adressierbar machen (🔗-Button) | ✅ | ✅ |
 | 5 | 04-d-einfache-index-md-eintr-ge-zu-textboxe | #D: Einfache index.md-Einträge zu Textboxen migrieren | ⬜ | |
 | 6 | 05-e-index-md-eintr-ge-auf-sonderrolle-limi | #E: Index.md-Einträge auf Sonderrolle limitieren (mit mir diskutieren) | ⬜ | |
 | 7 | 06-f-ki-kommentare-in-index-md-konzept-disk | #F: KI-Kommentare in index.md (Konzept diskutieren) | ⬜ | |
@@ -34,4 +34,4 @@ Liste aller Textboxen in `offene-umbauplaene/blocks/`, erstellt 25.05.2026 als A
 | 27 | 26-48-status-single-source-of-truth-manuell | #48: Status Single Source of Truth — Manual. Status-Zeilen aus READMEs entfernen | ⬜ | |
 | 28 | 27-phase-3-migration-zu-einzeldateien-h | Phase 3 — Migration zu Einzeldateien (#H) | ⬜ | |
 
-**Insgesamt:** 28 Textboxen, alle ⬜ offen, keine mit (✓ erledigt).
+**Insgesamt:** 28 Textboxen · 1 ✅ erledigt · 26 ⬜ offen · 1 offen · 1 erledigt (nicht ⬜-Format).
