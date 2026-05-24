@@ -13,6 +13,7 @@ Die offenen Punkte sind als **einklappbare Textboxen** in `blocks.md` dokumentie
 |---|-------|-----|------|---------|
 | #4 | Automatischer MEMORY_BASE.md-Update (T1) ❌ | Zurückgestellt | — | — |
 | #5 | Section-Analyzer-Prompt verbessern (Scope/Konsequenz/Diskussion) | Feature | 🟡 Mittel | Gering–Mittel |
+| #9 | Tabs konsolidieren: Übersicht+Monitoring+Nacht-Report → ein Tab | UX | 🟡 Mittel | Mittel |
 | #11 | Dead CSS-Klassen nach B3 entfernen | Cleanup | 🟢 Gering | Gering |
 | #12 | review-evaluator-Logs: Einzel-Entries nachrüsten | Bugfix | 🟢 Gering | Mittel |
 | #13 | review-list.json nicht separat existent | Doku | 🟢 Gering | Gering |
