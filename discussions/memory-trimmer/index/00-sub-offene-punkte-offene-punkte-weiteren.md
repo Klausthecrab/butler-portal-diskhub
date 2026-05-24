@@ -1,1 +1,1 @@
-### Sub: offene-punkte || Offene Punkte & Weiterentwicklung
+### Sub: offene-punkte || Offene Punkte & Weiterentwicklung (✓ erledigt)
