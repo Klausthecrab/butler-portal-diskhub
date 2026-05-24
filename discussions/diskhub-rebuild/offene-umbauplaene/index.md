@@ -416,6 +416,137 @@
 >
 > **Ergebnis:** Neue Elemente erscheinen jetzt unten in der Liste (blocks.md-Datei-Reihenfolge). TOC war bereits korrekt. Keine weiteren Änderungen nötig.
 
+### #42: Jedes Element als Session-Starter || Textbox, Bild, offener Punkt klickbar
+
+*— · 24.05.2026*
+
+> **Quelle:** Vision-Workshop Max + Hermi (24.05.2026)
+>
+> Aktuell haben nur Boxen den "In Sub entwickeln"-Button. Jedes Diskussionselement soll zum Session-Starter werden können: Textboxen, Bild-Blöcke, offene Punkte in index.md. Der Prompt muss je Element-Typ unterschiedlich sein:
+> - **Textbox:** Inhalt lesen → mit Max diskutieren
+> - **Bild-Block:** Bild analysieren → was soll damit passieren?
+> - **Offener Punkt (index.md):** Punkt verstehen → Plan vorschlagen
+>
+> **Sub-Punkte:**
+> - [ ] **E.01** — Button-Integration für alle Element-Typen in BlocksSection (Textbox, Bild, Sub-Akkordeon)
+> - [ ] **E.02** — Button für offene Punkte in renderIndexMd() / renderBlock()
+> - [ ] **E.03** — Unterschiedliche Prompts je Element-Typ im Webhook-Handler
+> - [ ] **E.04** — Hover-Over-Infotext für alle neuen Buttons (erklärt Ziel und Flow des Session-Starts)
+> - [ ] **E.05** — Tests: Jeder Button-Typ → korrekter Prompt → Session gestartet (Rückkanal-Check)
+>
+> **Tests:**
+> - [ ] **T.01** — Textbox-Button → Prompt enthält Box-Inhalt + "erkläre was du vor hast"
+> - [ ] **T.02** — Bild-Button → Prompt enthält Bild-Referenz + Aufforderung zur Analyse
+> - [ ] **T.03** — Offener-Punkt-Button → Prompt enthält Punkt-Beschreibung + Status-Kontext
+> - [ ] **T.04** — Rückkanal: Session-Start liefert 204/200, Webhook erreicht Discord
+
+### #43: Plan-Phase vor Umsetzung || "erklär was du vor hast" als Default
+
+*— · 24.05.2026*
+
+> **Quelle:** Vision-Workshop Max + Hermi (24.05.2026)
+>
+> Jeder Session-Start soll standardmäßig **nicht** direkt umsetzen, sondern erst erklären was Hermi vorhat. Max gibt dann Go oder widerspricht. Der Plan ist Session-intern (kein DiskHub-Eintrag) — nur das Ergebnis wird dokumentiert.
+>
+> **Sub-Punkte:**
+> - [ ] **P.01** — Webhook-Prompt um "erklären, nicht umsetzen"-Instruktion erweitern (Default-Verhalten)
+> - [ ] **P.02** — Klare Erwartung an Hermi: Startprompt referenzieren + konkreten Vorschlag liefern
+> - [ ] **P.03** — User gibt Go → Umsetzung startet. User widerspricht → Korrektur/Neurichtung
+> - [ ] **P.04** — Tests: Rückkanal nach Plan-Phase funktioniert (Session läuft nicht ins Leere)
+>
+> **Tests:**
+> - [ ] **T.01** — Session startet → Hermi erklärt Plan → wartet auf Go
+> - [ ] **T.02** — Bei "Go" → Umsetzung läuft. Bei "Stop" → Session bricht ab
+> - [ ] **T.03** — Rückkanal: Go/Stop erreicht Hermi korrekt
+
+### #44: Prompt-Baukasten im Webhook || Dynamischer Prompt statt roher README
+
+*— · 24.05.2026*
+
+> **Quelle:** Vision-Workshop Max + Hermi (24.05.2026)
+>
+> Aktuell schiebt der Webhook die komplette README in den Prompt. Stattdessen: dynamisch aus den API-Daten bauen:
+> `📋 Grundfrage + 📌 Stand + 🔜 [genau das eine Element]`
+> Fallback auf volle README bei fehlender Struktur.
+>
+> **Sub-Punkte:**
+> - [ ] **B.01** — Prompt-Baukasten-Funktion in routes.py: Grundfrage (H1 + Frage), Stand (Zusammenfassung), Element-Kontext
+> - [ ] **B.02** — Element-Typ-Detektion: Box vs. Bild vs. offener Punkt → unterschiedlicher Prompt-Aufbau
+> - [ ] **B.03** — Fallback auf volle README wenn kein spezifisches Element referenziert wird
+> - [ ] **B.04** — Tests: Rückkanal prüft ob Prompt-Inhalt korrekt gebaut wurde
+>
+> **Tests:**
+> - [ ] **T.01** — Box-Referenz → Prompt enthält Box-Content + Kontext
+> - [ ] **T.02** — Keine Referenz → volle README als Fallback
+> - [ ] **T.03** — Rückkanal: Webhook liefert Prompt-Inhalt zur Verifikation
+
+### #45: Auto-Rückkanal || Session-Ergebnis als Block in blocks.md
+
+*— · 24.05.2026*
+
+> **Quelle:** Vision-Workshop Max + Hermi (24.05.2026)
+>
+> Nach erfolgreicher Umsetzung + Verifikation schreibt Hermi das Ergebnis automatisch als neuen Block an das Ende von blocks.md. Format: `### 🤖 <Kurztitel>` + Content (Zusammenfassung, Findings, Commit-Ref). Git-Commit + Push. Der Auto-Rückkanal ersetzt das manuelle Eintragen.
+>
+> **Sub-Punkte:**
+> - [ ] **R.01** — CLI-basierte Doku: Ergebnis ans Ende von blocks.md schreiben (read_file + patch)
+> - [ ] **R.02** — Format-Konvention: Prefix `🤖`, Datum im Content, Commit-Hash im Content
+> - [ ] **R.03** — Git-Commit + Push nach jedem Schreibvorgang
+> - [ ] **R.04** — Fehlerbehandlung: Bei Schreibfehler → Max benachrichtigen, nichts halb in blocks.md hinterlassen
+> - [ ] **R.05** — Tests: Rückkanal funktioniert korrekt — Block erscheint in blocks.md, Commit auf remote
+>
+> **Tests:**
+> - [ ] **T.01** — Nach Session: `🤖`-Block am Ende von blocks.md
+> - [ ] **T.02** — Content enthält Zusammenfassung + Commit-Hash
+> - [ ] **T.03** — Git-Commit + Push auf remote sichtbar
+> - [ ] **T.04** — Rückkanal: Diskussion-UI zeigt neuen Block nach Reload
+
+### #46: diskhub-doc Skill || Format-Wissen + Schutz gegen Context Rot
+
+*— · 24.05.2026*
+
+> **Quelle:** Vision-Workshop Max + Hermi (24.05.2026)
+>
+> Skill der Hermi erklärt wie Einträge in DiskHub korrekt formatiert werden. Enthält blocks.md-Format (`###`-Struktur, Prefix-Regeln), Commit-Konventionen und Prüf-Logik. Manuell ladbar (nicht automatisch) — Max sagt "dokumentiere das" und lädt den Skill dazu.
+>
+> **Sub-Punkte:**
+> - [ ] **S.01** — Skill erstellen: blocks.md-Format-Vorgabe, Prefix-Regeln (`🤖`, `📷`), Datums-Format
+> - [ ] **S.02** — Prüf-Logik: "Sieht der Eintrag aus wie die bestehenden?" vor Commit
+> - [ ] **S.03** — Commit-Konventionen: Nachricht enthält Punkt-Nummer + Kurzbeschreibung
+> - [ ] **S.04** — Skill-Doku: Erklärung wann und wie geladen wird
+> - [ ] **S.05** — Tests: Skill geladen → korrekter Eintrag in blocks.md
+>
+> **Tests:**
+> - [ ] **T.01** — Skill geladen → Eintrag folgt Format-Konvention
+> - [ ] **T.02** — Fehlerfall: ungültiges Format → Skill weist zurück mit Erklärung
+> - [ ] **T.03** — Rückkanal: Skill antwortet mit "Eintrag OK" oder "Format-Fehler in Zeile X"
+
+### #47: Session-interne Verifikation || Check vor Dokumentation
+
+*— · 24.05.2026*
+
+> **Quelle:** Vision-Workshop Max + Hermi (24.05.2026)
+>
+> Bevor Hermi das Ergebnis dokumentiert, prüft er ob die Zielbedingung erfüllt ist:
+> - **Code:** Tests, Build, Health-Check
+> - **Konzept:** Rückfragen bei Unklarheiten
+> - **Allgemein:** "Ziel war X → wurde X erreicht?"
+> Verifikation läuft in derselben Session (kein externer Check nötig). Schützt gegen Context Rot und stellt sicher dass nur saubere Ergebnisse in DiskHub landen.
+>
+> **Sub-Punkte:**
+> - [ ] **V.01** — Verifikations-Schritt als separater Schritt vor "dokumentieren" (Teil des Session-Ablaufs)
+> - [ ] **V.02** — Code-Verifikation: Tests laufen lassen, Build prüfen, Health-Check aufrufen
+> - [ ] **V.03** — Konzept-Verifikation: Zielbedingung aus Prompt extrahieren + mit Ergebnis abgleichen
+> - [ ] **V.04** — Fehlerfall: Verifikation fehlschlagen → Max benachrichtigen, nichts dokumentieren
+> - [ ] **V.05** — Tests: Rückkanal nach Verifikation funktioniert (OK/NOK erreicht Max)
+>
+> **Tests:**
+> - [ ] **T.01** — Code-Punkt: Tests grün + Build OK → Verifikation bestanden
+> - [ ] **T.02** — Code-Punkt: Tests rot → Verifikation fehlgeschlagen, Max wird informiert
+> - [ ] **T.03** — Konzept-Punkt: Zielbedingung erfüllt → OK
+> - [ ] **T.04** — Konzept-Punkt: Unklarheit → Rückfrage an Max
+> - [ ] **T.05** — Rückkanal: Verifikations-Ergebnis erreicht Max korrekt
+
 ---
 
 💬 **Sub-Diskussion fortsetzen**
