@@ -267,7 +267,7 @@ function generateToc(blocksMd, indexMd) {
 }
 
 // Block-aware rendering for index.md — drei Zonen: Header, Content, Footer
-function renderIndexMd(md, mode, discussionId) {
+function renderIndexMd(md, mode, discussionId, indexFiles) {
   if (!md) return ''
 
   if (mode === 'footer-only') {
@@ -344,7 +344,7 @@ function renderIndexMd(md, mode, discussionId) {
   // Alle Blöcke rendern
   for (let bIdx = 0; bIdx < blocks.length; bIdx++) {
     const block = blocks[bIdx]
-    result += renderBlock(block, bIdx === latestOpenIndex, bIdx, discussionId)
+    result += renderBlock(block, bIdx === latestOpenIndex, bIdx, discussionId, indexFiles)
   }
 
   // Rest-Preamble nach allen Blöcken anhängen (Sub-Referenzen, Footer)
@@ -355,7 +355,7 @@ function renderIndexMd(md, mode, discussionId) {
   return result
 }
 
-function renderBlock(block, isHot, blockIdx, discussionId) {
+function renderBlock(block, isHot, blockIdx, discussionId, indexFiles) {
   const heading = block.heading.substring(4).trim() // "### " entfernen
   const content = block.content.join('\n').trim()
   const footnote = block.footnote || ''
@@ -400,7 +400,11 @@ function renderBlock(block, isHot, blockIdx, discussionId) {
     .replace(/>/g, '&gt;')
 
   // 🔗 Referenz für index.md-Einträge (#B) — nach escapedHeading
-  const escapedRef = discussionId + ' > entry-' + entryNr + ' "' + escapedHeading.replace(/"/g, '&quot;') + '"'
+  // #H: Pfad-Format für index/-Ordner (Phase 4 F.02), Fallback auf entry-NR für alte Diskussionen
+  const fileSlug = indexFiles && indexFiles[blockIdx]?.name
+  const escapedRef = fileSlug
+    ? discussionId + '/index/' + fileSlug
+    : discussionId + ' > entry-' + entryNr + ' "' + escapedHeading.replace(/"/g, '&quot;') + '"'
 
   // Zwei-Titel-System für Accordion (L.6): "Frage || Aussage"
   let titleQuestion = escapedHeading
@@ -1806,7 +1810,7 @@ function SplitViewModal({ discussion, onClose }) {
                             )}
                             {subViewData.index && (
                               <div className={styles.markdownContent}
-                                dangerouslySetInnerHTML={{ __html: renderIndexMd(subViewData.index, undefined, discussion.id) }}
+                                dangerouslySetInnerHTML={{ __html: renderIndexMd(subViewData.index, undefined, discussion.id, subViewData.index_files || []) }}
                               />
                             )}
                             {/* Box hinzufügen — Sub-View */}
@@ -1956,7 +1960,7 @@ function SplitViewModal({ discussion, onClose }) {
                           )}
                           {data.index && (
                             <div className={styles.markdownContent}
-                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, 'footer-only', discussion.id) }}
+                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, 'footer-only', discussion.id, data.index_files || []) }}
                             />
                           )}
                           {data.subs && data.subs.map((sub, idx) => {

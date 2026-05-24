@@ -51,12 +51,19 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 | + | Dashboard-Restart + Build: fehlerfrei | ✅ |
 | + | Git-Commit: auto-committed via add-box + edit-block | ✅ |
 
+### Fortschritt (24.05.2026)
+
+**Phase 4 F.02 — 🔗-Format für index.md-Einträge** ✅
+- [x] `renderBlock()`: 5. Parameter `indexFiles` + Pfad-Format `diskussion/index/slug`
+- [x] `renderIndexMd()`: 4. Parameter `indexFiles`, durchgereicht an `renderBlock()`
+- [x] Call-Sites (Sub-View + Main-View): `data.index_files || []` übergeben
+- [x] Fallback auf `> entry-NR "titel"` für Diskussionen ohne index/-Ordner
+- [x] Build (16s) + Dashboard-Restart + API-Verifikation (48 index_files ✅)
+- Der 🔗-Button kopiert jetzt `diskhub-rebuild/index/00-01-datei-struktur-erledigt-neue-ordner-s` statt `> entry-1 "Datei-Struktur"`.
+
 ### Offen / Nächste Schritte (in Prioritäts-Reihenfolge)
 
-1. **Phase 4 F.02 — 🔗-Format für index.md-Einträge**
-   Der 🔗-Button bei index.md-Einträgen kopiert noch das alte Format `> entry-NR "titel"`. Nach Migration existieren die Einträge als Einzeldateien unter `index/`. Sollte auf Pfad-Format umgestellt werden: `diskussion/index/punkt-slug`. Sub-Diskussionen-🔗 (F.03) sind bereits ✅.
-
-2. **Phase 6 — Git-Push**
+1. **Phase 6 — Git-Push**
    Aktuell committet add-box/edit-block/delete-block automatisch (`git add -A && git commit`), aber push fehlt. Analog zu butler-hermi-config: nach jedem Commit automatisch pushen. Max will das wahrscheinlich.
 
 3. **Weitere Diskussionen migrieren**
