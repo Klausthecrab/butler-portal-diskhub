@@ -49,10 +49,29 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 | + | blocks.md + index.md sowohl für Haupt- als auch Subs getrasht | ✅ |
 | + | Sub-Diskussionen ohne ###-Header (03, 04, 08–12): unberührt | ✅ |
 | + | Dashboard-Restart + Build: fehlerfrei | ✅ |
-| + | Git-Commit: auto-committed via add-box | ✅ |
+| + | Git-Commit: auto-committed via add-box + edit-block | ✅ |
 
-### Offen / Nächste Schritte
-1. Andere Diskussionen migrieren (Script kann auf jede Diskussion mit blocks.md/index.md losgelassen werden)
-2. Phase 5: Sub-Diskussionen Einzeldateien (optional — braucht dein Go)
-3. Phase 6: Git-Auto-Commit (aktuell nur add-box committet automatisch)
-4. 🔗-Referenzen prüfen (M.08) — alte #box-NR-Referenzen sind historisch
+### Offen / Nächste Schritte (in Prioritäts-Reihenfolge)
+
+1. **Phase 4 F.02 — 🔗-Format für index.md-Einträge**
+   Der 🔗-Button bei index.md-Einträgen kopiert noch das alte Format `> entry-NR "titel"`. Nach Migration existieren die Einträge als Einzeldateien unter `index/`. Sollte auf Pfad-Format umgestellt werden: `diskussion/index/punkt-slug`. Sub-Diskussionen-🔗 (F.03) sind bereits ✅.
+
+2. **Phase 6 — Git-Push**
+   Aktuell committet add-box/edit-block/delete-block automatisch (`git add -A && git commit`), aber push fehlt. Analog zu butler-hermi-config: nach jedem Commit automatisch pushen. Max will das wahrscheinlich.
+
+3. **Weitere Diskussionen migrieren**
+   Bisher nur offene-umbauplaene migriert. Andere Diskussionen mit blocks.md/index.md:
+   - diskhub-rebuild (Hauptebene)
+   - memory-trimmer
+   - registry-pythonpath-fix
+   - gateway-standardisierung
+   Einmal `python3 scripts/split-collection-files.py discussions/<name>` und fertig.
+
+4. **🔗-Referenzen prüfen (M.08)**
+   Alte `#box-NR`-Referenzen in anderen Diskussionen. Ein grep nach `> box-\d+` oder `> entry-\d+` in allen discussions/. Niedrige Prio, weil der neue 🔗-Button Pfad-Format kopiert.
+
+5. **Phase 5 — Sub-Diskussionen Einzeldateien (optional)**
+   Für Diskussionen mit Sub-Struktur das Script rekursiv laufen lassen. Braucht Max Go.
+
+6. **Andere Diskussionen: Status-Prüfung vor Migration**
+   Vor Migration checken: Haben sie bereits blocks/-Ordner? (Dann schon migriert.) Haben sie blocks.md mit ###-Headern? (Dann Migration sinnvoll.)
