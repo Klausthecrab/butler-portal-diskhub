@@ -207,6 +207,15 @@ Synthese aus der Diskussion zu #A (Semantik-Regeln) und #E (Sonderrollen). Defin
 - ✅ Build OK (16.21s), Dashboard-Neustart, API 200
 - 🔜 Nächster Schritt: Phase 2 (Element-Typen trennen #D, #E) — von Kazzle freigeben lassen
 
+**Phase 2 — Fortschritt (24.05.2026):**
+- ✅ **#D — Migration:** 15 offene index.md-Einträge (#29–#48 ohne ✓) als Textboxen in blocks.md angelegt (box-12 bis box-26)
+- ✅ index.md-Stubs: Jeder migrierte Eintrag durch `→ Textbox #box-NN` ersetzt
+- ✅ 33 erledigt-Einträge (#01–#28, #33, #38, #40, #41, #46) als Sonderrollen in index.md belassen
+- ✅ Migration-Map dokumentiert: `#punkt-XX` (alt) → `#box-YY` (neu) in Commit-Nachricht
+- ✅ **#E — Limitierung:** Kategorien aus Phase 0 angewendet — offene Punkte → Textbox, erledigte → Sonderrolle (Decision Record)
+- ✅ Build OK (16.20s, Vite), Dashboard-Restart, API 200 — 27 Blöcke, 48 Index-Einträge, 15 Stubs
+- 🔜 Visuelle Markierung für Sonderrollen (CSS data-role) — zurückgestellt, Kazzle will erstmal so lassen
+
 ### #K: Konzeptblöcke in blocks.md sollen „erledigt"-Status bekommen
 *— · 24.05.2026*
 
