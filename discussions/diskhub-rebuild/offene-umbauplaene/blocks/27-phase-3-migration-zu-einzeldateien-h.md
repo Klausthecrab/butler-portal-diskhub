@@ -66,6 +66,14 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 - [x] 3 mit Migrationsbedarf identifiziert (siehe Offene Punkte)
 - registry-pythonpath-fix hat 0 ###-Header → kein Bedarf
 
+**diskhub-rebuild Hauptebene migriert** ✅
+- [x] blocks.md → `blocks/` (18 Dateien, `00-49-*` bis `17-index-md-*`)
+- [x] index.md → `index/` (1 Datei, Sub:-Verweis)
+- [x] Sammeldateien getrasht (blocks.md + index.md)
+- [x] Script-Verifikation: alle Checks ✅
+- [x] API-Verifikation: `GET /api/diskhub/diskhub-rebuild` → `blocks_files[18]`, `index_files[1]` ✅
+- [x] Dashboard läuft + API 200 ✅
+
 ### Offene Punkte (priorisiert: 2 → 4 → 3 → 1)
 
 **1. Weitere Diskussionen migrieren** (Phase 2)
@@ -73,7 +81,7 @@ Folgende Diskussionen haben noch Sammeldateien und sollen migriert werden:
 
 | Diskussion | blocks.md ### | index.md ### | Subs mit ### |
 |---|---|---|---|
-| **diskhub-rebuild** (Hauptebene) | 18 🏗️ | 0 | — |
+| **diskhub-rebuild** (Hauptebene) | 18 → ✅ | 1 → ✅ | — |
 | **gateway-standardisierung** | — | 6 🏗️ | 5 Subs (je 1-2 Einträge) |
 | **memory-trimmer** | — | 7 🏗️ | Sub `offene-punkte` → blocks.md 7 🏗️ |
 | **registry-pythonpath-fix** | — | 0 ✅ | — |
