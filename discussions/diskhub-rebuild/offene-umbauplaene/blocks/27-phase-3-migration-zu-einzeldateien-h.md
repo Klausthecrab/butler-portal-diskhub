@@ -49,7 +49,9 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 | + | blocks.md + index.md sowohl für Haupt- als auch Subs getrasht | ✅ |
 | + | Sub-Diskussionen ohne ###-Header (03, 04, 08–12): unberührt | ✅ |
 | + | Dashboard-Restart + Build: fehlerfrei | ✅ |
-| + | Git-Commit: auto-committed via add-box + edit-block | ✅ |
+|| + | Git-Commit: auto-committed via add-box + edit-block | ✅ |
+|| + | **Phase 5 — Sub-Einzeldateien: Script rekursiv (4 Disk, 14 Ebenen) — 17 index.md ohne ### → 0 Änderungen** | ✅ |
+|| + | **Phase 6 — Git-Push: GitHub Repo erstellt, Remote gesetzt, routes.py mit _git_push() in 6 Endpunkten, Push getestet (0444b7c)** | ✅ |
 
 ### Fortschritt (24.05.2026)
 
