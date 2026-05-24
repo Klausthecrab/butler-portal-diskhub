@@ -9,8 +9,6 @@
 
 Tolerantes Memory-System für Hermes: MEMORY.md mit Puffer, nächtlicher Trimmer + Evaluator, Portal-Visualisierung. Der Agent kann ohne Umbau-Training wachsen — der Trimmer kümmert sich um Limits, Puffer und Struktur. Kein Hermes-Core-Code, reines Sidecar.
 
----
-
 ### Architektur: Trimmer vs. Evaluator || Zwei strikt getrennte Verantwortlichkeiten
 *— · 17.05.2026*
 
@@ -46,8 +44,6 @@ Trimmer-Lauf (02:00) → MEMORY.md zurücksetzen auf MEMORY_BASE.md
 > **Ergebnis:** Zwei strikt getrennte Verantwortlichkeiten ohne LLM im Reset-Pfad.
 *session: spec-20260517 · 17.05.2026*
 
----
-
 ### Setup (Python/Flask/n8n) || Technische Basis
 *— · 17.05.2026*
 
@@ -63,8 +59,6 @@ Trimmer-Lauf (02:00) → MEMORY.md zurücksetzen auf MEMORY_BASE.md
 
 > **Ergebnis:** Setup abgeschlossen und läuft stabil.
 *session: setup-20260517 · 17.05.2026*
-
----
 
 ### Komponenten || Script-Übersicht
 *— · 17.05.2026*
@@ -84,8 +78,6 @@ Trimmer-Lauf (02:00) → MEMORY.md zurücksetzen auf MEMORY_BASE.md
 
 > **Ergebnis:** Vollständiger 4-Tab-Portal-Stack mit Backend v1.1.
 *session: komponenten-20260517 · 17.05.2026*
-
----
 
 ### Features v1.0–v1.9 || Release-Übersicht (✓ erledigt)
 *— · 24.05.2026*
@@ -108,8 +100,6 @@ Trimmer-Lauf (02:00) → MEMORY.md zurücksetzen auf MEMORY_BASE.md
 | Repair #1: Section Analysis | v1.8 | §-Überschriften + Post-Endpoint |
 
 Alle Feature-Sub-Diskussionen wurden in diesen Block konsolidiert — kein Datenverlust.
-
----
 
 ### Legacy: Alter Evaluator
 *— · 22.05.2026*
