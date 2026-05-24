@@ -173,3 +173,8 @@ einfach schreiben "befehl der selber checkt was das frontend ist. der wird ausge
 Frage: bringt es was dazu einen (nur für KI lesbar) kommentar zu verfassen: bspw: das UI rendert bei index.md nur bestimmten text, da gibt es aber noch kommentar wie bspw "hi hermi. hier ist ein kommentar von vergangenheits KI zu zukunfts hermi: diese Parameter beschreiben die technischen Details vom Portal "XYZ" , sind vom "dd.mm.yyyy". Das erspart die Ressourcen, diese Dinge selbst zu prüfen. "
 Diese muss man dann aber auch pflegen. (automatisch; semi: bei erkennung; monitoring cron)
 
+
+### Phase2-Test
+*— · 24.05.2026*
+
+funktioniert

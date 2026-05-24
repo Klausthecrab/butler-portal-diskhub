@@ -1603,7 +1603,7 @@ def delete_block():
     sub_id = data.get('sub_id', '')
 
     if not discussion_id or (block_index is None and not file_name):
-        return jsonify({'error': 'discussion_id und block_index erforderlich'}), 400
+        return jsonify({'error': 'discussion_id und block_index (oder file_name) erforderlich'}), 400
 
     if is_sub and sub_id:
         target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id)
@@ -1643,6 +1643,7 @@ def delete_block():
 
         with open(blocks_path, 'w') as f:
             f.writelines(new_lines)
+        blocks_left = len(header_indices) - 1
 
     sha = ''
     try:
@@ -1800,6 +1801,79 @@ def edit_block():
     })
 
     return jsonify({'status': 'ok', 'sha': sha, 'file_name': file_name})
+
+
+@diskhub.route('/diskhub/edit-index-title', methods=['POST'])
+def edit_index_title():
+    """'⬜/✅ Status-Toggle für index.md-Einträge'
+    Findet den Eintrag bei entry_index (0-based), toggelt (✓ erledigt) und schreibt zurück."""
+    data = request.get_json(silent=True) or {}
+    discussion_id = data.get('discussion_id', '')
+    entry_index = data.get('entry_index')
+    is_sub = data.get('is_sub', False)
+    sub_id = data.get('sub_id', '')
+
+    if not discussion_id or entry_index is None:
+        return jsonify({'error': 'discussion_id und entry_index erforderlich'}), 400
+
+    if is_sub and sub_id:
+        target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id)
+    else:
+        target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id)
+
+    index_path = os.path.join(target_dir, 'index.md')
+    if not os.path.isfile(index_path):
+        return jsonify({'error': 'index.md nicht gefunden'}), 404
+
+    with open(index_path, 'r') as f:
+        lines = f.readlines()
+
+    # Alle ###-Header finden
+    header_indices = [i for i, line in enumerate(lines) if line.startswith('### ')]
+
+    if entry_index < 0 or entry_index >= len(header_indices):
+        return jsonify({'error': f'entry_index {entry_index} ungültig (0-{len(header_indices)-1})'}), 400
+
+    line_idx = header_indices[entry_index]
+    old_line = lines[line_idx]
+    heading_text = old_line[4:].rstrip('\n')  # "### " entfernen, Newline abtrennen
+
+    # (✓ erledigt) toggeln
+    if '(✓ erledigt)' in heading_text:
+        new_heading = re.sub(r'\s*\(✓ erledigt\)\s*', ' ', heading_text).strip()
+    else:
+        new_heading = heading_text + ' (✓ erledigt)'
+
+    lines[line_idx] = f'### {new_heading}\n'
+
+    with open(index_path, 'w') as f:
+        f.writelines(lines)
+
+    # Git commit
+    sha = ''
+    try:
+        subprocess.run(['git', 'add', '-A'], capture_output=True, text=True, timeout=10, cwd=REPO_DIR)
+        result = subprocess.run(
+            ['git', 'commit', '-m', f'disc: {discussion_id}: Index-Titel getoggelt — {new_heading[:40]}'],
+            capture_output=True, text=True, timeout=10, cwd=REPO_DIR
+        )
+        if result.returncode == 0:
+            sha_match = re.search(r'\[master [a-f0-9]+\) ([a-f0-9]+)', result.stdout)
+            if sha_match:
+                sha = sha_match.group(1)
+    except Exception as e:
+        sha = f'commit fehlgeschlagen: {e}'
+
+    _log_activity('edit-index-title', {
+        'discussion': discussion_id,
+        'entry_index': entry_index,
+        'new_title': new_heading,
+        'sha': sha,
+        'is_sub': is_sub,
+        'sub_id': sub_id,
+    })
+
+    return jsonify({'status': 'ok', 'sha': sha})
 
 
 @diskhub.route('/diskhub/add-box', methods=['POST'])

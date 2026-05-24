@@ -439,7 +439,7 @@ function renderBlock(block, isHot, blockIdx, discussionId) {
     summaryTitle = escapedHeading
   }
   html += `<details${hasResult ? ' open' : ''}>`
-  html += `<summary class="${styles.blockHeader}"><h3>${subBadge}${summaryTitle}${statusBadge}</h3><button class="${styles.copyLinkBtn}" data-copy-entry data-ref="${escapedRef}" title="Referenz kopieren: ${escapedRef}">🔗</button></summary>`
+  html += `<summary class="${styles.blockHeader}"><h3>${subBadge}${summaryTitle}${statusBadge}</h3><button class="${styles.copyLinkBtn}" data-copy-entry data-ref="${escapedRef}" title="Referenz kopieren: ${escapedRef}">🔗</button><button class="${styles.copyLinkBtn}" data-toggle-index-done data-entry-index="${blockIdx}" title="${hasResult ? 'Als offen markieren' : 'Als erledigt markieren'}">${hasResult ? '✅' : '⬜'}</button></summary>`
   html += `<div class="${styles.blockContent}">${renderMarkdown(content)}</div>`
   if (result) {
     // Ergebnis-Zeile rendern
@@ -2587,7 +2587,7 @@ export default function Page() {
     }
   }, [selected])
 
-  // Globaler Click-Handler für [data-copy-entry] Buttons (#B)
+  // Globaler Click-Handler für [data-copy-entry] und [data-toggle-index-done] Buttons (#B)
   useEffect(() => {
     const handler = (e) => {
       const btn = e.target.closest('[data-copy-entry]')
@@ -2597,11 +2597,46 @@ export default function Page() {
         const origText = btn.textContent
         btn.textContent = '✅'
         setTimeout(() => { btn.textContent = origText }, 2000)
+        return
+      }
+      const toggleBtn = e.target.closest('[data-toggle-index-done]')
+      if (toggleBtn) {
+        const entryIndex = parseInt(toggleBtn.getAttribute('data-entry-index'), 10)
+        if (isNaN(entryIndex)) return
+        const headingEl = toggleBtn.closest('summary').querySelector('h3')
+        const origText = toggleBtn.textContent
+        toggleBtn.textContent = '⏳'
+        fetch(`${API}/edit-index-title`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            discussion_id: discussion.id,
+            entry_index: entryIndex,
+            is_sub: !!activeSubView,
+            sub_id: activeSubView || undefined,
+          }),
+        })
+          .then(r => r.json())
+          .then(d => {
+            if (d.status === 'ok') {
+              setErrorMsg('✅ Status aktualisiert' + (d.sha ? ' (' + d.sha.slice(0, 7) + ')' : ''))
+              fetchDiscussionData()
+            } else {
+              toggleBtn.textContent = '❌'
+              setTimeout(() => { toggleBtn.textContent = origText }, 2000)
+              setErrorMsg('❌ ' + (d.error || 'Fehler beim Status-Toggle'))
+            }
+          })
+          .catch(() => {
+            toggleBtn.textContent = '❌'
+            setTimeout(() => { toggleBtn.textContent = origText }, 2000)
+            setErrorMsg('❌ Netzwerkfehler')
+          })
       }
     }
     document.addEventListener('click', handler)
     return () => document.removeEventListener('click', handler)
-  }, [])
+  }, [discussion.id, activeSubView, fetchDiscussionData])
 
   return (
     <div className={styles.diskhubContainer}>
