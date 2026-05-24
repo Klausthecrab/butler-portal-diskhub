@@ -1,4 +1,4 @@
-### Phase 3 — Migration zu Einzeldateien (#H)
+### Phase 3 — Migration zu Einzeldateien (#H) (✓ erledigt)
 *— · 24.05.2026*
 
 ## Entscheidung: Phase 3 + Frontend-C.05 in einem Durchgang
@@ -6,24 +6,24 @@
 **Datum:** 24.05.2026
 **Autor:** Hermi
 
-### Problem
+## Problem
 Nach Phase-3-Migration wird blocks.md gelöscht. Das Frontend sendete aber noch `block_index` statt `file_name` (C.05 war ausstehend). Edit/Delete wären für migrierte Diskussionen kaputt.
 
-### Ansatz
+## Ansatz
 Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang implementiert. Dadurch:
 - Migration erstellt Einzeldateien aus blocks.md + index.md
 - Frontend sendet `file_name` bei Edit/Delete
 - Backend-Fallback auf `block_index` bleibt für Diskussionen ohne Migration
 - `edit-index-title`-Endpoint auf index/-Ordner umgestellt
 
-### Script: scripts/split-collection-files.py
+## Script: scripts/split-collection-files.py
 - Liest ###-Header aus Sammeldateien → Einzeldateien unter blocks/ und index/
 - NN = Position in Datei (00, 01, ...), Slug aus Titel
 - Kollisionsschutz via -2, -3-Suffix
 - Trash statt rm für Sammeldateien
 - Eingebaute Verifikation (NN-Format, Datei-Anzahl, exists-Checks)
 
-### Migration ausgeführt
+## Migration ausgeführt
 **Ziel:** diskhub-rebuild/offene-umbauplaene + 12 Sub-Diskussionen
 
 | Metrik | Wert |
@@ -34,7 +34,7 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 | Sub-Diskussionen migriert | 01-datei-struktur, 02-ui-struktur, 05–07 |
 | Subs ohne ###-Header | Übersprungen (08–12 hatten keine Blöcke) |
 
-### Verifikation (7-Punkte-Plan + Erweiterungen)
+## Verifikation (7-Punkte-Plan + Erweiterungen)
 
 | # | Check | Status |
 |---|-------|--------|
@@ -49,11 +49,11 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 | + | blocks.md + index.md sowohl für Haupt- als auch Subs getrasht | ✅ |
 | + | Sub-Diskussionen ohne ###-Header (03, 04, 08–12): unberührt | ✅ |
 | + | Dashboard-Restart + Build: fehlerfrei | ✅ |
-|| + | Git-Commit: auto-committed via add-box + edit-block | ✅ |
-|| + | **Phase 5 — Sub-Einzeldateien: Script rekursiv (4 Disk, 14 Ebenen) — 17 index.md ohne ### → 0 Änderungen** | ✅ |
-|| + | **Phase 6 — Git-Push: GitHub Repo erstellt, Remote gesetzt, routes.py mit _git_push() in 6 Endpunkten, Push getestet (0444b7c)** | ✅ |
+| + | Git-Commit: auto-committed via add-box + edit-block | ✅ |
+| + | **Phase 5 — Sub-Einzeldateien: Script rekursiv (4 Disk, 14 Ebenen) — 17 index.md ohne ### → 0 Änderungen** | ✅ |
+| + | **Phase 6 — Git-Push: GitHub Repo erstellt, Remote gesetzt, routes.py mit _git_push() in 6 Endpunkten, Push getestet (0444b7c)** | ✅ |
 
-### Fortschritt (24.05.2026)
+## Fortschritt (24.05.2026)
 
 **Phase 4 F.02 — 🔗-Format für index.md-Einträge** ✅
 - [x] `renderBlock()`: 5. Parameter `indexFiles` + Pfad-Format `diskussion/index/slug`
@@ -90,7 +90,7 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 - [x] Script-Verifikation: Hauptebene ✅, offene-punkte blocks/ ✅
 - [x] API-Verifikation: Hauptebene `index_files[7]`, Sub `blocks_files[7]` ✅
 
-### Offene Punkte (priorisiert: 2 → 4 → 3 → 1)
+## Offene Punkte (priorisiert: 2 → 4 → 3 → 1)
 
 **1. Weitere Diskussionen migrieren** ✅
 Alle 3 Diskussionen migriert — siehe Fortschritt oben.
