@@ -1,10 +1,4 @@
-# API-Key-Handling
-
-**Parent:** [Gateway-Strategie](../index.md)
-
----
-
-### Block: Aufgabenverteilung klären
+### Sub: Wie handhaben wir API-Keys? || API-Key-Handling geklärt
 
 Gateway routet nur. API-Key-Validierung bleibt beim Schlüsselmeister. Schlüsselmeister bekommt vorgelagerten Auth-Check-Endpoint.
 

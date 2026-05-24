@@ -1,9 +1,3 @@
-# Sollten wir uns für Traefik entscheiden?
-
-**Parent:** [Gateway-Strategie](../index.md)
-
----
-
 ### Block: Traefik-Entscheidung
 
 Entscheidung für **Traefik** als zentralen Gateway. Docker-Label-Discovery für Container, file Provider (YAML) für native Services. Auto-Let's-Encrypt, zentrale Metriken, skalierbar.
