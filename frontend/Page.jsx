@@ -1167,6 +1167,46 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   // Sync ref for drag handler
   useEffect(() => { splitRatioRef.current = splitRatio }, [splitRatio])
 
+  // Globaler Click-Handler: data-toggle-index-done (index.md Status-Toggle)
+  useEffect(() => {
+    const handler = (e) => {
+      const toggleBtn = e.target.closest('[data-toggle-index-done]')
+      if (!toggleBtn) return
+      const entryIndex = parseInt(toggleBtn.getAttribute('data-entry-index'), 10)
+      if (isNaN(entryIndex)) return
+      const origText = toggleBtn.textContent
+      toggleBtn.textContent = '⏳'
+      fetch(`${API}/edit-index-title`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          discussion_id: discussion.id,
+          entry_index: entryIndex,
+          is_sub: !!activeSubView,
+          sub_id: activeSubView || undefined,
+        }),
+      })
+        .then(r => r.json())
+        .then(d => {
+          if (d.status === 'ok') {
+            setErrorMsg('✅ Status aktualisiert' + (d.sha ? ' (' + d.sha.slice(0, 7) + ')' : ''))
+            fetchDiscussionData()
+          } else {
+            toggleBtn.textContent = '❌'
+            setTimeout(() => { toggleBtn.textContent = origText }, 2000)
+            setErrorMsg('❌ ' + (d.error || 'Fehler beim Status-Toggle'))
+          }
+        })
+        .catch(() => {
+          toggleBtn.textContent = '❌'
+          setTimeout(() => { toggleBtn.textContent = origText }, 2000)
+          setErrorMsg('❌ Netzwerkfehler')
+        })
+    }
+    document.addEventListener('click', handler)
+    return () => document.removeEventListener('click', handler)
+  }, [discussion.id, activeSubView, fetchDiscussionData])
+
   // Split-View Resizer — globaler Drag-Listener
   useEffect(() => {
     if (!isDragging) return
