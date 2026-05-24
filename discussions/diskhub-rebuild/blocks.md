@@ -172,3 +172,10 @@ einfach schreiben "befehl der selber checkt was das frontend ist. der wird ausge
 
 Frage: bringt es was dazu einen (nur für KI lesbar) kommentar zu verfassen: bspw: das UI rendert bei index.md nur bestimmten text, da gibt es aber noch kommentar wie bspw "hi hermi. hier ist ein kommentar von vergangenheits KI zu zukunfts hermi: diese Parameter beschreiben die technischen Details vom Portal "XYZ" , sind vom "dd.mm.yyyy". Das erspart die Ressourcen, diese Dinge selbst zu prüfen. "
 Diese muss man dann aber auch pflegen. (automatisch; semi: bei erkennung; monitoring cron)
+
+### pfad button in diskhub
+*— · 24.05.2026*
+
+ist der ausreichen? checkt eine frische hermi instanz mit diesem link "diskhub-rebuild#box-17" bspw direkt "aha, das gehört zu diskhub, ist eine Diskussion und es geht um den inhalt der Textbox 17, den lese ich jetzt".
+
+bitte mit mir diskutieren
