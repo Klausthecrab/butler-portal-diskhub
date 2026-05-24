@@ -110,5 +110,21 @@ Sub-Diskussionen, Textblöcke, etc
 *— · 24.05.2026*
 *Erledigt: 24.05.2026*
 
-diskhub-doc Skill erstellt: strikter Workflow mit Vorschlag → Bestätigung → Status+Datum → 🤖-Block → Pre-Commit-Check → Commit + Verifikation. Zwei Sicherheits-Gates. Gültigkeitsbereich auf DiskHub beschränkt. Ort-Kontext im Vorschlag. Sub-Punkte S.01–S.09 alle umgesetzt. Einmal iteriert (Gültigkeitsbereich + Location).
+diskhub-doc Skill erstellt.
+
+Workflow:
+- Vorschlag generieren → Bestätigung abwarten
+- Status + Datum in index.md setzen
+- 🤖-Block in blocks.md anhängen
+- Pre-Commit-Check: *Erledigt:* vorhanden?
+- Commit + Verifikation gegenlesen
+
+Sicherheits-Gates:
+- Zwei Gates: Skill laden + Vorschlag bestätigen
+- Nur für DiskHub-Diskussionen gültig
+
+Nachträglich ergänzt:
+- Gültigkeitsbereich auf DiskHub beschränkt
+- Ort-Kontext im Vorschlag
+
 Commit: d654ec8
