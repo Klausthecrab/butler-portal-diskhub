@@ -105,3 +105,10 @@ probleme dabei:
 
 wie kann man die migration, aber vor allem: "die nutzung" verbessern. wenn ich hermi bitte "mit diskhub" zu interagieren, dann muss klar sein was meine erwartung ist. 
 Sub-Diskussionen, Textblöcke, etc
+
+### 🤖 #46 — diskhub-doc Skill angelegt
+*— · 24.05.2026*
+*Erledigt: 24.05.2026*
+
+diskhub-doc Skill erstellt: strikter Workflow mit Vorschlag → Bestätigung → Status+Datum → 🤖-Block → Pre-Commit-Check → Commit + Verifikation. Zwei Sicherheits-Gates. Gültigkeitsbereich auf DiskHub beschränkt. Ort-Kontext im Vorschlag. Sub-Punkte S.01–S.09 alle umgesetzt. Einmal iteriert (Gültigkeitsbereich + Location).
+Commit: c0f1d80
