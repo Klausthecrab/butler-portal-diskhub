@@ -82,19 +82,16 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 - [x] API-Verifikation: `index_files[6]` via Haupt-Diskussion ✅
 - [x] 6 Sammeldateien getrasht
 
+**memory-trimmer migriert** ✅
+- [x] Hauptebene: index.md → `index/` (7 Dateien, Sub:-Verweise)
+- [x] Sub `offene-punkte`: blocks.md → `blocks/` (7 Dateien, #4 bis #13)
+- [x] Script-Verifikation: Hauptebene ✅, offene-punkte blocks/ ✅
+- [x] API-Verifikation: Hauptebene `index_files[7]`, Sub `blocks_files[7]` ✅
+
 ### Offene Punkte (priorisiert: 2 → 4 → 3 → 1)
 
-**1. Weitere Diskussionen migrieren** (Phase 2)
-Folgende Diskussionen haben noch Sammeldateien und sollen migriert werden:
-
-| Diskussion | blocks.md ### | index.md ### | Subs mit ### |
-|---|---|---|---|
-| **diskhub-rebuild** (Hauptebene) | 18 → ✅ | 1 → ✅ | — |
-| **gateway-standardisierung** | — | 6 → ✅ | 5 Subs → ✅ |
-| **memory-trimmer** | — | 7 🏗️ | Sub `offene-punkte` → blocks.md 7 🏗️ |
-| **registry-pythonpath-fix** | — | 0 ✅ | — |
-
-Ausführung: `python3 scripts/split-collection-files.py discussions/<name>`
+**1. Weitere Diskussionen migrieren** ✅
+Alle 3 Diskussionen migriert — siehe Fortschritt oben.
 
 **2. 🔗-Referenzen prüfen (M.08)**
 Alte `> box-\d+` oder `> entry-\d+`-Referenzen in allen discussions/. Niedrige Prio, da neue 🔗-Buttons Pfad-Format kopieren.
