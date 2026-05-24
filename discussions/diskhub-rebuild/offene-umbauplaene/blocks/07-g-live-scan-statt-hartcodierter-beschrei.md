@@ -1,4 +1,4 @@
-### #G: Live-Scan statt hartcodierter Beschreibung (niedrige Prio)
+### #G: Live-Scan statt hartcodierter Beschreibung (niedrige Prio) (✓ erledigt)
 *— · 24.05.2026*
 
 Abgeleitet aus diskhub-rebuild#box-17 (Index.md vs textboxen).

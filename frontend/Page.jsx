@@ -1054,7 +1054,6 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   const [boxLoading, setBoxLoading] = useState(false)
   const [pendingImage, setPendingImage] = useState(null)
   const [showImageModal, setShowImageModal] = useState(false)
-const [showImageModal, setShowImageModal] = useState(false)
   const [hideDone, setHideDone] = useState(false)
 
   // SSE Streaming
