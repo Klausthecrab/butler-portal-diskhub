@@ -183,7 +183,7 @@ Synthese aus der Diskussion zu #A (Semantik-Regeln) und #E (Sonderrollen). Defin
 
 **Phase 1 — Adressierbarkeit:** index.md-Einträge + Sub-Diskussionen bekommen 🔗 + HTML-ID + Auto-Scroll. → #B, #C
 
-**Phase 2 — Element-Typen trennen:** Einfache index.md-Einträge → Textboxen migrieren (#D). Verbleibende index.md-Einträge auf Sonderrollen limitieren + visuelle Markierung (#E).
+**Phase 2 ✅ — Element-Typen trennen:** Einfache index.md-Einträge → Textboxen migrieren (#D). Verbleibende index.md-Einträge auf Sonderrollen limitieren + visuelle Markierung (#E).
 
 **Sonderrollen-Katalog (Phase 0):**
 - README/Header — System-Element, Fixposition Top

@@ -768,6 +768,31 @@
   display: flex;
   border-top: 1px solid #334155;
 }
+.toggleDoneBtn,
+.toggleDoneBtnActive {
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid #334155;
+  color: #64748b;
+  font-size: 0.825rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s;
+  line-height: 1;
+}
+.toggleDoneBtn:hover {
+  background: #166534;
+  color: #6ee7b7;
+}
+.toggleDoneBtnActive {
+  color: #22c55e;
+}
+.toggleDoneBtnActive:hover {
+  background: #92400e;
+  color: #fbbf24;
+}
+
 .editBlockActionBtn,
 .deleteBlockActionBtn,
 .copyLinkBtn {

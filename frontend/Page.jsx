@@ -725,6 +725,17 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
     }
   }
 
+  const handleToggleDone = (idx, headingText, content) => {
+    const isDone = headingText.includes('(✓ erledigt)')
+    let newTitle
+    if (isDone) {
+      newTitle = headingText.replace(/\s*\(✓ erledigt\)\s*/, ' ').trim()
+    } else {
+      newTitle = headingText + ' (✓ erledigt)'
+    }
+    onEditBlock(idx, newTitle, content, () => {})
+  }
+
   const copyBoxLink = (idx, headingText) => {
     const subPath = isSub && subId ? '/' + subId : ''
     const cleanedTitle = headingText.replace(/^📷\s*/, '').trim()
@@ -751,6 +762,7 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
     <div>
       {reversedBlocks.map(({ block, originalIdx }, displayIdx) => {
         const headingText = block.heading.replace(/^###\s+/, '').trim()
+        const isDone = headingText.includes('(✓ erledigt)')
 
         // Datum aus Content parsen und aus sichtbarem Inhalt entfernen
         const dateInfo = parseBlockDate(block.content)
@@ -775,7 +787,7 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
               )}
             </div>
             {isImageBlock ? (
-              <div id={'box-' + originalIdx} className={styles.blockCard} data-status="open">
+              <div id={'box-' + originalIdx} className={styles.blockCard} data-status={isDone ? 'done' : 'open'}>
                 <div className={headerClass}>
                   <h3>{editingIndex === originalIdx ? '✏️ ' + editTitle : headingText}</h3>
                   <span className={styles.boxAnchorLabel}>#box-{originalIdx}</span>
@@ -838,6 +850,13 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                   {copiedIndex === originalIdx ? '✅' : '🔗'}
                 </button>
                 <button
+                  className={`${styles.toggleDoneBtn} ${isDone ? styles.toggleDoneBtnActive : ''}`}
+                  onClick={() => handleToggleDone(originalIdx, headingText, content)}
+                  title={isDone ? 'Als offen markieren' : 'Als erledigt markieren'}
+                >
+                  {isDone ? '✅' : '⬜'}
+                </button>
+                <button
                   className={styles.editBlockActionBtn}
                   onClick={() => startEditing(originalIdx, headingText, content)}
                   title="Diese Textbox bearbeiten"
@@ -854,7 +873,7 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
               </div>
               </div>
             ) : (
-              <details id={'box-' + originalIdx} className={styles.blockCard} data-status="open">
+              <details id={'box-' + originalIdx} className={styles.blockCard} data-status={isDone ? 'done' : 'open'}>
                 <summary className={headerClass}>
                   <h3>{editingIndex === originalIdx ? '✏️ ' + editTitle : headingText}</h3>
                   <span className={styles.boxAnchorLabel}>#box-{originalIdx}</span>
@@ -915,6 +934,13 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                   title={'Referenz kopieren: ' + discussionId + (isSub && subId ? '/' + subId : '') + ' > ' + (headingText.startsWith('📷') ? 'img' : 'box') + '-' + originalIdx + ' "' + headingText.replace(/^📷\s*/, '').trim() + '"'}
                 >
                   {copiedIndex === originalIdx ? '✅' : '🔗'}
+                </button>
+                <button
+                  className={`${styles.toggleDoneBtn} ${isDone ? styles.toggleDoneBtnActive : ''}`}
+                  onClick={() => handleToggleDone(originalIdx, headingText, content)}
+                  title={isDone ? 'Als offen markieren' : 'Als erledigt markieren'}
+                >
+                  {isDone ? '✅' : '⬜'}
                 </button>
                 <button
                   className={styles.editBlockActionBtn}
