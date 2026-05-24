@@ -746,6 +746,62 @@
   background: #991b1b !important;
 }
 
+/* #30: Erledigte ausblenden — Globaler Toggle */
+.doneFilter[data-hide-done="true"] [data-status="done"] {
+  display: none !important;
+}
+
+/* Toggle in discStats */
+.hideDoneToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: #94a3b8;
+  user-select: none;
+}
+.hideDoneToggle input[type="checkbox"] {
+  accent-color: #6366f1;
+  cursor: pointer;
+  margin: 0;
+}
+.hideDoneLabel {
+  color: #94a3b8;
+  transition: color 0.15s;
+}
+.hideDoneToggle:hover .hideDoneLabel {
+  color: #cbd5e1;
+}
+
+/* ─── Convert-Button (Starte Discord-Session für Textbox, #24) ─── */
+.doneFilter[data-hide-done="true"] [data-status="done"] {
+  display: none !important;
+}
+
+/* Toggle in discStats */
+.hideDoneToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: #94a3b8;
+  user-select: none;
+}
+.hideDoneToggle input[type="checkbox"] {
+  accent-color: #6366f1;
+  cursor: pointer;
+  margin: 0;
+}
+.hideDoneLabel {
+  color: #94a3b8;
+  transition: color 0.15s;
+}
+.hideDoneToggle:hover .hideDoneLabel {
+  color: #cbd5e1;
+}
+
 /* ─── Convert-Button (Starte Discord-Session für Textbox, #24) ─── */
 .convertBtn {
   width: 100%;

@@ -1054,6 +1054,8 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   const [boxLoading, setBoxLoading] = useState(false)
   const [pendingImage, setPendingImage] = useState(null)
   const [showImageModal, setShowImageModal] = useState(false)
+const [showImageModal, setShowImageModal] = useState(false)
+  const [hideDone, setHideDone] = useState(false)
 
   // SSE Streaming
   const lastTsRef = useRef(0)
@@ -1832,10 +1834,16 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                       <span>Zuletzt {subViewData.parsed.updated_at}</span>
                                     </>
                                   )}
+                                  <span className={styles.statsSep}>·</span>
+                                  <label className={styles.hideDoneToggle}>
+                                    <input type="checkbox" checked={hideDone} onChange={e => setHideDone(e.target.checked)} />
+                                    <span className={styles.hideDoneLabel}>Ausblenden ✓</span>
+                                  </label>
                                 </div>
                               </>
                             )}
-                            {subViewData.readme_body ? (
+                            <div className={styles.doneFilter} data-hide-done={hideDone ? 'true' : 'false'}>
+                              {subViewData.readme_body ? (
                               <div className={styles.markdownContent}
                                 dangerouslySetInnerHTML={{
                                   __html: renderMarkdown(
@@ -1876,6 +1884,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 dangerouslySetInnerHTML={{ __html: renderIndexMd(subViewData.index, undefined, discussion.id, subViewData.index_files || []) }}
                               />
                             )}
+                            </div>
                             {/* Box hinzufügen — Sub-View */}
                             <div className={styles.addBoxSection}>
                               <div className={styles.sectionLabel}>➕ Neue Textbox</div>
@@ -1981,10 +1990,16 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                     <span>Zuletzt {data.parsed.updated_at}</span>
                                   </>
                                 )}
+                                <span className={styles.statsSep}>·</span>
+                                <label className={styles.hideDoneToggle}>
+                                  <input type="checkbox" checked={hideDone} onChange={e => setHideDone(e.target.checked)} />
+                                  <span className={styles.hideDoneLabel}>Ausblenden ✓</span>
+                                </label>
                               </div>
                             </>
                           )}
-                          {data.readme_body ? (
+                          <div className={styles.doneFilter} data-hide-done={hideDone ? 'true' : 'false'}>
+                            {data.readme_body ? (
                             <div className={styles.markdownContent}
                               dangerouslySetInnerHTML={{
                                 __html: renderMarkdown(
@@ -2026,6 +2041,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                               dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, 'footer-only', discussion.id, data.index_files || []) }}
                             />
                           )}
+                          </div>
                           {data.subs && data.subs.map((sub, idx) => {
                             const subNum = String(idx + 1).padStart(2, '0')
                             const isExpanded = expandedSubs.has(sub.id)

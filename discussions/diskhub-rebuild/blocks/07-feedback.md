@@ -1,4 +1,4 @@
-### feedback:
+### feedback: (✓ erledigt)
 *— · 23.05.2026*
 
 - stimmt jetzt "neu = unten"?
