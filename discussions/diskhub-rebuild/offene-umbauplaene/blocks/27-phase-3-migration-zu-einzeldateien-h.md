@@ -61,24 +61,32 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 - [x] Build (16s) + Dashboard-Restart + API-Verifikation (48 index_files ✅)
 - Der 🔗-Button kopiert jetzt `diskhub-rebuild/index/00-01-datei-struktur-erledigt-neue-ordner-s` statt `> entry-1 "Datei-Struktur"`.
 
-### Offen / Nächste Schritte (in Prioritäts-Reihenfolge)
+**Punkt 5 — Status-Prüfung vor Migration** ✅
+- [x] 4 Diskussionen gescannt (diskhub-rebuild, gateway-standardisierung, memory-trimmer, registry-pythonpath-fix)
+- [x] 3 mit Migrationsbedarf identifiziert (siehe Offene Punkte)
+- registry-pythonpath-fix hat 0 ###-Header → kein Bedarf
 
-1. **Phase 6 — Git-Push**
-   Aktuell committet add-box/edit-block/delete-block automatisch (`git add -A && git commit`), aber push fehlt. Analog zu butler-hermi-config: nach jedem Commit automatisch pushen. Max will das wahrscheinlich.
+### Offene Punkte (priorisiert: 2 → 4 → 3 → 1)
 
-3. **Weitere Diskussionen migrieren**
-   Bisher nur offene-umbauplaene migriert. Andere Diskussionen mit blocks.md/index.md:
-   - diskhub-rebuild (Hauptebene)
-   - memory-trimmer
-   - registry-pythonpath-fix
-   - gateway-standardisierung
-   Einmal `python3 scripts/split-collection-files.py discussions/<name>` und fertig.
+**1. Weitere Diskussionen migrieren** (Phase 2)
+Folgende Diskussionen haben noch Sammeldateien und sollen migriert werden:
 
-4. **🔗-Referenzen prüfen (M.08)**
-   Alte `#box-NR`-Referenzen in anderen Diskussionen. Ein grep nach `> box-\d+` oder `> entry-\d+` in allen discussions/. Niedrige Prio, weil der neue 🔗-Button Pfad-Format kopiert.
+| Diskussion | blocks.md ### | index.md ### | Subs mit ### |
+|---|---|---|---|
+| **diskhub-rebuild** (Hauptebene) | 18 🏗️ | 0 | — |
+| **gateway-standardisierung** | — | 6 🏗️ | 5 Subs (je 1-2 Einträge) |
+| **memory-trimmer** | — | 7 🏗️ | Sub `offene-punkte` → blocks.md 7 🏗️ |
+| **registry-pythonpath-fix** | — | 0 ✅ | — |
 
-5. **Phase 5 — Sub-Diskussionen Einzeldateien (optional)**
-   Für Diskussionen mit Sub-Struktur das Script rekursiv laufen lassen. Braucht Max Go.
+Ausführung: `python3 scripts/split-collection-files.py discussions/<name>`
 
-6. **Andere Diskussionen: Status-Prüfung vor Migration**
-   Vor Migration checken: Haben sie bereits blocks/-Ordner? (Dann schon migriert.) Haben sie blocks.md mit ###-Headern? (Dann Migration sinnvoll.)
+**2. 🔗-Referenzen prüfen (M.08)**
+Alte `> box-\d+` oder `> entry-\d+`-Referenzen in allen discussions/. Niedrige Prio, da neue 🔗-Buttons Pfad-Format kopieren.
+
+**3. Phase 5 — Sub-Diskussionen Einzeldateien (optional)**
+Für Diskussionen mit Sub-Struktur das Script rekursiv laufen lassen. Braucht Max Go.
+- gateway-standardisierung: 5 Subs mit index.md-Einträgen
+- memory-trimmer: Sub `offene-punkte` mit blocks.md
+
+**4. Phase 6 — Git-Push**
+Auto-Push nach jedem Commit (analog butler-hermi-config). Aktuell nur Commit, kein Push.
