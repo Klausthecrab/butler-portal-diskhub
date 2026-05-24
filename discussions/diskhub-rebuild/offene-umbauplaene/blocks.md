@@ -85,38 +85,197 @@ Offene Fragen:
 - Caching / letzter-Run-Zeitstempel?
 - Erst relevant wenn index.md-Sonderrolle geklärt ist.
 
-### #H: Datei-Architektur: Einzeldateien statt Sammeldateien (Konzept)
+### #H: Datei-Architektur — Einzeldateien statt Sammeldateien
 *— · 24.05.2026*
 
-Abgeleitet aus der Diskussion um index.md vs. Textboxen (Session 24.05.2026).
+> **Umsetzungsplan (erstellt 24.05.2026, Hermi + Kazzle)**
 
-Aktuell: Alle Umbauplan-Punkte leben in index.md, alle Textboxen in blocks.md — jeweils eine große Datei mit vielen ###-Einträgen. Referenzen sind positionsbasiert (#box-3).
+## Vision
 
-Vision: Jeder Eintrag bekommt eine eigene .md-Datei:
-- Umbauplan-Punkte → /index/punkt-xx.md
-- Textboxen → /blocks/box-name.md
-- Sub-Diskussionen bleiben Ordner (wie gehabt)
-- README.md bleibt wie gehabt
+Jeder Eintrag bekommt eine eigene `.md`-Datei. Keine Sammeldateien mehr (`blocks.md`, `index.md`). Stabile Pfad-Referenzen statt positionsbasierter Nummern.
 
-Vorteile:
-- Stabile Pfad-Referenzen statt fragiler Indizes
-- Git-Diff zeigt nur den betroffenen Eintrag
-- Promotion zur Sub-Diskussion = Ordner anlegen, Datei verschieben
+**Datei-Struktur nach Umbau** (Beispiel: `offene-umbauplaene`):
+```
+offene-umbauplaene/
+├── README.md                              ← bleibt (Diskussionstitel + Metadaten)
+├── blocks/                                ← NEU: Ordner für Textboxen
+│   ├── 00-neue-punkte-unformatiert.md     ← ### #49
+│   ├── 01-semantik-regeln.md              ← ### #A
+│   ├── 02-index-adressierbar.md           ← ### #B
+│   ├── 03-sub-adressierbar.md             ← ### #C
+│   ├── 04-migration-textboxen.md          ← ### #D
+│   ├── 05-sonderrolle-index.md            ← ### #E
+│   ├── 06-ki-kommentare.md                ← ### #F
+│   ├── 07-live-scan.md                    ← ### #G
+│   ├── 08-einzeldateien.md                ← ### #H (diese Datei)
+│   ├── 09-pfad-button-format.md           ← ### #I
+│   └── ...                                ← weitere Textboxen (#29–#50+)
+├── index/                                 ← NEU: Ordner für index.md-Einträge
+│   ├── 00-datei-struktur.md               ← ### #01 (erledigt)
+│   ├── 01-ui-struktur.md                  ← ### #02 (erledigt)
+│   └── ...                                ← ### #03–#28 (erledigt, Stubs aus #D)
+├── 01-datei-struktur/                     ← Sub-Diskussion (Ordner, bleibt)
+│   ├── README.md
+│   ├── index.md
+│   └── blocks.md
+├── 02-ui-struktur/                        ← Sub-Diskussion (Ordner, bleibt)
+│   └── ...
+└── assets/                                ← Bilder, bleibt
+```
 
-Nachteile / Fragen:
-- Viele kleine Dateien statt einer großen — Overhead?
-- Ein API-Request liefert alle Blöcke — bei Einzeldateien mehr Requests?
-- Sortierung (chronologisch, alphabetisch via Prefix?)
-- UI merkt der Nutzer nichts — reine Backend-Änderung
+**Dateinamen-Konvention:**
+- `NN-slug.md` — zweistellige Nummer (`00`–`99`) für Sortierung + Slug aus Titel (max 40 Zeichen, nur `[a-z0-9-]`)
+- Beispiel: `### #A: Semantik-Regeln definieren` → `01-semantik-regeln.md`
+- `NN` = fortlaufend, gelöschte Dateien geben ihre Nummer nicht frei (wie #box-Nummern)
+- Neue Einträge bekommen nächsthöhere Nummer
 
-Offene Details:
-- 🔗-Referenzen: Kopiert nach Umbau `diskhub-rebuild/index/01-datei-struktur.md` für Umbauplan-Punkte und `diskhub-rebuild/blocks/box-name.md` für Textboxen? (Abhängig von #B)
-- Migrationspfad: Was passiert mit bestehenden index.md / blocks.md? Werden sie automatisch per Script gesplittet (1 ###-Eintrag → 1 Datei)? Manuelle Migration? Mix?
-- Promotion: "Datei verschieben" = `mv blocks/feedback.md feedback/README.md`? Oder Ordner anlegen + Datei behalten als `feedback/blocks/box.md`?
-- API-Konsequenz: Aktuell returns GET /diskhub/xyz die kompletten Dateien als String. Nach Umbau: Liste von Dateien aus /index/ + /blocks/ zurückgeben? Neuer Endpoint nötig?
-- Verhalten nach Migration: Existieren index.md und blocks.md noch (als dünnes Inhaltsverzeichnis / TOC) oder verschwinden sie komplett?
+**🔗-Referenz-Format (neu):**
+- Statt `diskhub-rebuild/offene-umbauplaene > box-8 "..."`  
+- Neu: `diskhub-rebuild/offene-umbauplaene/blocks/08-einzeldateien`  
+- Pfad = stabil, nie neu vergeben, auch wenn Datei gelöscht wird
 
-Setzt #E (Sonderrolle index.md) und #A (Semantik-Regeln) voraus.
+**Promotion zur Sub-Diskussion:**
+- `mv blocks/08-einzeldateien.md 08-einzeldateien/README.md`  
+- Ordner anlegen, Datei als README verschieben → Sub-Diskussion ist geboren
+
+**Was bleibt, was fällt:**
+- `blocks.md` und `index.md` als Sammeldateien → **werden gelöscht** nach erfolgreicher Migration
+- Keine redundante TOC-Datei — das Frontend generiert das TOC dynamisch
+- `README.md` bleibt unverändert
+- Sub-Diskussions-Ordner bleiben unverändert (haben bereits Einzeldatei-Charakter)
+- `assets/` bleibt unverändert
+
+---
+
+## Phase 0 — Definitionen & Konventionen (✅ Konzept steht)
+
+- [x] **D.01** — Dateinamen-Konvention: `NN-slug.md` mit max 40 Zeichen, `[a-z0-9-]`
+- [x] **D.02** — Sortierung: alphabetisch via `NN`-Prefix, neue Einträge bekommen nächsthöhere Zahl
+- [x] **D.03** — 🔗-Format: `diskussion/blocks/nn-slug` bzw. `diskussion/index/nn-slug`
+- [x] **D.04** — Promotion-Pattern: `mv blocks/file.md ziel/README.md`
+- [x] **D.05** — Sammeldateien werden gelöscht, kein redundantes TOC
+- [x] **D.06** — API-Response: `blocks` bleibt String (backward compatible), zusätzlich `blocks_files[]` mit `{name, title}`
+
+---
+
+## Phase 1 — Backend: Read umstellen
+
+Ziel: `get_discussion()` in `routes.py` kann Einzeldateien aus `/blocks/` und `/index/` lesen. Fallback auf alte Sammeldatei für Rückwärtskompatibilität.
+
+**Sub-Punkte:**
+- [ ] **B.01** — `get_discussion()`: Prüfe ob Ordner `blocks/` existiert → wenn ja, lese alle `.md`-Dateien, sortiert, konkateniert zu einem String für `result['blocks']`  
+  + sammle `blocks_files[]: [{name, title}]` aus dem Heading der ersten Zeile jeder Datei
+- [ ] **B.02** — Gleiches Pattern für `index/`-Ordner: `result['index']` + `result['index_files']`
+- [ ] **B.03** — Fallback: Wenn `blocks/` nicht existiert, lies wie bisher `blocks.md` → backward compatible
+- [ ] **B.04** — `_parse_index_status()` muss auch den `/index/`-Ordner parsen können (oder bleibt auf dem String)
+- [ ] **B.05** — Test: GET /diskhub/offene-umbauplaene liefert gleichen Response wie vorher (rein String), zusätzlich `blocks_files[]`
+- [ ] **B.06** — Health-Check: API 200 nach Änderung
+
+---
+
+## Phase 2 — Backend: CRUD auf Einzeldateien
+
+Ziel: `add_box`, `edit_block`, `delete_block` arbeiten auf Einzeldateien statt zeilenbasiert in `blocks.md`.
+
+**Sub-Punkte:**
+- [ ] **C.01** — `add_box()`: Neue Datei `blocks/<nn>-<slug>.md` schreiben statt an `blocks.md` anhängen
+  - `nn` = nächsthöhere Zahl aus bestehenden Dateien in `/blocks/`
+  - `slug` = aus Titel generiert (lowercase, `[a-z0-9-]`, max 40 Zeichen)
+  - Inhalt: `### <titel>\n*— · <datum>*\n\n<content>\n`
+- [ ] **C.02** — `add_box()` bei Bild-Upload: Gleiches Pattern mit 📷-Prefix im Titel
+- [ ] **C.03** — `edit_block()`: Statt `block_index` → `file_name` aus Request-Body
+  - Datei direkt überschreiben (read → modify titel/content → write)
+  - Datumszeile (`*— · <datum>*`) erhalten falls vorhanden
+  - Fallback: wenn `file_name` fehlt → alter `block_index`-Pfad für backward compat
+- [ ] **C.04** — `delete_block()`: Statt Block aus Datei entfernen → Datei löschen
+  - Fallback: wenn `file_name` fehlt → alter `block_index`-Pfad
+- [ ] **C.05** — Frontend: 🔗-Button, Edit-Button, Delete-Button senden `file_name` statt `block_index`
+  - `renderBlock()` bekommt `file_name` aus `blocks_files[]` oder direkt aus der Datei
+  - `copyBoxLink()` kopiert Pfad-Format: `diskussion/blocks/nn-slug`
+- [ ] **C.06** — Error-Handling: Datei existiert nicht → 404 mit klarer Meldung, kein stummer Abbruch
+- [ ] **C.07** — Test: add/edit/delete auf Einzeldatei-CRUD → API 200 + Datei existiert/nicht existiert
+- [ ] **C.08** — Health-Check: API 200 nach Änderungen
+
+---
+
+## Phase 3 — Migration: Sammeldateien aufsplitten
+
+Ziel: Einmaliges Script, das bestehende `blocks.md` und `index.md` in Einzeldateien zerlegt.
+
+**Sub-Punkte:**
+- [ ] **M.01** — Script schreiben: `scripts/split-collection-files.py`
+  - Liest `blocks.md`, findet alle `### `-Headings
+  - Pro Block: Dateiname aus Heading-Titel generieren (`NN-slug.md`)
+  - Block-Inhalt in Datei schreiben (inkl. `### `-Header)
+  - Wenn Datei bereits existiert (Kollision): `NN-slug-2.md`
+- [ ] **M.02** — Sortierung via `NN` aus bestehender Reihenfolge in blocks.md
+- [ ] **M.03** — Gleiches Script für `index.md`: `/index/punkt-<slug>.md`
+  - Erledigt-Einträge und Stubs (#D) landen ebenfalls in Einzeldateien
+- [ ] **M.04** — Nur für Haupt-Diskussionen + Sub-Diskussionen, die `blocks.md` oder `index.md` haben
+- [ ] **M.05** — Nach erfolgreicher Migration: `blocks.md` und `index.md` löschen (mit `trash`, nicht `rm`)
+- [ ] **M.06** — Git-Commit: `disc: #H — migration: blocks.md + index.md in Einzeldateien`
+- [ ] **M.07** — Manuelle Verifikation: Diskussion im Dashboard öffnen → gleiche Blöcke + gleiches TOC
+- [ ] **M.08** — 🔗-Referenzen in anderen Diskussionen prüfen: Verweisen sie noch korrekt? (Alte `#box-<nr>`-Anker brechen — müssen zu Pfad-Referenzen migriert werden)
+
+---
+
+## Phase 4 — Frontend: 🔗-Format umstellen
+
+Ziel: 🔗-Button kopiert stabile Pfad-Referenzen statt `box-<nr>` und `entry-<nr>`.
+
+- [ ] **F.01** — `copyBoxLink()` akzeptiert optional `file_name`: Wenn vorhanden → `diskussion/blocks/<file_name>`, sonst wie bisher `diskussion > box-<nr>`
+- [ ] **F.02** — Index.md-Einträge: `diskussion/index/<file_name>` statt `diskussion > entry-<nr>`
+- [ ] **F.03** — Sub-Diskussionen bleiben: `diskussion/sub-slug` (keine Änderung nötig)
+- [ ] **F.04** — Datei-Kollision: Wenn Dateiname aus Slug berechnet wird, muss er unique sein (Prefix + Kurzslug reicht)
+- [ ] **F.05** — Build: `npm run build` → fehlerfrei
+
+---
+
+## Phase 5 — Sub-Diskussionen: Sub-eigene blocks.md → Einzeldateien (optional)
+
+Nur wenn Kazzle das auch für Sub-Diskussionen will. Betrifft alle 12 Sub-Ordner in `offene-umbauplaene/`.
+
+- [ ] **S.01** — Prüfung: Haben Sub-Diskussionen bereits Einzeldateien? (Subs haben README + index.md + blocks.md — könnten auf gleiches Pattern umgestellt werden)
+- [ ] **S.02** — Umsetzung: selbes Script wie Phase 3, rekursiv für alle Sub-Ordner
+- [ ] **S.03** — Nur wenn Kazzle das explizit freigibt — Sub-Subs sind seltener
+
+---
+
+## Phase 6 — Git-Integration: Auto-Commit
+
+Ziel: Nach jeder Einzeldatei-Änderung → sauberer Commit mit Dateinamen.
+
+- [ ] **G.01** — `git add -A` → `git commit -m "disc: <disc>/<sub>: box — <titel>"` für add-box
+- [ ] **G.02** — `git add -A` → `git commit -m "disc: <disc>/<sub>: box editiert — <titel>"` für edit
+- [ ] **G.03** — `git add -A` → `git commit -m "disc: <disc>/<sub>: box gelöscht — <titel>"` für delete
+- [ ] **G.04** — `git push` nach Commit (autonom, wie butler-hermi-config)
+
+---
+
+## Abhängigkeiten
+
+| # | Abhängigkeit | Status | Auswirkung auf #H |
+|---|---|---|---|
+| #A | Semantik-Regeln (Textbox vs Sub vs index) | ✅ erledigt | Bestätigt Drei-Typen-Trennung: `/blocks/`, `/index/`, Sub-Ordner bleiben eigenständig |
+| #B | Adressierbarkeit 🔗 | ✅ erledigt | 🔗-Format muss von `box-<nr>`/`entry-<nr>` auf Pfade umgestellt werden (Phase 4) |
+| #E | Sonderrolle index.md | ✅ konzeptuell geklärt | Index.md-Einträge in `/index/punkt-xx.md` — Sammeldatei wird obsolet |
+
+---
+
+## 🔗-Referenz-Auflösung nach Migration
+
+**Alte Referenzen** in Diskussionen und KI-Sessions, die noch `#box-<nr>` oder `#punkt-<nr>` verwenden:
+
+| Altes Format | Neues Format | Beispiel |
+|---|---|---|
+| `#box-0` | `blocks/00-neue-punkte-unformatiert` | `diskhub-rebuild/offene-umbauplaene/blocks/00-neue-punkte-unformatiert` |
+| `#box-8` | `blocks/08-einzeldateien` | → 🔗 kopiert jetzt Pfad |
+| `#punkt-31` (alt) | `blocks/...` | nach #D-Migration längst in blocks.md |
+
+Alte `#box-<nr>`-Anker brechen nach Migration — das ist akzeptabel, weil:
+- 🔗-Button kopiert ab sofort Pfad-Format
+- Alte Referenzen in Session-Logs sind historisch
+- Wenn nötig: Migration-Map-Datei für KI-Tools
 
 ### #I: Pfad-Button-Format — Selbst-erklärende Referenz für KI-Sessions
 *— · 24.05.2026*
@@ -242,6 +401,40 @@ Aktuell: Nur index.md-Einträge haben `(✓ erledigt)` + `*Erledigt: DD.MM.YYYY*
 - [x] Kombinierbar mit manuellem ✏️-Edit — beide schreiben in den selben Title in blocks.md
 - [x] Build OK (16.24s), Dashboard-Neustart, API 200
 - [x] Compiled JS + CSS verifiziert: `toggleDoneBtn`, `handleToggleDone`, `erledigt` im Bundle vorhanden
+- [x] Kazzle fragt: Gleicher Button auch für index.md-Einträge möglich? → Plan in box-11 dokumentiert
+
+**Plan: ⬜/✅-Button für index.md-Einträge (+ verfeinerter Plan)**
+
+**Warum extra?** Der Button für blocks.md nutzt `/edit-block` — die bestehende API für Textboxen. index.md-Einträge haben keinen eigenen Edit-Endpoint. Der ✏️-Button existiert dort nicht. Also braucht's einen neuen Endpoint.
+
+**Backend — neuer Endpoint:**
+- `POST /api/diskhub/edit-index-title`
+- Input: `discussion_id`, `entry_index` (0-based, entspricht `#punkt-<nr>`), `new_title`, optional: `sub_id`
+- Backend: Lädt index.md, findet die `###`-Zeile per Position (durchgehen bis zum entry_index-ten `###`), ersetzt ihren Title-Teil, schreibt zurück, git commit
+- Der Title-Teil ist alles nach `### ` bis zum Zeilenende (oder bis `||` wenn Sub-Referenz) — aber für index.md-Einträge ohne `||` einfach die ganze Zeile
+- **Option A: Nur Title ersetzen** — simpel, `git diff` zeigt nur die geänderte Zeile
+- **Option B: Automatisch Status-Zähler in README.md aktualisieren** — nützlich aber komplexer (muss zählen wie viele Einträge `(✓ erledigt)` haben vs. nicht)
+
+**Frontend — Button-Logik:**
+- Selbes Pattern wie in `BlocksSection`: Jeder index.md-Eintrag kriegt einen ⬜/✅-Button
+- Aktuelle Position: index.md-Einträge haben keinen eigenen Button-Bereich — sie werden als Accordion in `renderIndexMd()` gerendert, die Action-Buttons (🔗) hängen über einem globalen Event-Handler dran
+- **Ansatz A: Button in den bestehenden 🔗-Handler integrieren** — neben den `entry-<nr>`-🔗 einen zweiten Button setzen
+- **Ansatz B: Eigener kleiner Button pro Eintrag** — sauberer, aber mehr DOM-Eingriff
+- Erkennung identisch: `(✓ erledigt)` im `###`-Text → grüne Box
+- Der Button ruft `POST /api/diskhub/edit-index-title` mit dem toggelten Title auf
+
+**Status-Zähler (optional aber empfohlen):**
+- README.md der Diskussion hat oft: `**Status:** X erledigt · Y offen`
+- Der Button könnte beim Setzen/Entfernen von `(✓ erledigt)` die Zähler automatisch neu berechnen
+- Macht das Feature deutlich wertvoller — kein manuelles Nachpflegen vergessener Zähler mehr
+- **Pitfall:** Der Zähler zählt meist index.md-Einträge, nicht blocks.md-Blöcke. Müsste konsistent sein: entweder beide zählen oder klar trennen.
+
+**Workflow für Kazzle:**
+1. Entscheiden: Option A (nur Title) oder B (Title + Zähler) für den Endpoint?
+2. Entscheiden: Ansatz A oder B für den Frontend-Button?
+3. Hermi baut
+4. Build + Dashboard-Restart
+5. Doku im Fortschritt
 
 ### #29: UI-Layout: Preview auf 30-35 %
 
