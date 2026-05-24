@@ -165,6 +165,15 @@ Wenn eine Textbox gelöscht wird, bleibt ihre Nummer "gestorben" — keine neue 
 - Brauchen index.md-Einträge das gleiche `entry-`-Format oder reicht der bestehende `#punkt-<nr>`-Anchor?
 - Soll das Format später durch ein strukturierteres Schema ersetzt werden (z.B. `diskhub://`-URI)?
 
+**Fortschritt (24.05.2026):**
+- [x] `copyBoxLink()` in `Page.jsx` umgestellt: akzeptiert `headingText`, erzeugt `diskussion > box-<nr> "titel"` (bzw. `img-<nr>` für 📷-Blöcke)
+- [x] Beide 🔗-Buttons (Textboxen + Bild-Blöcke) aktualisiert — rufen `copyBoxLink(idx, headingText)` auf
+- [x] Title-Attribut zeigt Vorschau des kopierten Strings
+- [x] Build OK (16.39s), Dashboard-Neustart, API 200
+- [ ] Sub-Diskussionen 🔗 (#C) noch nicht umgestellt (eigenes Format `diskussion/sub-slug`)
+- [ ] index.md-Einträge 🔗 (#B) noch nicht umgestellt
+- [ ] Nummern-Stabilität (Platzhalter bei Löschung) noch nicht implementiert
+
 ### #J: Umbauplan — Element-Semantik & Phasenmodell
 *— · 24.05.2026*
 

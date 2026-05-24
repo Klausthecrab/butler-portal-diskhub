@@ -825,8 +825,8 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                 </button>
                 <button
                   className={styles.copyLinkBtn}
-                  onClick={() => copyBoxLink(originalIdx)}
-                  title={'#box-' + originalIdx + ' — Referenz kopieren (z.B. "' + discussionId + (isSub && subId ? '/' + subId : '') + '#box-' + originalIdx + '")'}
+                  onClick={() => copyBoxLink(originalIdx, headingText)}
+                  title={'Referenz kopieren: ' + discussionId + (isSub && subId ? '/' + subId : '') + ' > ' + (headingText.startsWith('📷') ? 'img' : 'box') + '-' + originalIdx + ' "' + headingText.replace(/^📷\s*/, '').trim() + '"'}
                 >
                   {copiedIndex === originalIdx ? '✅' : '🔗'}
                 </button>
@@ -904,8 +904,8 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                 </button>
                 <button
                   className={styles.copyLinkBtn}
-                  onClick={() => copyBoxLink(originalIdx)}
-                  title={'#box-' + originalIdx + ' — Referenz kopieren (z.B. "' + discussionId + (isSub && subId ? '/' + subId : '') + '#box-' + originalIdx + '")'}
+                  onClick={() => copyBoxLink(originalIdx, headingText)}
+                  title={'Referenz kopieren: ' + discussionId + (isSub && subId ? '/' + subId : '') + ' > ' + (headingText.startsWith('📷') ? 'img' : 'box') + '-' + originalIdx + ' "' + headingText.replace(/^📷\s*/, '').trim() + '"'}
                 >
                   {copiedIndex === originalIdx ? '✅' : '🔗'}
                 </button>
