@@ -718,9 +718,10 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
     }
   }
 
-  const copyBoxLink = (idx, headingText) => {
-    const hash = '#box-' + idx
-    navigator.clipboard.writeText(hash)
+  const copyBoxLink = (idx) => {
+    const subPath = isSub && subId ? '/' + subId : ''
+    const ref = discussionId + subPath + '#box-' + idx
+    navigator.clipboard.writeText(ref)
     setCopiedIndex(idx)
     setTimeout(() => setCopiedIndex(null), 2000)
   }
@@ -822,8 +823,8 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                 </button>
                 <button
                   className={styles.copyLinkBtn}
-                  onClick={() => copyBoxLink(originalIdx, headingText)}
-                  title={'#box-' + originalIdx + ' — Link kopieren (in Diskussion einfügen: #box-' + originalIdx + ')'}
+                  onClick={() => copyBoxLink(originalIdx)}
+                  title={'#box-' + originalIdx + ' — Referenz kopieren (z.B. "' + discussionId + (isSub && subId ? '/' + subId : '') + '#box-' + originalIdx + '")'}
                 >
                   {copiedIndex === originalIdx ? '✅' : '🔗'}
                 </button>
@@ -901,8 +902,8 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                 </button>
                 <button
                   className={styles.copyLinkBtn}
-                  onClick={() => copyBoxLink(originalIdx, headingText)}
-                  title={'#box-' + originalIdx + ' — Link kopieren (in Diskussion einfügen: #box-' + originalIdx + ')'}
+                  onClick={() => copyBoxLink(originalIdx)}
+                  title={'#box-' + originalIdx + ' — Referenz kopieren (z.B. "' + discussionId + (isSub && subId ? '/' + subId : '') + '#box-' + originalIdx + '")'}
                 >
                   {copiedIndex === originalIdx ? '✅' : '🔗'}
                 </button>
@@ -1890,6 +1891,7 @@ function SplitViewModal({ discussion, onClose }) {
                                 md={data.blocks}
                                 discussionId={discussion.id}
                                 isSub={false}
+                                subId={undefined}
                                 onConvertToSub={handleConvertToSub}
                                 onEditBlock={handleEditBlock}
                                 onDeleteBlock={handleDeleteBlock}
