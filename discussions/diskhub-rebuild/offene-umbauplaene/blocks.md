@@ -85,3 +85,29 @@ Offene Fragen:
 - Wie technisch umsetzbar (Backend-Endpoint pro Portal / pro Sub-Diskussion)?
 - Caching / letzter-Run-Zeitstempel?
 - Erst relevant wenn index.md-Sonderrolle geklärt ist.
+
+### #H: Datei-Architektur: Einzeldateien statt Sammeldateien (Konzept)
+*— · 24.05.2026*
+
+Abgeleitet aus der Diskussion um index.md vs. Textboxen (Session 24.05.2026).
+
+Aktuell: Alle Umbauplan-Punkte leben in index.md, alle Textboxen in blocks.md — jeweils eine große Datei mit vielen ###-Einträgen. Referenzen sind positionsbasiert (#box-3).
+
+Vision: Jeder Eintrag bekommt eine eigene .md-Datei:
+- Umbauplan-Punkte → /index/punkt-xx.md
+- Textboxen → /blocks/box-name.md
+- Sub-Diskussionen bleiben Ordner (wie gehabt)
+- README.md bleibt wie gehabt
+
+Vorteile:
+- Stabile Pfad-Referenzen statt fragiler Indizes
+- Git-Diff zeigt nur den betroffenen Eintrag
+- Promotion zur Sub-Diskussion = Ordner anlegen, Datei verschieben
+
+Nachteile / Fragen:
+- Viele kleine Dateien statt einer großen — Overhead?
+- Ein API-Request liefert alle Blöcke — bei Einzeldateien mehr Requests?
+- Sortierung (chronologisch, alphabetisch via Prefix?)
+- UI merkt der Nutzer nichts — reine Backend-Änderung
+
+Setzt #E (Sonderrolle index.md) und #A (Semantik-Regeln) voraus.
