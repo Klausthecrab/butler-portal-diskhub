@@ -170,8 +170,8 @@ Wenn eine Textbox gelöscht wird, bleibt ihre Nummer "gestorben" — keine neue 
 - [x] Beide 🔗-Buttons (Textboxen + Bild-Blöcke) aktualisiert — rufen `copyBoxLink(idx, headingText)` auf
 - [x] Title-Attribut zeigt Vorschau des kopierten Strings
 - [x] Build OK (16.39s), Dashboard-Neustart, API 200
-- [ ] Sub-Diskussionen 🔗 (#C) noch nicht umgestellt (eigenes Format `diskussion/sub-slug`)
-- [ ] index.md-Einträge 🔗 (#B) noch nicht umgestellt
+- [x] **Sub-Diskussionen 🔗 (#C):** Bereits implementiert — Button kopiert `diskhub-rebuild/offene-umbauplaene` (Zeile 1960)
+- [x] **index.md-Einträge 🔗 (#B):** Bereits implementiert — Button kopiert `diskhub-rebuild > entry-31 "Titel"` via globalem Click-Handler (Zeile 403+2564)
 - [ ] Nummern-Stabilität (Platzhalter bei Löschung) noch nicht implementiert
 
 ### #J: Umbauplan — Element-Semantik & Phasenmodell
