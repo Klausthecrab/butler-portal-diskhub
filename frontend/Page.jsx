@@ -355,7 +355,7 @@ function renderIndexMd(md, mode) {
   return result
 }
 
-function renderBlock(block, isHot) {
+function renderBlock(block, isHot, blockIdx, discussionId) {
   const heading = block.heading.substring(4).trim() // "### " entfernen
   const content = block.content.join('\n').trim()
   const footnote = block.footnote || ''
@@ -365,6 +365,11 @@ function renderBlock(block, isHot) {
   // Status-Marker aus Heading entfernen (von alter Formatierung)
   const headingClean = heading.replace(/ \((✓ erledigt|● offen)\)$/, '')
   const cleanHeading = isSub ? headingClean.substring(4).trim() : headingClean
+
+  // 🔗 Referenz für index.md-Einträge (#B)
+  const entryLabelMatch = cleanHeading.match(/^#(\d+|[A-Z]):?\s*/)
+  const entryNr = entryLabelMatch ? entryLabelMatch[1] : String(blockIdx)
+  const escapedRef = discussionId + ' > entry-' + entryNr + ' "' + escapedHeading.replace(/"/g, '&quot;') + '"'
 
   // Prüfen ob Block erledigt (Ergebnis-Zeile vorhanden oder alter Status)
   const hasResult = !!block.result || heading.includes('(✓ erledigt)')

@@ -179,3 +179,10 @@ Diese muss man dann aber auch pflegen. (automatisch; semi: bei erkennung; monito
 ist der ausreichen? checkt eine frische hermi instanz mit diesem link "diskhub-rebuild#box-17" bspw direkt "aha, das gehört zu diskhub, ist eine Diskussion und es geht um den inhalt der Textbox 17, den lese ich jetzt".
 
 bitte mit mir diskutieren
+
+### diskhub knowledge skill
+*— · 24.05.2026*
+
+zeigen und ggf verbessern. der hinweis dazu muss auch in memory_base eingetragen werden.
+
+hinweis zu knowledge skill zeigen lassen.
