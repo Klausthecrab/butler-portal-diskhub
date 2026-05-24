@@ -196,6 +196,41 @@ Ziel: `add_box`, `edit_block`, `delete_block` arbeiten auf Einzeldateien statt z
 
 ---
 
+## Fortschritt (Phase 1 + 2 — 24.05.2026)
+
+**Was umgesetzt wurde:**
+
+**Phase 1 — Backend Read umstellen:**
+- `get_discussion()` prüft `blocks/` und `index/` Ordner, liest Einzeldateien sortiert, konkateniert zu String
+- Fallback auf `blocks.md` / `index.md` wenn Ordner nicht existieren
+- Neue API-Felder: `blocks_files[]`, `index_files[]` mit `{name, title}`
+
+**Phase 2 — Backend CRUD auf Einzeldateien:**
+- `add_box()`: Prüft ob `blocks/` existiert → schreibt Einzeldatei (`blocks/<NN>-<slug>.md`), sonst Fallback `blocks.md`
+- `edit_block()`: Akzeptiert `file_name` → liest/schreibt Datei direkt (Datumszeile erhalten). Fallback `block_index`
+- `delete_block()`: Akzeptiert `file_name` → `os.remove()`. Fallback `block_index`
+- Alle Endpunkte backward-compatible: Frontend muss nicht geändert werden
+
+**Ausstehend:** C.05 (Frontend 🔗-Button + Edit/Delete senden `file_name`) — kommt in Phase 4
+
+---
+
+## Verifikation nach Phase 3 (Migration)
+
+Nachdem das Migration-Script läuft und `blocks/` existiert:
+
+1. `ls -la discussions/<disc>/blocks/` — alle `.md`-Dateien vorhanden, sortiert nach `NN`
+2. `GET /diskhub/<disc>` — `blocks`-String identisch zu vorher, `blocks_files[]` gefüllt mit korrekten `{name, title}`
+3. `POST /diskhub/add-box` — neue Datei `blocks/<NN>-<slug>.md` angelegt, `file_name` im Response
+4. `POST /diskhub/edit-block` mit `file_name` — Datei-Content aktualisiert, Datumszeile erhalten
+5. `POST /diskhub/delete-block` mit `file_name` — Datei gelöscht, `blocks_left` korrekt
+6. `GET /diskhub/other-disc` — Diskussion OHNE `blocks/` funktioniert noch (backward compat)
+7. `GET /diskhub/health` — 200
+
+Am besten als Python-Script (`scripts/verify-phase-1-2.py`) das automatisch alle 7 Punkte prüft.
+
+---
+
 ## Phase 3 — Migration: Sammeldateien aufsplitten
 
 Ziel: Einmaliges Script, das bestehende `blocks.md` und `index.md` in Einzeldateien zerlegt.
@@ -400,6 +435,11 @@ Aktuell: Nur index.md-Einträge haben `(✓ erledigt)` + `*Erledigt: DD.MM.YYYY*
 - [x] Build OK (16.24s), Dashboard-Neustart, API 200
 - [x] Compiled JS + CSS verifiziert: `toggleDoneBtn`, `handleToggleDone`, `erledigt` im Bundle vorhanden
 - [x] Kazzle fragt: Gleicher Button auch für index.md-Einträge möglich? → Plan in box-11 dokumentiert
+- [x] **Umsetzung (24.05.2026):** ⬜/✅-Button für index.md-Einträge implementiert
+  - Backend: `POST /api/diskhub/edit-index-title` — toggelt `(✓ erledigt)` auf ###-Entry + git commit
+  - Frontend: Button in `renderBlock()`-HTML via `data-toggle-index-done` + globalem Click-Handler (Pattern wie `data-copy-entry`)
+  - Entscheidung: Backend A (nur Title) + Frontend A (im bestehenden Handler-Pattern)
+  - Build OK, Dashboard-Neustart, API 200 verifiziert
 
 **Plan: ⬜/✅-Button für index.md-Einträge (+ verfeinerter Plan)**
 
@@ -428,11 +468,11 @@ Aktuell: Nur index.md-Einträge haben `(✓ erledigt)` + `*Erledigt: DD.MM.YYYY*
 - **Pitfall:** Der Zähler zählt meist index.md-Einträge, nicht blocks.md-Blöcke. Müsste konsistent sein: entweder beide zählen oder klar trennen.
 
 **Workflow für Kazzle:**
-1. Entscheiden: Option A (nur Title) oder B (Title + Zähler) für den Endpoint?
-2. Entscheiden: Ansatz A oder B für den Frontend-Button?
-3. Hermi baut
-4. Build + Dashboard-Restart
-5. Doku im Fortschritt
+1. ✅ Entscheiden: Option A (nur Title) oder B (Title + Zähler) für den Endpoint? → **A (nur Title)**
+2. ✅ Entscheiden: Ansatz A oder B für den Frontend-Button? → **A (im bestehenden Handler-Pattern)**
+3. ✅ Hermi baut
+4. ✅ Build + Dashboard-Restart
+5. ✅ Doku im Fortschritt
 
 ### #29: UI-Layout: Preview auf 30-35 %
 
