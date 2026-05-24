@@ -74,6 +74,14 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 - [x] API-Verifikation: `GET /api/diskhub/diskhub-rebuild` → `blocks_files[18]`, `index_files[1]` ✅
 - [x] Dashboard läuft + API 200 ✅
 
+**gateway-standardisierung migriert** ✅
+- [x] Hauptebene: index.md → `index/` (6 Dateien, Sub:-Verweise)
+- [x] 5 Subs: api-key-handling, docker-label-kompatibilitaet, einheitlicher-reverse-proxy, traefik-entscheidung, valider-test-eintrag (6 Dateien)
+- [x] 12 index.md-Einträge total, 0 blocks.md (keine vorhanden)
+- [x] Script-Verifikation: index/-Migration ✅
+- [x] API-Verifikation: `index_files[6]` via Haupt-Diskussion ✅
+- [x] 6 Sammeldateien getrasht
+
 ### Offene Punkte (priorisiert: 2 → 4 → 3 → 1)
 
 **1. Weitere Diskussionen migrieren** (Phase 2)
@@ -82,7 +90,7 @@ Folgende Diskussionen haben noch Sammeldateien und sollen migriert werden:
 | Diskussion | blocks.md ### | index.md ### | Subs mit ### |
 |---|---|---|---|
 | **diskhub-rebuild** (Hauptebene) | 18 → ✅ | 1 → ✅ | — |
-| **gateway-standardisierung** | — | 6 🏗️ | 5 Subs (je 1-2 Einträge) |
+| **gateway-standardisierung** | — | 6 → ✅ | 5 Subs → ✅ |
 | **memory-trimmer** | — | 7 🏗️ | Sub `offene-punkte` → blocks.md 7 🏗️ |
 | **registry-pythonpath-fix** | — | 0 ✅ | — |
 
