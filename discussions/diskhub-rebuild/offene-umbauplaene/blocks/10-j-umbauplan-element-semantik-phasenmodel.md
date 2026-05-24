@@ -24,7 +24,7 @@ Synthese aus der Diskussion zu #A (Semantik-Regeln) und #E (Sonderrollen). Defin
 - 🔜 Nächster Schritt: Phase 1 (Adressierbarkeit #B, #C) — von Kazzle freigeben lassen
 
 **Phase 1 — Fortschritt (24.05.2026):**
-- ✅ `renderBlock()` + `renderIndexMd()`: HTML-ID `punkt-<idx>` + 🔗-Button mit `data-copy-entry` und `data-ref` (Format: `diskussion > entry-<nr> "titel"`)
+- ✅ `renderBlock()` + `renderIndexMd()`: HTML-ID `punkt-<idx>` + 🔗-Button mit `data-copy-entry` und `data-ref` (Format: `diskussion > entry-<nr> "titel"` — **Phase 4: auf Pfad-Format `diskussion/index/<name>` umgestellt**)
 - ✅ Sub-Diskussionen (#C): 🔗-Button kopiert `diskussion/sub-slug` mit `e.stopPropagation()` (öffnet kein Accordion)
 - ✅ Auto-Scroll: `#punkt-<idx>` Hash → `scrollIntoView()` via useEffect
 - ✅ Globaler Click-Handler: `document.addEventListener` delegiert `[data-copy-entry]` → clipboard write + ✅-Feedback

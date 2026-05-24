@@ -161,7 +161,7 @@ Ziel: Einmaliges Script, das bestehende `blocks.md` und `index.md` in Einzeldate
 - [ ] **M.05** — Nach erfolgreicher Migration: `blocks.md` und `index.md` löschen (mit `trash`, nicht `rm`)
 - [ ] **M.06** — Git-Commit: `disc: #H — migration: blocks.md + index.md in Einzeldateien`
 - [ ] **M.07** — Manuelle Verifikation: Diskussion im Dashboard öffnen → gleiche Blöcke + gleiches TOC
-- [ ] **M.08** — 🔗-Referenzen in anderen Diskussionen prüfen: Verweisen sie noch korrekt? (Alte `#box-<nr>`-Anker brechen — müssen zu Pfad-Referenzen migriert werden)
+|- [x] **M.08** — 🔗-Referenzen in anderen Diskussionen geprüft und bereinigt (Phase 4 F.02 + M.08 Cleanup — Mai 2026)
 
 ---
 
@@ -169,8 +169,8 @@ Ziel: Einmaliges Script, das bestehende `blocks.md` und `index.md` in Einzeldate
 
 Ziel: 🔗-Button kopiert stabile Pfad-Referenzen statt `box-<nr>` und `entry-<nr>`.
 
-- [ ] **F.01** — `copyBoxLink()` akzeptiert optional `file_name`: Wenn vorhanden → `diskussion/blocks/<file_name>`, sonst wie bisher `diskussion > box-<nr>`
-- [ ] **F.02** — Index.md-Einträge: `diskussion/index/<file_name>` statt `diskussion > entry-<nr>`
+|- [x] **F.01** — `copyBoxLink()` akzeptiert optional `file_name`: Wenn vorhanden → `diskussion/blocks/<file_name>`, Fallback auf `diskussion > box-<nr>` für Diskussionen ohne blocks/-Ordner (✅ Phase 4)
+|- [x] **F.02** — Index.md-Einträge: `diskussion/index/<file_name>` statt `diskussion > entry-<nr>`, Fallback auf altes Format für Diskussionen ohne index/-Ordner (✅ Phase 4)
 - [ ] **F.03** — Sub-Diskussionen bleiben: `diskussion/sub-slug` (keine Änderung nötig)
 - [ ] **F.04** — Datei-Kollision: Wenn Dateiname aus Slug berechnet wird, muss er unique sein (Prefix + Kurzslug reicht)
 - [ ] **F.05** — Build: `npm run build` → fehlerfrei

@@ -93,8 +93,8 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 **1. Weitere Diskussionen migrieren** ✅
 Alle 3 Diskussionen migriert — siehe Fortschritt oben.
 
-**2. 🔗-Referenzen prüfen (M.08)**
-Alte `> box-\d+` oder `> entry-\d+`-Referenzen in allen discussions/. Niedrige Prio, da neue 🔗-Buttons Pfad-Format kopieren.
+**2. 🔗-Referenzen prüfen (M.08)** ✅
+Alte `> box-\d+` oder `> entry-\d+`-Referenzen in allen discussions/ aufgeräumt (24.05.2026): 4 Textboxen in offene-umbauplaene gepatcht (08-h, 09-i, 10-j, 27), keine Altreferenzen in anderen Diskussionen.
 
 **3. Phase 5 — Sub-Diskussionen Einzeldateien (optional)**
 Für Diskussionen mit Sub-Struktur das Script rekursiv laufen lassen. Braucht Max Go.

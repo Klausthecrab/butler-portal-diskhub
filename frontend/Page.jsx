@@ -1020,7 +1020,7 @@ function DiscussionCard({ discussion, onClick }) {
 
 // ─── Split-View Modal (Diskussion + Preview) ─────────────────────────────────
 
-function SplitViewModal({ discussion, onClose }) {
+function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -2010,8 +2010,8 @@ function SplitViewModal({ discussion, onClose }) {
                                       e.stopPropagation()
                                       const ref = discussion.id + '/' + sub.id
                                       navigator.clipboard.writeText(ref)
-                                      setCopiedSub(sub.id)
-                                      setTimeout(() => setCopiedSub(null), 2000)
+                                      onCopySub(sub.id)
+                                      setTimeout(() => onCopySub(null), 2000)
                                     }}
                                     title={'Referenz kopieren: ' + discussion.id + '/' + sub.id}
                                   >{copiedSub === sub.id ? '✅' : '🔗'}</button>
@@ -2663,7 +2663,7 @@ export default function Page() {
       )}
 
       {selected && (
-        <SplitViewModal discussion={selected} onClose={() => setSelected(null)} />
+        <SplitViewModal discussion={selected} onClose={() => setSelected(null)} copiedSub={copiedSub} onCopySub={setCopiedSub} />
       )}
     </div>
   )
