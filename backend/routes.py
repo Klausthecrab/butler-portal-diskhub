@@ -1806,7 +1806,8 @@ def edit_block():
 @diskhub.route('/diskhub/edit-index-title', methods=['POST'])
 def edit_index_title():
     """'⬜/✅ Status-Toggle für index.md-Einträge'
-    Findet den Eintrag bei entry_index (0-based), toggelt (✓ erledigt) und schreibt zurück."""
+    Unterstützt index/ Ordner (Einzeldateien, #H) und index.md Fallback.
+    """
     data = request.get_json(silent=True) or {}
     discussion_id = data.get('discussion_id', '')
     entry_index = data.get('entry_index')
@@ -1821,33 +1822,54 @@ def edit_index_title():
     else:
         target_dir = os.path.join(DISCUSSIONS_DIR, discussion_id)
 
-    index_path = os.path.join(target_dir, 'index.md')
-    if not os.path.isfile(index_path):
-        return jsonify({'error': 'index.md nicht gefunden'}), 404
-
-    with open(index_path, 'r') as f:
-        lines = f.readlines()
-
-    # Alle ###-Header finden
-    header_indices = [i for i, line in enumerate(lines) if line.startswith('### ')]
-
-    if entry_index < 0 or entry_index >= len(header_indices):
-        return jsonify({'error': f'entry_index {entry_index} ungültig (0-{len(header_indices)-1})'}), 400
-
-    line_idx = header_indices[entry_index]
-    old_line = lines[line_idx]
-    heading_text = old_line[4:].rstrip('\n')  # "### " entfernen, Newline abtrennen
-
-    # (✓ erledigt) toggeln
-    if '(✓ erledigt)' in heading_text:
-        new_heading = re.sub(r'\s*\(✓ erledigt\)\s*', ' ', heading_text).strip()
+    # #H: Einzeldateien aus index/ Ordner
+    index_dir = os.path.join(target_dir, 'index')
+    if os.path.isdir(index_dir):
+        md_files = sorted([f for f in os.listdir(index_dir) if f.endswith('.md')])
+        if entry_index < 0 or entry_index >= len(md_files):
+            return jsonify({'error': f'entry_index {entry_index} ungültig (0-{len(md_files)-1})'}), 400
+        filepath = os.path.join(index_dir, md_files[entry_index])
+        with open(filepath, 'r') as f:
+            lines = f.readlines()
+        # Erste ###-Zeile finden und toggeln
+        for i, line in enumerate(lines):
+            if line.startswith('### '):
+                heading_text = line[4:].rstrip('\n')
+                if '(✓ erledigt)' in heading_text:
+                    new_heading = re.sub(r'\s*\(✓ erledigt\)\s*', ' ', heading_text).strip()
+                else:
+                    new_heading = heading_text + ' (✓ erledigt)'
+                lines[i] = f'### {new_heading}\n'
+                break
+        with open(filepath, 'w') as f:
+            f.writelines(lines)
     else:
-        new_heading = heading_text + ' (✓ erledigt)'
+        # Fallback: index.md
+        index_path = os.path.join(target_dir, 'index.md')
+        if not os.path.isfile(index_path):
+            return jsonify({'error': 'index.md nicht gefunden'}), 404
 
-    lines[line_idx] = f'### {new_heading}\n'
+        with open(index_path, 'r') as f:
+            lines = f.readlines()
 
-    with open(index_path, 'w') as f:
-        f.writelines(lines)
+        header_indices = [i for i, line in enumerate(lines) if line.startswith('### ')]
+
+        if entry_index < 0 or entry_index >= len(header_indices):
+            return jsonify({'error': f'entry_index {entry_index} ungültig (0-{len(header_indices)-1})'}), 400
+
+        line_idx = header_indices[entry_index]
+        old_line = lines[line_idx]
+        heading_text = old_line[4:].rstrip('\n')
+
+        if '(✓ erledigt)' in heading_text:
+            new_heading = re.sub(r'\s*\(✓ erledigt\)\s*', ' ', heading_text).strip()
+        else:
+            new_heading = heading_text + ' (✓ erledigt)'
+
+        lines[line_idx] = f'### {new_heading}\n'
+
+        with open(index_path, 'w') as f:
+            f.writelines(lines)
 
     # Git commit
     sha = ''

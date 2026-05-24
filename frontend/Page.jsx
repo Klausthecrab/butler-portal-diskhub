@@ -673,7 +673,8 @@ function parseCreatedDate(readme) {
   return m ? m[1] : ''
 }
 
-function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditBlock, onDeleteBlock }) {
+function BlocksSection({ md, discussionId, isSub, subId, blocksFiles, onConvertToSub, onEditBlock, onDeleteBlock }) {
+  blocksFiles = blocksFiles || []
   const blocks = useMemo(() => parseBlocksMd(md), [md])
   // #41: Neu = unten — chronologische Reihenfolge (neuestes Element zuletzt)
   const reversedBlocks = useMemo(() => {
@@ -704,10 +705,10 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
     setEditContent('')
   }
 
-  const saveEdit = (idx) => {
+const saveEdit = (idx, file_name) => {
     if (!editTitle.trim()) return
     setEditLoading(true)
-    onEditBlock(idx, editTitle.trim(), editContent, () => {
+    onEditBlock(idx, editTitle.trim(), editContent, file_name, () => {
       setEditingIndex(null)
       setEditTitle('')
       setEditContent('')
@@ -715,32 +716,39 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
     })
   }
 
-  const handleDelete = (idx) => {
+  const handleDelete = (idx, file_name) => {
     if (confirmingDelete === idx) {
       setConfirmingDelete(null)
-      onDeleteBlock(idx)
+      onDeleteBlock(idx, file_name)
     } else {
       setConfirmingDelete(idx)
       setTimeout(() => setConfirmingDelete(null), 4000)
     }
   }
 
-  const handleToggleDone = (idx, headingText, content) => {
+  const handleToggleDone = (idx, headingText, content, file_name) => {
     const isDone = headingText.includes('(✓ erledigt)')
     let newTitle
     if (isDone) {
-      newTitle = headingText.replace(/\s*\(✓ erledigt\)\s*/, ' ').trim()
+      newTitle = headingText.replace(/\s*\(✓ erledigt\)\s*/g, ' ').trim()
     } else {
       newTitle = headingText + ' (✓ erledigt)'
     }
-    onEditBlock(idx, newTitle, content, () => {})
+    onEditBlock(idx, newTitle, content, file_name, () => {})
   }
 
-  const copyBoxLink = (idx, headingText) => {
+  const copyBoxLink = (idx, headingText, file_name) => {
     const subPath = isSub && subId ? '/' + subId : ''
     const cleanedTitle = headingText.replace(/^📷\s*/, '').trim()
     const prefix = headingText.startsWith('📷') ? 'img' : 'box'
-    const ref = discussionId + subPath + ' > ' + prefix + '-' + idx + ' "' + cleanedTitle + '"'
+    let ref
+    if (file_name) {
+      // #H: Pfad-Format für Einzeldateien
+      ref = discussionId + subPath + '/blocks/' + file_name
+    } else {
+      // Fallback: altes box-NR-Format
+      ref = discussionId + subPath + ' > ' + prefix + '-' + idx + ' "' + cleanedTitle + '"'
+    }
     navigator.clipboard.writeText(ref)
     setCopiedIndex(idx)
     setTimeout(() => setCopiedIndex(null), 2000)
@@ -770,6 +778,9 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
           ? block.content.filter((_, i) => i !== dateInfo.idx)
           : block.content
         const content = filteredContent.join('\n').trim()
+
+        // #H: file_name aus blocks_files[] für Einzeldateien-API
+        const file_name = blocksFiles[originalIdx]?.name
 
         // #40: Bild-Blöcke immer sichtbar ohne Accordion
         const isImageBlock = headingText.startsWith('📷')
@@ -814,7 +825,7 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                   <div className={styles.editBlockButtons}>
                     <button
                       className={styles.editBlockSaveBtn}
-                      onClick={() => saveEdit(idx)}
+                      onClick={() => saveEdit(originalIdx, file_name)}
                       disabled={editLoading || !editTitle.trim()}
                     >
                       {editLoading ? '⏳ Speichern...' : '✅ Speichern'}
@@ -844,14 +855,14 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                 </button>
                 <button
                   className={styles.copyLinkBtn}
-                  onClick={() => copyBoxLink(originalIdx, headingText)}
+                  onClick={() => copyBoxLink(originalIdx, headingText, file_name)}
                   title={'Referenz kopieren: ' + discussionId + (isSub && subId ? '/' + subId : '') + ' > ' + (headingText.startsWith('📷') ? 'img' : 'box') + '-' + originalIdx + ' "' + headingText.replace(/^📷\s*/, '').trim() + '"'}
                 >
                   {copiedIndex === originalIdx ? '✅' : '🔗'}
                 </button>
                 <button
                   className={`${styles.toggleDoneBtn} ${isDone ? styles.toggleDoneBtnActive : ''}`}
-                  onClick={() => handleToggleDone(originalIdx, headingText, content)}
+                  onClick={() => handleToggleDone(originalIdx, headingText, content, file_name)}
                   title={isDone ? 'Als offen markieren' : 'Als erledigt markieren'}
                 >
                   {isDone ? '✅' : '⬜'}
@@ -865,7 +876,7 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                 </button>
                 <button
                   className={`${styles.deleteBlockActionBtn} ${confirmingDelete === originalIdx ? styles.deleteBlockActionBtnDanger : ''}`}
-                  onClick={() => handleDelete(originalIdx)}
+                  onClick={() => handleDelete(originalIdx, file_name)}
                   title={confirmingDelete === originalIdx ? 'Erneut klicken zum Löschen' : 'Diese Textbox löschen'}
                 >
                   {confirmingDelete === originalIdx ? '⚠️ Sicher?' : '🗑️'}
@@ -900,7 +911,7 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                   <div className={styles.editBlockButtons}>
                     <button
                       className={styles.editBlockSaveBtn}
-                      onClick={() => saveEdit(idx)}
+                      onClick={() => saveEdit(originalIdx, file_name)}
                       disabled={editLoading || !editTitle.trim()}
                     >
                       {editLoading ? '⏳ Speichern...' : '✅ Speichern'}
@@ -930,14 +941,14 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                 </button>
                 <button
                   className={styles.copyLinkBtn}
-                  onClick={() => copyBoxLink(originalIdx, headingText)}
+                  onClick={() => copyBoxLink(originalIdx, headingText, file_name)}
                   title={'Referenz kopieren: ' + discussionId + (isSub && subId ? '/' + subId : '') + ' > ' + (headingText.startsWith('📷') ? 'img' : 'box') + '-' + originalIdx + ' "' + headingText.replace(/^📷\s*/, '').trim() + '"'}
                 >
                   {copiedIndex === originalIdx ? '✅' : '🔗'}
                 </button>
                 <button
                   className={`${styles.toggleDoneBtn} ${isDone ? styles.toggleDoneBtnActive : ''}`}
-                  onClick={() => handleToggleDone(originalIdx, headingText, content)}
+                  onClick={() => handleToggleDone(originalIdx, headingText, content, file_name)}
                   title={isDone ? 'Als offen markieren' : 'Als erledigt markieren'}
                 >
                   {isDone ? '✅' : '⬜'}
@@ -951,7 +962,7 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
                 </button>
                 <button
                   className={`${styles.deleteBlockActionBtn} ${confirmingDelete === originalIdx ? styles.deleteBlockActionBtnDanger : ''}`}
-                  onClick={() => handleDelete(originalIdx)}
+                  onClick={() => handleDelete(originalIdx, file_name)}
                   title={confirmingDelete === originalIdx ? 'Erneut klicken zum Löschen' : 'Diese Textbox löschen'}
                 >
                   {confirmingDelete === originalIdx ? '⚠️ Sicher?' : '🗑️'}
@@ -1539,19 +1550,23 @@ function SplitViewModal({ discussion, onClose }) {
       })
   }
 
-  // Textbox bearbeiten (#25)
-  const handleEditBlock = (blockIndex, title, content, onSuccess) => {
+  // Textbox bearbeiten (#25 + #H: file_name)
+  const handleEditBlock = (blockIndex, title, content, file_name, onSuccess) => {
+    const payload = {
+      discussion_id: discussion.id,
+      block_index: blockIndex,
+      title,
+      content,
+      is_sub: !!activeSubView,
+      sub_id: activeSubView || undefined,
+    }
+    if (file_name) {
+      payload.file_name = file_name
+    }
     fetch(`${API}/edit-block`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        discussion_id: discussion.id,
-        block_index: blockIndex,
-        title,
-        content,
-        is_sub: !!activeSubView,
-        sub_id: activeSubView || undefined,
-      }),
+      body: JSON.stringify(payload),
     })
       .then(r => r.json())
       .then(d => {
@@ -1570,17 +1585,21 @@ function SplitViewModal({ discussion, onClose }) {
       })
   }
 
-  // Textbox löschen (#25)
-  const handleDeleteBlock = (blockIndex) => {
+  // Textbox löschen (#25 + #H: file_name)
+  const handleDeleteBlock = (blockIndex, file_name) => {
+    const payload = {
+      discussion_id: discussion.id,
+      block_index: blockIndex,
+      is_sub: !!activeSubView,
+      sub_id: activeSubView || undefined,
+    }
+    if (file_name) {
+      payload.file_name = file_name
+    }
     fetch(`${API}/delete-block`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        discussion_id: discussion.id,
-        block_index: blockIndex,
-        is_sub: !!activeSubView,
-        sub_id: activeSubView || undefined,
-      }),
+      body: JSON.stringify(payload),
     })
       .then(r => r.json())
       .then(d => {
@@ -1768,14 +1787,15 @@ function SplitViewModal({ discussion, onClose }) {
                             {subViewData.blocks && (
                               <div className={styles.blocksSection}>
                                 <div className={styles.sectionLabel}>📝 Blöcke</div>
-<BlocksSection
-                                  md={subViewData.blocks}
-                                  discussionId={discussion.id}
-                                  isSub={true}
-                                  subId={activeSubView}
-                                  onConvertToSub={handleConvertToSub}
-                                  onEditBlock={handleEditBlock}
-                                  onDeleteBlock={handleDeleteBlock}
+                                <BlocksSection
+                                md={subViewData.blocks}
+                                discussionId={discussion.id}
+                                isSub={true}
+                                subId={activeSubView}
+                                blocksFiles={subViewData.blocks_files}
+                                onConvertToSub={handleConvertToSub}
+                                onEditBlock={handleEditBlock}
+                                onDeleteBlock={handleDeleteBlock}
                                 />
                               </div>
                             )}
@@ -1927,6 +1947,7 @@ function SplitViewModal({ discussion, onClose }) {
                                 discussionId={discussion.id}
                                 isSub={false}
                                 subId={undefined}
+                                blocksFiles={data.blocks_files}
                                 onConvertToSub={handleConvertToSub}
                                 onEditBlock={handleEditBlock}
                                 onDeleteBlock={handleDeleteBlock}
