@@ -199,6 +199,14 @@ Synthese aus der Diskussion zu #A (Semantik-Regeln) und #E (Sonderrollen). Defin
 - ✅ `diskhub-doc`-Skill um Referenz auf neuen Knowledge-Skill ergänzt
 - 🔜 Nächster Schritt: Phase 1 (Adressierbarkeit #B, #C) — von Kazzle freigeben lassen
 
+**Phase 1 — Fortschritt (24.05.2026):**
+- ✅ `renderBlock()` + `renderIndexMd()`: HTML-ID `punkt-<idx>` + 🔗-Button mit `data-copy-entry` und `data-ref` (Format: `diskussion > entry-<nr> "titel"`)
+- ✅ Sub-Diskussionen (#C): 🔗-Button kopiert `diskussion/sub-slug` mit `e.stopPropagation()` (öffnet kein Accordion)
+- ✅ Auto-Scroll: `#punkt-<idx>` Hash → `scrollIntoView()` via useEffect
+- ✅ Globaler Click-Handler: `document.addEventListener` delegiert `[data-copy-entry]` → clipboard write + ✅-Feedback
+- ✅ Build OK (16.21s), Dashboard-Neustart, API 200
+- 🔜 Nächster Schritt: Phase 2 (Element-Typen trennen #D, #E) — von Kazzle freigeben lassen
+
 ### #K: Konzeptblöcke in blocks.md sollen „erledigt"-Status bekommen
 *— · 24.05.2026*
 
