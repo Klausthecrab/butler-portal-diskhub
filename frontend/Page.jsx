@@ -1191,6 +1191,12 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
           if (d.status === 'ok') {
             setErrorMsg('✅ Status aktualisiert' + (d.sha ? ' (' + d.sha.slice(0, 7) + ')' : ''))
             fetchDiscussionData()
+            // Sub-Diskussion ebenfalls neu laden, wenn in Sub-Ansicht
+            if (activeSubView && discussion?.id) {
+              fetch(`${API}/${discussion.id}?sub_id=${encodeURIComponent(activeSubView)}`)
+                .then(r => r.json())
+                .then(sd => setSubViewData(sd))
+            }
           } else {
             toggleBtn.textContent = '❌'
             setTimeout(() => { toggleBtn.textContent = origText }, 2000)

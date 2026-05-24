@@ -96,10 +96,8 @@ Alle 3 Diskussionen migriert — siehe Fortschritt oben.
 **2. 🔗-Referenzen prüfen (M.08)** ✅
 Alte `> box-\d+` oder `> entry-\d+`-Referenzen in allen discussions/ aufgeräumt (24.05.2026): 4 Textboxen in offene-umbauplaene gepatcht (08-h, 09-i, 10-j, 27), keine Altreferenzen in anderen Diskussionen.
 
-**3. Phase 5 — Sub-Diskussionen Einzeldateien (optional)**
-Für Diskussionen mit Sub-Struktur das Script rekursiv laufen lassen. Braucht Max Go.
-- gateway-standardisierung: 5 Subs mit index.md-Einträgen
-- memory-trimmer: Sub `offene-punkte` mit blocks.md
+**3. Phase 5 — Sub-Diskussionen Einzeldateien** ✅
+Für alle 4 Diskussionen rekursiv gelaufen (Script, 14 Ebenen). 17 index.md-Dateien ohne ###-Header übersprungen — keine Migration nötig.
 
 **4. Phase 6 — Git-Push** ✅
 Auto-Push nach jedem Commit (analog butler-hermi-config). GitHub Repo `Klausthecrab/butler-portal-diskhub` erstellt. `_git_push()`-Helper in 6 Endpunkten (add/edit/delete/update-readme/promote/toggle-title).

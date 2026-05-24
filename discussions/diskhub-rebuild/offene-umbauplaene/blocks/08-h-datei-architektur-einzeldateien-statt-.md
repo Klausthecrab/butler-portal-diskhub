@@ -177,13 +177,13 @@ Ziel: 🔗-Button kopiert stabile Pfad-Referenzen statt `box-<nr>` und `entry-<n
 
 ---
 
-## Phase 5 — Sub-Diskussionen: Sub-eigene blocks.md → Einzeldateien (optional)
+## Phase 5 — Sub-Diskussionen: Sub-eigene blocks.md → Einzeldateien ✅
 
-Nur wenn Kazzle das auch für Sub-Diskussionen will. Betrifft alle 12 Sub-Ordner in `offene-umbauplaene/`.
+Alle 17 verbliebenen Sammeldateien (index.md) in Sub-Diskussionen haben 0 ###-Header — Script übersprungen, keine Migration nötig. Phase 5 faktisch bereits abgeschlossen.
 
-- [ ] **S.01** — Prüfung: Haben Sub-Diskussionen bereits Einzeldateien? (Subs haben README + index.md + blocks.md — könnten auf gleiches Pattern umgestellt werden)
-- [ ] **S.02** — Umsetzung: selbes Script wie Phase 3, rekursiv für alle Sub-Ordner
-- [ ] **S.03** — Nur wenn Kazzle das explizit freigibt — Sub-Subs sind seltener
+|- [x] **S.01** — Prüfung: 17 index.md-Dateien in Subs (offene-umbauplaene/01-12, memory-trimmer/01-06+offene-punkte, registry) — alle ohne ###-Header
+|- [x] **S.02** — Umsetzung: Script rekursiv über alle 4 Diskussionen gelaufen (14 Ebenen) — 0 Änderungen
+|- [x] **S.03** — Kazzle-Go erteilt ✅ (24.05.2026)
 
 ---
 
