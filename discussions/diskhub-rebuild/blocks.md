@@ -180,10 +180,3 @@ ist der ausreichen? checkt eine frische hermi instanz mit diesem link "diskhub-r
 
 bitte mit mir diskutieren
 
-### diskhub knowledge skill
-*— · 24.05.2026*
-
-zeigen und ggf verbessern. der hinweis dazu muss auch in memory_base eingetragen werden.
-
-hinweis zu knowledge skill zeigen lassen.
-
