@@ -2021,8 +2021,14 @@ def add_box():
         # Slug aus Titel generieren
         slug = re.sub(r'[^a-z0-9-]', '-', title.lower())
         slug = re.sub(r'-+', '-', slug).strip('-')[:40]
+        # Kollisionsschutz: wenn Datei existiert, -2, -3, … Suffix
         file_name = f'{nn}-{slug}'
         filepath = os.path.join(blocks_dir, f'{file_name}.md')
+        counter = 0
+        while os.path.exists(filepath):
+            counter += 1
+            file_name = f'{nn}-{slug}-{counter}'
+            filepath = os.path.join(blocks_dir, f'{file_name}.md')
         today = datetime.now(timezone.utc).strftime('%d.%m.%Y')
         block_md = f'### {title}\n*— · {today}*\n\n{content}\n' if content else f'### {title}\n*— · {today}*\n'
         with open(filepath, 'w') as f:
