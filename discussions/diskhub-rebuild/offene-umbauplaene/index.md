@@ -58,7 +58,7 @@
 
 > **Ergebnis:** `sub.status` aus API-Daten im Header gerendert: grüner Badge bei `erledigt > 0 && offen === 0`, gelber Badge bei `offen > 0`. CSS-Klassen `.badgeDone`/`.badgeOpen` wiederverwendet.
 
-### #10: Header-Box mit weißem Hintergrund + Trennlinien || CSS für hellen Header
+### #10: Header-Box mit weißem Hintergrund + Trennlinien || CSS für hellen Header (✓ erledigt)
 
 *— · 21.05.2026*
 
