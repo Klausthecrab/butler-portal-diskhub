@@ -1858,7 +1858,7 @@ def edit_index_title():
             capture_output=True, text=True, timeout=10, cwd=REPO_DIR
         )
         if result.returncode == 0:
-            sha_match = re.search(r'\[master [a-f0-9]+\) ([a-f0-9]+)', result.stdout)
+            sha_match = re.search(r'\[master ([a-f0-9]+)\]', result.stdout)
             if sha_match:
                 sha = sha_match.group(1)
     except Exception as e:
