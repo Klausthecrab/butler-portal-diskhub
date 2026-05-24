@@ -1,4 +1,4 @@
-### #A: Semantik-Regeln für Textbox vs. Sub-Diskussion definieren
+### #A: Semantik-Regeln für Textbox vs. Sub-Diskussion definieren (✓ erledigt)
 *— · 24.05.2026*
 
 Wo halten wir die Entscheidungen fest? Ziel: Klare Definition, die sowohl für Menschen als auch für AI lesbar ist.
