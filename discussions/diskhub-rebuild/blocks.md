@@ -187,7 +187,3 @@ zeigen und ggf verbessern. der hinweis dazu muss auch in memory_base eingetragen
 
 hinweis zu knowledge skill zeigen lassen.
 
-### Test-Box Phase 2
-*— · 24.05.2026*
-
-Funktioniert der Fallback auf blocks.md?
