@@ -1174,8 +1174,20 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
       if (!toggleBtn) return
       const entryIndex = parseInt(toggleBtn.getAttribute('data-entry-index'), 10)
       if (isNaN(entryIndex)) return
-      const origText = toggleBtn.textContent
-      toggleBtn.textContent = '⏳'
+
+      // Optimistic UI: sofort umschalten, API im Hintergrund
+      const wasDone = toggleBtn.textContent.trim() === '✅'
+      const card = toggleBtn.closest('[data-status]')
+      const newIsDone = !wasDone
+      // data-status toggeln → CSS färbt Header grün/grau
+      card.setAttribute('data-status', newIsDone ? 'done' : 'open')
+      // details open toggeln (erledigt = aufgeklappt, offen = zu)
+      const details = card.querySelector('details')
+      if (details) details.open = newIsDone
+      // Button sofort wechseln
+      toggleBtn.textContent = newIsDone ? '✅' : '⬜'
+      toggleBtn.title = newIsDone ? 'Als offen markieren' : 'Als erledigt markieren'
+
       fetch(`${API}/edit-index-title`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1190,28 +1202,33 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
         .then(d => {
           if (d.status === 'ok') {
             setErrorMsg('✅ Status aktualisiert' + (d.sha ? ' (' + d.sha.slice(0, 7) + ')' : ''))
-            fetchDiscussionData()
-            // Sub-Diskussion ebenfalls neu laden, wenn in Sub-Ansicht
+            // Sub-Diskussion im Hintergrund reloaden (nur falls in Sub-Ansicht)
             if (activeSubView && discussion?.id) {
               fetch(`${API}/${discussion.id}?sub_id=${encodeURIComponent(activeSubView)}`)
                 .then(r => r.json())
                 .then(sd => setSubViewData(sd))
             }
           } else {
-            toggleBtn.textContent = '❌'
-            setTimeout(() => { toggleBtn.textContent = origText }, 2000)
+            // Fehler → Rollback
+            card.setAttribute('data-status', wasDone ? 'done' : 'open')
+            if (details) details.open = wasDone
+            toggleBtn.textContent = wasDone ? '✅' : '⬜'
+            toggleBtn.title = wasDone ? 'Als offen markieren' : 'Als erledigt markieren'
             setErrorMsg('❌ ' + (d.error || 'Fehler beim Status-Toggle'))
           }
         })
         .catch(() => {
-          toggleBtn.textContent = '❌'
-          setTimeout(() => { toggleBtn.textContent = origText }, 2000)
-          setErrorMsg('❌ Netzwerkfehler')
+          // Netzwerkfehler → Rollback
+          card.setAttribute('data-status', wasDone ? 'done' : 'open')
+          if (details) details.open = wasDone
+          toggleBtn.textContent = wasDone ? '✅' : '⬜'
+          toggleBtn.title = wasDone ? 'Als offen markieren' : 'Als erledigt markieren'
+          setErrorMsg('❌ Netzwerkfehler — Status nicht gespeichert')
         })
     }
     document.addEventListener('click', handler)
     return () => document.removeEventListener('click', handler)
-  }, [discussion.id, activeSubView, fetchDiscussionData])
+  }, [discussion.id, activeSubView])
 
   // Split-View Resizer — globaler Drag-Listener
   useEffect(() => {
