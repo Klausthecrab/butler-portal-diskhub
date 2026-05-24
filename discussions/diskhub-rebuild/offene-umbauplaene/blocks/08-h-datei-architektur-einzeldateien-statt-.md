@@ -187,14 +187,14 @@ Nur wenn Kazzle das auch für Sub-Diskussionen will. Betrifft alle 12 Sub-Ordner
 
 ---
 
-## Phase 6 — Git-Integration: Auto-Commit
+## Phase 6 — Git-Integration: Auto-Commit + Push ✅
 
-Ziel: Nach jeder Einzeldatei-Änderung → sauberer Commit mit Dateinamen.
+Ziel: Nach jeder Einzeldatei-Änderung → sauberer Commit + Push zu GitHub.
 
-- [ ] **G.01** — `git add -A` → `git commit -m "disc: <disc>/<sub>: box — <titel>"` für add-box
-- [ ] **G.02** — `git add -A` → `git commit -m "disc: <disc>/<sub>: box editiert — <titel>"` für edit
-- [ ] **G.03** — `git add -A` → `git commit -m "disc: <disc>/<sub>: box gelöscht — <titel>"` für delete
-- [ ] **G.04** — `git push` nach Commit (autonom, wie butler-hermi-config)
+|- [x] **G.01** — `git add -A` → `git commit -m "disc: <disc>/<sub>: box — <titel>"` für add-box
+|- [x] **G.02** — `git add -A` → `git commit -m "disc: <disc>/<sub>: box editiert — <titel>"` für edit
+|- [x] **G.03** — `git add -A` → `git commit -m "disc: <disc>/<sub>: box gelöscht — <titel>"` für delete
+|- [x] **G.04** — `git push` nach Commit (autonom, wie butler-hermi-config) — via `_git_push()`-Helper in 6 Endpunkten
 
 ---
 

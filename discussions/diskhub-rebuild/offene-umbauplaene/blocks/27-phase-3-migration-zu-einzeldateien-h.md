@@ -101,5 +101,5 @@ Für Diskussionen mit Sub-Struktur das Script rekursiv laufen lassen. Braucht Ma
 - gateway-standardisierung: 5 Subs mit index.md-Einträgen
 - memory-trimmer: Sub `offene-punkte` mit blocks.md
 
-**4. Phase 6 — Git-Push**
-Auto-Push nach jedem Commit (analog butler-hermi-config). Aktuell nur Commit, kein Push.
+**4. Phase 6 — Git-Push** ✅
+Auto-Push nach jedem Commit (analog butler-hermi-config). GitHub Repo `Klausthecrab/butler-portal-diskhub` erstellt. `_git_push()`-Helper in 6 Endpunkten (add/edit/delete/update-readme/promote/toggle-title).

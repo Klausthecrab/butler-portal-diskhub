@@ -74,6 +74,17 @@ def _log_activity(action, details=None):
         print(f"[DISKHUB] Activity log write failed: {e}")
 
 
+def _git_push():
+    """Push commits to remote. Silent failure — nicht kritisch wenn Push fehlschlägt."""
+    try:
+        subprocess.run(
+            ['git', 'push'],
+            capture_output=True, text=True, timeout=30, cwd=REPO_DIR
+        )
+    except Exception as e:
+        print(f"[DISKHUB] Git push failed (non-critical): {e}")
+
+
 # ── Hilfsfunktionen ────────────────────────────────────────────────────────────
 
 def _parse_readme_status(readme_path):
@@ -1325,6 +1336,7 @@ def update_readme():
             sha_match = re.search(r'\[master [a-f0-9]+\) ([a-f0-9]+)', result.stdout)
             if sha_match:
                 sha = sha_match.group(1)
+            _git_push()
     except Exception as e:
         sha = f'commit fehlgeschlagen: {e}'
 
@@ -1502,6 +1514,7 @@ def promote_block():
                 ['git', 'commit', '-m', 'disc: ' + discussion_id + ': promoted block -> ' + sub_folder_id],
                 capture_output=True, text=True, timeout=10, cwd=REPO_DIR
             )
+            _git_push()
         except Exception:
             pass
 
@@ -1661,6 +1674,7 @@ def delete_block():
             sha_match = re.search(r'\[master [a-f0-9]+\) ([a-f0-9]+)', result.stdout)
             if sha_match:
                 sha = sha_match.group(1)
+            _git_push()
     except Exception as e:
         sha = f'commit fehlgeschlagen: {e}'
 
@@ -1787,6 +1801,7 @@ def edit_block():
             sha_match = re.search(r'\[master [a-f0-9]+\) ([a-f0-9]+)', result.stdout)
             if sha_match:
                 sha = sha_match.group(1)
+            _git_push()
     except Exception as e:
         sha = f'commit fehlgeschlagen: {e}'
 
@@ -1883,6 +1898,7 @@ def edit_index_title():
             sha_match = re.search(r'\[master ([a-f0-9]+)\]', result.stdout)
             if sha_match:
                 sha = sha_match.group(1)
+            _git_push()
     except Exception as e:
         sha = f'commit fehlgeschlagen: {e}'
 
@@ -2064,6 +2080,7 @@ def add_box():
             sha_match = re.search(r'\[master [a-f0-9]+\) ([a-f0-9]+)', result.stdout)
             if sha_match:
                 sha = sha_match.group(1)
+            _git_push()
     except Exception as e:
         sha = f'commit fehlgeschlagen: {e}'
 
