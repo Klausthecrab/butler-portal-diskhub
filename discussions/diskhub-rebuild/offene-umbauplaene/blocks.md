@@ -2,7 +2,6 @@
 
 ---
 
-
 ### #49 neue "offene Punkte" werden unformatiert angelegt
 *— · 24.05.2026*
 
@@ -165,3 +164,26 @@ Wenn eine Textbox gelöscht wird, bleibt ihre Nummer "gestorben" — keine neue 
 - Soll das Format auch von Hermi-Kommandos geparst werden können (z.B. `/lies diskhub-rebuild > box-18`)?
 - Brauchen index.md-Einträge das gleiche `entry-`-Format oder reicht der bestehende `#punkt-<nr>`-Anchor?
 - Soll das Format später durch ein strukturierteres Schema ersetzt werden (z.B. `diskhub://`-URI)?
+
+### #J: Umbauplan — Element-Semantik & Phasenmodell
+*— · 24.05.2026*
+
+Synthese aus der Diskussion zu #A (Semantik-Regeln) und #E (Sonderrollen). Definiert die Reihenfolge des Umbaus.
+
+**Phase 0 — Foundation:** Knowledge-Skill `diskhub-element-semantik` erstellen (Element-Typen, Sonderrollen-Katalog, Kriterien). Memory-Verweis setzen. `diskhub-doc`-Skill patchen. → #A
+
+**Phase 1 — Adressierbarkeit:** index.md-Einträge + Sub-Diskussionen bekommen 🔗 + HTML-ID + Auto-Scroll. → #B, #C
+
+**Phase 2 — Element-Typen trennen:** Einfache index.md-Einträge → Textboxen migrieren (#D). Verbleibende index.md-Einträge auf Sonderrollen limitieren + visuelle Markierung (#E).
+
+**Phase 3 — Integration:** Session-Starter für alle Element-Typen (#42), Prompt-Baukasten (#44), Auto-Rückkanal (#45), Verifikation (#47), Status-SSoT (#48).
+
+**Phase 4 — Zukunft:** KI-Kommentare (#F), Live-Scan (#G), Einzeldateien (#H), Dead-Code-Cleanup (#39).
+
+**Sonderrollen-Katalog (Phase 0):**
+- README/Header — System-Element, Fixposition Top
+- Inhaltsverzeichnis (TOC) — System-Element, Fixposition nach Header
+- Ist-Zustand/Architektur — index.md-Eintrag, visuell markiert
+- Decision Record — index.md-Eintrag, visuell markiert
+- Changelog — index.md-Eintrag, visuell markiert, am Ende
+- Kalender/Timeline — Future, eigener Renderer

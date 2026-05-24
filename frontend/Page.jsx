@@ -718,9 +718,11 @@ function BlocksSection({ md, discussionId, isSub, subId, onConvertToSub, onEditB
     }
   }
 
-  const copyBoxLink = (idx) => {
+  const copyBoxLink = (idx, headingText) => {
     const subPath = isSub && subId ? '/' + subId : ''
-    const ref = discussionId + subPath + '#box-' + idx
+    const cleanedTitle = headingText.replace(/^📷\s*/, '').trim()
+    const prefix = headingText.startsWith('📷') ? 'img' : 'box'
+    const ref = discussionId + subPath + ' > ' + prefix + '-' + idx + ' "' + cleanedTitle + '"'
     navigator.clipboard.writeText(ref)
     setCopiedIndex(idx)
     setTimeout(() => setCopiedIndex(null), 2000)
