@@ -1,6 +1,6 @@
 # Memory Trimmer
 **Erstellt:** 04.05.2026 · **Zuletzt aktualisiert:** 24.05.2026
-**Status:** 14 umgesetzt · 5 offen · 1 zurückgestellt · Portal v1.1 live ✅
+**Status:** 14 erledigt · 5 offen · 1 zurückgestellt · Portal v1.1 live ✅
 
 Tolerantes Memory-System für Hermes: MEMORY.md mit Puffer, nächtlicher Trimmer + Evaluator, Portal-Visualisierung.
 
