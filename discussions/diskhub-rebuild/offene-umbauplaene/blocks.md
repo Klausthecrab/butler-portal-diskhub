@@ -234,6 +234,15 @@ Aktuell: Nur index.md-Einträge haben `(✓ erledigt)` + `*Erledigt: DD.MM.YYYY*
 - Soll der `diskhub-doc` Skill (#46) auch blocks.md-Blöcke schließen können?
 - Was passiert mit dem 🔗-Button? Zeigt er weiterhin die Referenz, auch wenn erledigt?
 
+**Fortschritt (24.05.2026):**
+- [x] `handleToggleDone()` in `Page.jsx`: Liest `(✓ erledigt)` aus dem Heading, toggelt via vorhandener `/edit-block`-API
+- [x] `isDone`-Detektion: `headingText.includes('(✓ erledigt')` → `data-status={isDone ? 'done' : 'open'}` (CSS existierte bereits)
+- [x] ⬜/✅-Button in der Action-Leiste beider Block-Typen (Bild + Text): zwischen 🔗 und ✏️
+- [x] CSS: `.toggleDoneBtn` + `.toggleDoneBtnActive` (hover: grün→erledigen, orange→öffnen)
+- [x] Kombinierbar mit manuellem ✏️-Edit — beide schreiben in den selben Title in blocks.md
+- [x] Build OK (16.24s), Dashboard-Neustart, API 200
+- [x] Compiled JS + CSS verifiziert: `toggleDoneBtn`, `handleToggleDone`, `erledigt` im Bundle vorhanden
+
 ### #29: UI-Layout: Preview auf 30-35 %
 
 *— · 22.05.2026*
