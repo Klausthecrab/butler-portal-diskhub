@@ -196,3 +196,9 @@ Synthese aus der Diskussion zu #A (Semantik-Regeln) und #E (Sonderrollen). Defin
 - Decision Record — index.md-Eintrag, visuell markiert
 - Changelog — index.md-Eintrag, visuell markiert, am Ende
 - Kalender/Timeline — Future, eigener Renderer
+
+**Phase 0 — Fortschritt (24.05.2026):**
+- ✅ Knowledge-Skill `knowledgeskill-diskhub-element-semantik` erstellt (shared-Kategorie)
+- ✅ Memory-Verweis gesetzt (alter DiskHub-Eintrag ersetzt)
+- ✅ `diskhub-doc`-Skill um Referenz auf neuen Knowledge-Skill ergänzt
+- 🔜 Nächster Schritt: Phase 1 (Adressierbarkeit #B, #C) — von Kazzle freigeben lassen
