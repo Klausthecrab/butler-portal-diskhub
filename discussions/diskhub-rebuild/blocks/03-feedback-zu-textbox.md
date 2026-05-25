@@ -1,4 +1,4 @@
-### feedback zu "+Textbox"
+### feedback zu "+Textbox" (✓ erledigt)
 *— · 22.05.2026*
 
 1) der "in Sub entwickeln" button sollte umgebaut werden: 

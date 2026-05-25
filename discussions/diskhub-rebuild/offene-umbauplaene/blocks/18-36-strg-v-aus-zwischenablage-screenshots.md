@@ -1,4 +1,4 @@
-### #36: STRG+V aus Zwischenablage (Screenshots) in Diskussionen
+### #36: STRG+V aus Zwischenablage (Screenshots) in Diskussionen (✓ erledigt)
 
 *— · 22.05.2026*
 
