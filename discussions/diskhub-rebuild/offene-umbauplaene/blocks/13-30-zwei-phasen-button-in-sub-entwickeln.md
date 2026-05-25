@@ -1,4 +1,4 @@
-### #30: Zwei-Phasen-Button "In Sub entwickeln" (✓ erledigt)
+### #30: Zwei-Phasen-Button "In Sub entwickeln"
 *— · 22.05.2026*
 
 > **Quelle:** "feedback zu '+Textbox'" in blocks.md
