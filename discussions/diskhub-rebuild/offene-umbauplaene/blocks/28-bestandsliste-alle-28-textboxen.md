@@ -18,7 +18,7 @@ Liste aller Textboxen in `offene-umbauplaene/blocks/`, erstellt 25.05.2026 als A
 | 11 | 10-j-umbauplan-element-semantik-phasenmodel | #J: Umbauplan — Element-Semantik & Phasenmodell | ✅ | ✅ |
 | 12 | 11-k-konzeptbl-cke-in-blocks-md-sollen-erle | #K: Konzeptblöcke in blocks.md sollen "erledigt"-Status bekommen | ✅ | ✅ |
 | 13 | 12-29-ui-layout-preview-auf-30-35 | #29: UI-Layout: Preview auf 30-35 % | ⬜ | ⬜ |
-| 14 | 13-30-zwei-phasen-button-in-sub-entwickeln | #30: Zwei-Phasen-Button "In Sub entwickeln" | ⬜ | |
+| 14 | 13-30-zwei-phasen-button-in-sub-entwickeln | #30: Zwei-Phasen-Button "In Sub entwickeln" | ⬜ | ⬜ |
 | 15 | 14-31-technisch-korrekte-referenz-im-pfad-b | #31: Technisch korrekte Referenz im Pfad-Button | ⬜ | |
 | 16 | 15-32-prompt-vorlagen-bei-neue-textbox | #32: Prompt-Vorlagen bei "+ Neue Textbox" | ⬜ | |
 | 17 | 16-34-diskussions-struktur-konzept-archiv | #34: Diskussions-Struktur-Konzept / Archiv | ⬜ | |
