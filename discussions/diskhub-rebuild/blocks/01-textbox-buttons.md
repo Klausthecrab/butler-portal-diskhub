@@ -1,4 +1,4 @@
-### Textbox buttons
+### Textbox buttons (✓ erledigt)
 *— · 22.05.2026*
 
 zu den "zu Sub ändern" / "Als Sub übernehmen" :
