@@ -1,4 +1,4 @@
-### #H: Datei-Architektur — Einzeldateien statt Sammeldateien
+### #H: Datei-Architektur — Einzeldateien statt Sammeldateien (✓ erledigt)
 *— · 24.05.2026*
 
 > **Umsetzungsplan (erstellt 24.05.2026, Hermi + Kazzle)**
