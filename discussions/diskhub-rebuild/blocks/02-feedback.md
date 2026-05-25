@@ -1,4 +1,4 @@
-### feedback (✓ erledigt)
+### feedback
 *— · 22.05.2026*
 
 diese punkte mit mir diskutieren:
