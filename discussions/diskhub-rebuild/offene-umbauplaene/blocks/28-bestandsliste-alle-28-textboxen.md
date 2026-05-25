@@ -32,6 +32,6 @@ Liste aller Textboxen in `offene-umbauplaene/blocks/`, erstellt 25.05.2026 als A
 | 25 | 24-45-auto-r-ckkanal | #45: Auto-Rückkanal | ⬜ | ⬜ |
 | 26 | 25-47-session-interne-verifikation | #47: Session-interne Verifikation | ⬜ | ⬜ |
 | 27 | 26-48-status-single-source-of-truth-manuell | #48: Status Single Source of Truth — Manual. Status-Zeilen aus READMEs entfernen | ⬜ | |
-| 28 | 27-phase-3-migration-zu-einzeldateien-h | Phase 3 — Migration zu Einzeldateien (#H) | ⬜ | |
+| 28 | 27-phase-3-migration-zu-einzeldateien-h | Phase 3 — Migration zu Einzeldateien (#H) | ✅ | ✅ |
 
 **Insgesamt:** 28 Textboxen · 6 ✅ erledigt · 20 ⬜ offen · 1 offen · 1 erledigt (nicht ⬜-Format).

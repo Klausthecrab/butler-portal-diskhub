@@ -1,4 +1,4 @@
-### Option A: Backend wandelt interne ### automatisch in ## um
+### Option A: Backend wandelt interne ### automatisch in ## um (✓ erledigt)
 *— · 25.05.2026*
 
 **Ansatz**
@@ -16,12 +16,22 @@ Im Backend (routes.py) prüfen die Endpoints `edit_block()` und `add_box()` den 
 - Nur backend-seitig, der Parser bleibt unverändert
 
 **Ort**
-`server.py` oder `routes.py` im Butler-Dashboard — die `edit_block()`- und `add_box()`-Funktionen
+`backend/routes.py` — die `edit_block()`- und `add_box()`-Funktionen
 
 **Umsetzung**
-- Nach dem Empfangen des Contents, vor dem Datei-Schreiben
-- Regex oder Split: erste Zeile behalten, rest auf `^### ` prüfen
-- Nur umwandeln, wenn `^### ` in Zeilen 2..N vorkommt
+Neue Hilfsfunktion `_sanitize_internal_headings()`:
+- Empfängt den rohen Content
+- Prüft jede Zeile auf `^### ` (außerhalb des Titels)
+- Wandelt diese in `## ` um
+- Wird in `edit_block()` und `add_box()` vor dem Datei-Schreiben aufgerufen
+
+**Fortschritt (25.05.2026):**
+- [x] Hilfsfunktion `_sanitize_internal_headings()` in routes.py eingebaut
+- [x] Aufruf in `edit_block()` (Zeile 1703) — Einzeldatei + Legacy-Pfad
+- [x] Aufruf in `add_box()` (Zeile 1996) — Einzeldatei + Legacy-Pfad
+- [x] Dashboard neugestartet (Port 8090) — Code live
+- [x] Verifikation add-box: Content mit 2x `###` → Datei hat 1x `###` (nur Titel)
+- [x] Verifikation edit-block: Content mit 2x `###` → Datei hat 1x `###` (nur Titel)
 
 **Status**
-🔜 offen
+✅ erledigt
