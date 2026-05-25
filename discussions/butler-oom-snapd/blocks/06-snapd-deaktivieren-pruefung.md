@@ -18,4 +18,4 @@ Nach Firefox-Umzug gibt es NULL Snap-Apps. Alle Kernkomponenten sind via apt ver
 - Sollte spaeter mal eine Snap-App gewuenscht sein → snapd einfach wieder aktivieren.
 
 **Status**
-🔜 offen
+✅ erledigt (durchgefuehrt: alle Snaps entfernt, snapd deaktiviert)

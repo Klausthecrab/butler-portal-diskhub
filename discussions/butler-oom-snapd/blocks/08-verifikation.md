@@ -11,15 +11,19 @@ Nach der Umsetzung muss geprueft werden, ob alles sauber laeuft.
 | Firefox geöffnet | ✅ | Lesezeichen übertragen, von Kazzle bestätigt |
 | `which firefox` | ✅ | `/usr/bin/firefox` (apt-Pfad) |
 | `firefox --version` | ✅ | Mozilla Firefox 151.0.1 |
-| `snap list` | ✅ | Firefox nicht mehr gelistet (nur Basis-Snaps) |
-| `losetup -a` | ⚠️ | 12 loop-devices (Basis-Snaps, kein Firefox mehr) |
-| Shortcut Ubuntu-Leiste | ✅ | `firefox.desktop` in Gnome-Favoriten statt `firefox_firefox.desktop` |
-| Backup | ✅ | Liegt unter ~/ygr0z5yf.default.backup |
+|| `snap list` | ✅ | Firefox nicht mehr gelistet, snap CLI tot (snapd gestoppt) |
+|| `losetup -a` | ✅ | 0 loop-devices (alle bereinigt) |
+|| `systemctl status snapd` | ✅ | inactive (dead), masked |
+|| `systemctl status snapd.socket` | ✅ | inactive (dead), masked |
+|| Dashboard (8090) | ✅ | 200 OK |
+|| n8n (5678) | ✅ | 200 OK |
+|| Registry (8025) | ✅ | 200 OK |
+|| Shortcut Ubuntu-Leiste | ✅ | `firefox.desktop` in Gnome-Favoriten statt `firefox_firefox.desktop` |
+|| Backup | ✅ | Liegt unter ~/ygr0z5yf.default.backup |
 
-**Noch offen (nächste Session)**
-- Snapd deaktivieren (#7) — erfordert separaten Durchgang
-- GNOME Software-Popup beobachten
-- Butler-Stabilität nach vollständiger Snapd-Deaktivierung
+**Noch offen (beobachten)**
+- GNOME Software-Popup kommt nicht mehr?
+- Butler-Stabilität nach Snapd-Deaktivierung
 
 **Status**
-✅ erledigt (Firefox-Umzug abgeschlossen)
+✅ erledigt (komplett — Firefox-Umzug + Snapd deaktiviert)
