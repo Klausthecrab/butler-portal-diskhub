@@ -95,28 +95,33 @@ curl -s http://localhost:8090/assets/Page-DF2k4hvb.js | grep 'DOM bleibt optimis
 
 **Hardlinks:** `~/repos/butler-portal-diskhub/frontend/Page.jsx` und `~/repos/butler-dashboard-v3/frontend/src/portals/diskhub/Page.jsx` haben identische Inode (3280139) — Hardlink, Änderung gilt für beide.
 
-## Ungeklärtes Problem
+## Root Cause gefunden — data-toggle-index-done Buttons existieren nicht im DOM
 
-**Kazzle testet (25.05.2026, 15:50):**
-- Strg+F5 / Strg+Shift+R gemacht
-- Sieht **keine** grüne Debug-Leiste
-- Verhalten fühlt sich "wie gestern" an — kein Fix spürbar
+**Live-Browser-Test (25.05.2026, 16:48 — Herme in neuer Session):**
 
-**Mögliche Ursachen:**
-1. Browser-Cache ignoriert Strg+F5 nicht (selten, aber möglich bei Service Workern oder extrem aggressivem Cache)
-2. Der Flask-Server served die index.html mit `Cache-Control: public, max-age=...` für index.html selbst (nicht nur JS-Chunks)
-3. Es läuft ein reverse proxy (nginx?) vor Flask der den alten Build cached
-4. Kazzle ist auf einem anderen Gerät/Netzwerk als der Butler-Server
-5. Der Browser hat den neuen Chunk geladen, aber irgendein Teil des alten Codes persistiert (React Hot Reload oder lokal gespeicherte Daten?)
-6. Die Seite wird über einen anderen Port/Host geladen als localhost:8090
+Nachdem Fix 4 (Build ✅, Server ✅, Cache-Header fix ✅) deployt war, sah Kazzle trotz Cache-Deaktivierung keine Debug-Leiste. Hermi hat per Headless-Browser die Seite live geladen, "Diskhub Rebuild" geöffnet und das DOM inspiziert.
 
-**Nächste Schritte für neue Session:**
-- Debug: curl gegen die tatsächliche URL die Kazzle im Browser nutzt (nicht localhost:8090 sondern 192.168.178.62:8090 oder ähnlich?)
-- Prüfen ob nginx oder anderer Proxy dazwischen hängt
-- Prüfen ob Flask die index.html cached (debug=True sollte nicht, aber evtl. send_from_directory mit Cache-Header)
-- Alternative: nach dem Build `send_from_directory` in server.py prüfen — evtl. wird index.html einmalig gecached
-- Workaround: `?v=2` Cache-Buster in der URL testen
-- Workaround: `window.location.reload(true)` im Browser erzwingen
+**Ergebnis:** `document.querySelector('[data-toggle-index-done]')` → **`null`**. Im gesamten DOM existiert kein Element mit `data-toggle-index-done`.
+
+**Warum die Buttons fehlen:**
+
+Der Render-Pfad in der **Haupt-Diskussion** ist zweigeteilt:
+
+1. **`generateToc()` (Zeile 227)** — rendert das Inhaltsverzeichnis als **reine Textzeilen**: `<div class="tocItem">├── 📝 Titel</div>`. Kein Button, kein `data-toggle-index-done`, nichts klickbares. Nur Deko-Text.
+
+2. **`renderIndexMd(data.index, 'footer-only', ...)` (Zeile 2053)** — wird mit `mode='footer-only'` aufgerufen → gibt NUR den Footer (alles nach der letzten `---`) zurück. **Keine Blöcke, keine `data-toggle-index-done` Buttons.**
+
+Die `data-toggle-index-done` Buttons werden in `renderBlock()` (Zeile 451) erzeugt, aber `renderBlock()` wird NUR in `renderIndexMd()` mit dem Default-Modus (ohne `mode`) aufgerufen — und das passiert NUR in **Sub-Diskussionen** (Zeile 1897).
+
+Für die Haupt-Diskussion: Index-Blöcke werden überhaupt nicht als interaktive Buttons gerendert. Das `generateToc()` macht nur statischen Text, und `renderIndexMd()` im `footer-only`-Modus gibt nur den Footer.
+
+**Konsequenz:** Der globale `click`-Handler in Zeile 1188 (`e.target.closest('[data-toggle-index-done]')`) kann **nie** feuern — weder vor noch nach Fix 4. Der Toggle auf index.md-Einträge in der Haupt-Diskussion war also von Anfang an defekt. Fix 4 hat korrekten Code für den Fall bereitgestellt, dass ein Button geklickt wird — aber die Buttons existieren nicht.
+
+**Das erklärt auch Fix 3->Fix 4:** In der vorherigen Session (Fix 3) hatte Hermi den Toggle im Browser getestet und ein sofortiges ✅ gesehen, das später bounce-backte. Das war der **Textbox-Toggle (blocks.md)**, nicht der index.md-Toggle. Der blocks.md-Toggle hat einen anderen Click-Handler (`onClick={()=>O(...)}`) und bounce-backt wegen `dangerouslySetInnerHTML`. Fix 4 hat das nur für index.md gelöst — aber da es dort nie klickbare Buttons gab, war der Fix nicht spürbar.
+
+**Nächste Schritte:**
+- `renderIndexMd()` in der Haupt-Diskussion muss den vollen Modus verwenden (nicht `footer-only`) damit die `data-toggle-index-done` Buttons gerendert werden
+- ODER `generateToc()` muss klickbare `data-toggle-index-done` Buttons statt reiner Textzeilen generieren
 
 ---
 

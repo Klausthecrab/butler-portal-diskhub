@@ -1,4 +1,4 @@
-### UI Müll / zersplitterte Karten — Ghost-Blöcke durch ### im Content (✓ erledigt)
+### 31 UI Müll / zersplitterte Karten — Ghost-Blöcke durch ### im Content (✓ erledigt)
 *— · 25.05.2026*
 
 **Problem**
