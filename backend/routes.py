@@ -491,12 +491,12 @@ def get_discussion(discussion_id):
     """Einzelne Diskussion mit index.md + README.md Inhalt.
     
     Query-Params:
-      sub_id (str, optional) — Sub-Diskussion laden statt Haupt-Diskussion
+      sub_path (str, optional) — Sub-Pfad (einzelner Name oder verschachtelt "eltern/sub")
     """
-    sub_id = request.args.get('sub_id', '').strip()
+    sub_path = request.args.get('sub_path', '').strip()
     
-    if sub_id:
-        folder = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_id)
+    if sub_path:
+        folder = os.path.join(DISCUSSIONS_DIR, discussion_id, sub_path)
     else:
         folder = os.path.join(DISCUSSIONS_DIR, discussion_id)
         
@@ -504,9 +504,9 @@ def get_discussion(discussion_id):
         return jsonify({'error': 'Diskussion nicht gefunden'}), 404
 
     result = {'id': discussion_id, 'name': discussion_id.replace('-', ' ').title()}
-    if sub_id:
-        result['sub_id'] = sub_id
-        result['sub_name'] = sub_id.replace('-', ' ').title()
+    if sub_path:
+        result['sub_id'] = sub_path
+        result['sub_name'] = sub_path.replace('-', ' ').title()
 
     readme_path = os.path.join(folder, 'README.md')
     if os.path.isfile(readme_path):
@@ -620,7 +620,7 @@ def get_discussion(discussion_id):
             subs.append(sub_data)
     result['subs'] = subs
 
-    _log_activity('view', {'discussion': discussion_id, 'sub_id': sub_id or None})
+    _log_activity('view', {'discussion': discussion_id, 'sub_id': sub_path or None})
     return jsonify(result)
 
 

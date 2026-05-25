@@ -1109,7 +1109,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   useEffect(() => {
     if (!activeSubView || !discussion?.id) return
     setSubViewLoading(true)
-    fetch(`${API}/${discussion.id}?sub_id=${encodeURIComponent(activeSubView)}`)
+    fetch(`${API}/${discussion.id}?sub_path=${encodeURIComponent(activeSubView)}`)
       .then(r => r.json())
       .then(d => { setSubViewData(d); setSubViewLoading(false) })
       .catch(() => setSubViewLoading(false))
@@ -1897,6 +1897,107 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 dangerouslySetInnerHTML={{ __html: renderIndexMd(subViewData.index, undefined, discussion.id, subViewData.index_files || [], hideDone) }}
                               />
                             )}
+                            {/* ── SUB-SUBS (verschachtelte Diskussionen) ── */}
+                            {subViewData.subs && subViewData.subs.length > 0 && (
+                              <div className={styles.blocksSection}>
+                                <div className={styles.sectionLabel}>📂 Sub-Diskussionen</div>
+                                {subViewData.subs.map((sub, idx) => {
+                                  const subNum = String(idx + 1).padStart(2, '0')
+                                  const isExpanded = expandedSubs.has(sub.id)
+                                  const subDate = parseCreatedDate(sub.readme)
+                                  return (
+                                    <div key={sub.id} className={styles.blockWrapper}>
+                                      <div className={styles.blockConnector}>
+                                        <div className={styles.connectorTop}>
+                                          <span className={styles.connectorDot}></span>
+                                          <span className={styles.connectorLine}></span>
+                                        </div>
+                                        {subDate && (
+                                          <div className={styles.connectorDate}>{subDate}</div>
+                                        )}
+                                      </div>
+                                      <div className={styles.subDocBlock}>
+                                        <div className={styles.subDocHeader}
+                                          onClick={() => {
+                                            setExpandedSubs(prev => {
+                                              const next = new Set(prev)
+                                              if (next.has(sub.id)) next.delete(sub.id); else next.add(sub.id)
+                                              return next
+                                            })
+                                          }}
+                                          role="button" tabIndex={0}
+                                          onKeyDown={e => { if (e.key === 'Enter') {
+                                            setExpandedSubs(prev => {
+                                              const next = new Set(prev)
+                                              if (next.has(sub.id)) next.delete(sub.id); else next.add(sub.id)
+                                              return next
+                                            })
+                                          }}}
+                                        >
+                                          <h3 className={styles.subDocTitle}>📂 #{subNum}: {readmeTitle(sub.readme) || sub.name}
+                                            {sub.status?.erledigt > 0 && sub.status?.offen === 0 && (
+                                              <span className={`${styles.badge} ${styles.badgeDone}`}>✓ {sub.status.erledigt} erledigt</span>
+                                            )}
+                                            {sub.status?.offen > 0 && (
+                                              <span className={`${styles.badge} ${styles.badgeOpen}`}>● {sub.status.offen} offen</span>
+                                            )}
+                                          </h3>
+                                          <button
+                                            className={styles.copyLinkBtn}
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              const ref = discussion.id + '/' + activeSubView + '/' + sub.id
+                                              navigator.clipboard.writeText(ref)
+                                              onCopySub(sub.id)
+                                              setTimeout(() => onCopySub(null), 2000)
+                                            }}
+                                            title={'Referenz kopieren: ' + discussion.id + '/' + activeSubView + '/' + sub.id}
+                                          >{copiedSub === sub.id ? '✅' : '🔗'}</button>
+                                          <span className={styles.subDocArrow}>{isExpanded ? '▾' : '▸'}</span>
+                                        </div>
+                                        {isExpanded && (
+                                          <div className={styles.subDocBody}>
+                                            {(() => {
+                                              const toc = generateToc(sub.blocks, sub.index)
+                                              if (toc) {
+                                                return (
+                                                  <div className={styles.markdownContent}
+                                                    dangerouslySetInnerHTML={{ __html: toc }}
+                                                  />
+                                                )
+                                              }
+                                              const preamble = extractPreamble(sub.readme)
+                                              if (preamble) {
+                                                return (
+                                                  <div className={styles.markdownContent}
+                                                    dangerouslySetInnerHTML={{ __html: renderMarkdown(preamble) }}
+                                                  />
+                                                )
+                                              }
+                                              if (sub.readme) {
+                                                return (
+                                                  <div className={styles.markdownContent}
+                                                    dangerouslySetInnerHTML={{ __html: renderMarkdown(sub.readme) }}
+                                                  />
+                                                )
+                                              }
+                                              return null
+                                            })()}
+                                            <div className={styles.subDocViewLink}
+                                              onClick={e => { e.stopPropagation(); window.history.pushState({subViewMode: true}, ''); setActiveSubView(activeSubView + '/' + sub.id) }}
+                                              role="button" tabIndex={0}
+                                              onKeyDown={e => { if (e.key === 'Enter') { window.history.pushState({subViewMode: true}, ''); setActiveSubView(activeSubView + '/' + sub.id) } }}
+                                            >
+                                              → Vollständige Ansicht
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
                             {/* Box hinzufügen — Sub-View */}
                             <div className={styles.addBoxSection}>
                               <div className={styles.sectionLabel}>➕ Neue Textbox</div>
@@ -2050,7 +2151,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                           )}
                           {data.index && (
                             <div className={styles.markdownContent}
-                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, 'footer-only', discussion.id, data.index_files || [], hideDone) }}
+                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, undefined, discussion.id, data.index_files || [], hideDone) }}
                             />
                           )}
                           {data.subs && data.subs.map((sub, idx) => {

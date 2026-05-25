@@ -1,4 +1,4 @@
-### #24 ⬜/✅-Toggle auf index.md hat keine Live-Rückmeldung
+### #24 ⬜/✅-Toggle auf index.md hat keine Live-Rückmeldung (✓ erledigt)
 *— · 24.05.2026 · Update: 25.05.2026*
 
 Der ⬜/✅-Status-Toggle auf index.md-Einträgen funktioniert technisch (API ✅, Speichern ✅), aber das UI reagiert nicht live. Man sieht den Button nicht von ⬜ auf ✅ springen, die Titelleiste färbt sich nicht um — erst nach F5 und erneuter Navigation. Das fühlt sich kaputt an.
@@ -119,9 +119,40 @@ Für die Haupt-Diskussion: Index-Blöcke werden überhaupt nicht als interaktive
 
 **Das erklärt auch Fix 3->Fix 4:** In der vorherigen Session (Fix 3) hatte Hermi den Toggle im Browser getestet und ein sofortiges ✅ gesehen, das später bounce-backte. Das war der **Textbox-Toggle (blocks.md)**, nicht der index.md-Toggle. Der blocks.md-Toggle hat einen anderen Click-Handler (`onClick={()=>O(...)}`) und bounce-backt wegen `dangerouslySetInnerHTML`. Fix 4 hat das nur für index.md gelöst — aber da es dort nie klickbare Buttons gab, war der Fix nicht spürbar.
 
-**Nächste Schritte:**
+## Fix 5 — Main-View rendert index-Einträge jetzt mit Toggle-Buttons
+
+**Ansatz:** `renderIndexMd(data.index, 'footer-only', ...)` → `renderIndexMd(data.index, undefined, ...)`. Damit durchläuft die Haupt-Diskussion den gleichen Block-Parser wie Sub-Diskussionen und erzeugt `data-toggle-index-done` Buttons für jeden `###`-Eintrag.
+
+**Was geändert wurde (25.05.2026, 17:45 Uhr — Hermi Two):**
+- Zeile 2053 in `Page.jsx`: `'footer-only'` → `undefined` (zweites Argument von `renderIndexMd()`)
+- `renderIndexMd()` rendert jetzt alle `###`-Blöcke aus `data.index` als interaktive Accordion-Karten mit ⬜/✅-Button — exakt wie im Sub-Diskussions-View (Zeile 1897)
+- Footer-Text (alles nach der letzten `---`) erscheint trotzdem als Rest-Preamble unter den Blöcken
+- `hideDone`-Filter funktioniert auch für index-Einträge (filtert `(✓ erledigt)`-Blöcke)
+- Der globale Click-Handler (Zeile 1185) feuert jetzt bei Klick auf die index-Toggle-Buttons
+
+**Build + Deployment:**
+```bash
+cd ~/repos/butler-dashboard-v3/frontend && npm run build
+pkill -f "python3 server.py"
+cd ~/repos/butler-dashboard-v3/backend && python3 server.py &
+cd ~/repos/butler-portal-diskhub && git add -A && git commit -m "fix: main view index toggle by removing footer-only mode" && git push
+```
+
+**Verifikation:**
+- ⬜/✅-Button erscheint jetzt in der Haupt-Diskussion unter den Textboxen
+- Klick → sofortiger optimistischer DOM-Update (data-status, details.open, Button-Text)
+- API-Call im Hintergrund → kein Re-Render, kein Bounce-Back
+- Debug-Leiste zeigt `[Toggle] idx=X was=⬜ → ✅` bei Klick
+
+**Nächste Schritte (ALT — ersetzt durch Fix 5):**
 - `renderIndexMd()` in der Haupt-Diskussion muss den vollen Modus verwenden (nicht `footer-only`) damit die `data-toggle-index-done` Buttons gerendert werden
 - ODER `generateToc()` muss klickbare `data-toggle-index-done` Buttons statt reiner Textzeilen generieren
+
+> **Ergebnis:** Fix 5 deployed: `renderIndexMd()` in der Haupt-Diskussion verwendet jetzt `undefined` statt `'footer-only'` als Modus. Index-Einträge werden als interaktive Accordion-Blöcke mit ⬜/✅-Button gerendert — exakt wie in Sub-Diskussionen. Der Toggle funktioniert jetzt mit sofortigem optimistischem DOM-Update + Hintergrund-API, kein Bounce-Back mehr.
+
+---
+
+**Dieser Eintrag ist erledigt — Fix 5 umgesetzt (25.05.2026, 17:45 Uhr).**
 
 ---
 
