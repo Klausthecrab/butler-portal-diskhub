@@ -1203,22 +1203,38 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
         .then(d => {
           if (d.status === 'ok') {
             setErrorMsg('✅ Status aktualisiert' + (d.sha ? ' (' + d.sha.slice(0, 7) + ')' : ''))
-            // Kein Re-Fetch, kein setSubViewData — Daten optimistisch im State updaten,
-            // damit der unvermeidbare Re-Render (setErrorMsg, etc.) den korrekten Status zeigt
-            // und nicht auf den alten data.index zurückfällt.
+            // Kein Re-Fetch, kein setSubViewData — Index-Markdown-String local patchen,
+            // damit renderIndexMd() beim Re-Render den korrekten Status zeigt.
+            // data.index/subViewData.index ist ein Markdown-String, kein Array.
+            const patchIndex = (md, idx, done) => {
+              if (!md) return md
+              const lines = md.split('\n')
+              let found = 0
+              for (let li = 0; li < lines.length; li++) {
+                if (lines[li].startsWith('### ')) {
+                  if (found === idx) {
+                    const hasDone = lines[li].includes('(✓ erledigt)')
+                    if (done && !hasDone) {
+                      lines[li] = lines[li].replace(/\s*$/, ' (✓ erledigt)')
+                    } else if (!done && hasDone) {
+                      lines[li] = lines[li].replace(/\s*\(✓ erledigt\)/, '')
+                    }
+                    break
+                  }
+                  found++
+                }
+              }
+              return lines.join('\n')
+            }
             if (activeSubView && subViewData?.index) {
               setSubViewData(prev => {
                 if (!prev) return prev
-                const idx = [...prev.index]
-                idx[entryIndex] = { ...idx[entryIndex], done: newIsDone }
-                return { ...prev, index: idx }
+                return { ...prev, index: patchIndex(prev.index, entryIndex, newIsDone) }
               })
             } else if (!activeSubView && data?.index) {
               setData(prev => {
                 if (!prev) return prev
-                const idx = [...prev.index]
-                idx[entryIndex] = { ...idx[entryIndex], done: newIsDone }
-                return { ...prev, index: idx }
+                return { ...prev, index: patchIndex(prev.index, entryIndex, newIsDone) }
               })
             }
           } else {

@@ -1,1 +1,1 @@
-### #30: Zwei-Phasen-Button "In Sub entwickeln" → Textbox #box-13
+### #30: Zwei-Phasen-Button "In Sub entwickeln" → Textbox #box-13 (✓ erledigt)
