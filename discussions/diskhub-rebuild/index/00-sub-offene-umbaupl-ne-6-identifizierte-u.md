@@ -1,4 +1,4 @@
-### Sub: Offene Umbaupläne || 6 identifizierte Umbau-Punkte (✓ erledigt)
+### Sub: Offene Umbaupläne || 6 identifizierte Umbau-Punkte
 
 Hier sind die sechs Kernpunkte aus der Diskussion mit Max dokumentiert. Jeder Punkt hat eine eigene Sub-Diskussion mit detaillierter Beschreibung und offenen Fragen.
 
