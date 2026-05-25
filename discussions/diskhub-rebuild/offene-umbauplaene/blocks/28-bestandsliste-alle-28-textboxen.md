@@ -24,7 +24,7 @@ Liste aller Textboxen in `offene-umbauplaene/blocks/`, erstellt 25.05.2026 als A
 | 17 | 16-34-diskussions-struktur-konzept-archiv | #34: Diskussions-Struktur-Konzept / Archiv | ⬜ | ⬜ |
 | 18 | 17-35-lightbox-f-r-bilder | #35: Lightbox für Bilder | ⬜ | ⬜ |
 | 19 | 18-36-strg-v-aus-zwischenablage-screenshots | #36: STRG+V aus Zwischenablage (Screenshots) in Diskussionen | ✅ | ✅ |
-| 20 | 19-37-bild-modal-eigenst-ndiger-strg-v-uplo | #37: Bild-Modal — Eigenständiger STRG+V/Upload-Dialog für Screenshots | ⬜ | |
+| 20 | 19-37-bild-modal-eigenst-ndiger-strg-v-uplo | #37: Bild-Modal — Eigenständiger STRG+V/Upload-Dialog für Screenshots | ✅ | ✅ |
 | 21 | 20-39-dead-code-cleanup-alten-button-pendin | #39: Dead Code Cleanup — Alten 📷-Button + pendingImage-Logik entfernen | ⬜ | |
 | 22 | 21-42-jedes-element-als-session-starter | #42: Jedes Element als Session-Starter | ⬜ | |
 | 23 | 22-43-plan-phase-vor-umsetzung | #43: Plan-Phase vor Umsetzung | ⬜ | |

@@ -1,4 +1,4 @@
-### #37: Bild-Modal — Eigenständiger STRG+V/Upload-Dialog für Screenshots (geplant)
+### #37: Bild-Modal — Eigenständiger STRG+V/Upload-Dialog für Screenshots (✓ erledigt)
 
 *— · 23.05.2026*
 
