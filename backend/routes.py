@@ -1974,6 +1974,7 @@ def add_box():
     discussion_id = data.get('discussion_id', '')
     title = data.get('title', '').strip()
     content = data.get('content', '').strip()
+    content = _auto_format_content(content)
     is_sub = data.get('is_sub', False)
     sub_id = data.get('sub_id', '')
 

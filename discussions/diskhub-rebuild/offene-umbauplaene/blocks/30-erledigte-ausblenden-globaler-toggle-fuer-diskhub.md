@@ -104,6 +104,29 @@ const [hideDone, setHideDone] = useState(false)
 
 ---
 
+## ✅ Verifikation (25.05.2026 — live getestet)
+
+**Build:** `npm run build` → ✅ erfolgreich (16s), "Ausblenden" in 9 Chunk-Dateien enthalten
+
+**Dashboard-Restart:** Port 8090 → neu gestartet, Health-Check OK
+
+**Browser-Test (3 Diskussionen):**
+| Diskussion | Ergebnis |
+|---|---|
+| DiskHub Rebuild | Toggle sichtbar in discStats, CSS-Regel im Stylesheet bestätigt, `data-hide-done` wechselt bei Klick |
+| Memory Trimmer | Gleicher Toggle, gleiches Verhalten |
+| Ram Analyse | Toggle sichtbar |
+
+**Was funktioniert:**
+- Toggle erscheint in `discStats` beider Ansichten (Main + Sub)
+- Klick setzt/entfernt `data-hide-done` auf dem Wrapper
+- CSS-Regel `.doneFilter[data-hide-done="true"] [data-status="done"] { display: none !important; }` ist im kompilierten Stylesheet aktiv
+- 9 gehashte Chunk-Dateien enthalten die neue Regel
+
+**Was NICHT getestet werden konnte:** Diskussionen mit sichtbaren ✓-Karten im Hauptview (20 ✓ in DiskHub Rebuild liegen im `footer-only`-index.md, Memory Trimmer nutzt Sub-Entitäten ohne `data-status`). Die CSS-Mechanik ist intakt — sobald ein Block mit `data-status="done"` im Wrapper liegt, wird er bei aktivem Toggle ausgeblendet.
+
+---
+
 **Ursprüngliche Analyse (vor Umsetzung):**
 - Status ist bereits als `data-status="done"` auf jedem Element vorhanden
 - Blocks werden in React-JSX gerendert → sauber via `.filter()` machbar
