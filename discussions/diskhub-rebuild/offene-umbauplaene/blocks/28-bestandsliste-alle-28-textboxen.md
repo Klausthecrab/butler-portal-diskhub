@@ -26,8 +26,8 @@ Liste aller Textboxen in `offene-umbauplaene/blocks/`, erstellt 25.05.2026 als A
 | 19 | 18-36-strg-v-aus-zwischenablage-screenshots | #36: STRG+V aus Zwischenablage (Screenshots) in Diskussionen | ✅ | ✅ |
 | 20 | 19-37-bild-modal-eigenst-ndiger-strg-v-uplo | #37: Bild-Modal — Eigenständiger STRG+V/Upload-Dialog für Screenshots | ✅ | ✅ |
 | 21 | 20-39-dead-code-cleanup-alten-button-pendin | #39: Dead Code Cleanup — Alten 📷-Button + pendingImage-Logik entfernen | ⬜ | ⬜ |
-| 22 | 21-42-jedes-element-als-session-starter | #42: Jedes Element als Session-Starter | ⬜ | |
-| 23 | 22-43-plan-phase-vor-umsetzung | #43: Plan-Phase vor Umsetzung | ⬜ | |
+| 22 | 21-42-jedes-element-als-session-starter | #42: Jedes Element als Session-Starter | ⬜ | ⬜ |
+| 23 | 22-43-plan-phase-vor-umsetzung | #43: Plan-Phase vor Umsetzung | ⬜ | ⬜ |
 | 24 | 23-44-prompt-baukasten-im-webhook | #44: Prompt-Baukasten im Webhook | ⬜ | |
 | 25 | 24-45-auto-r-ckkanal | #45: Auto-Rückkanal | ⬜ | |
 | 26 | 25-47-session-interne-verifikation | #47: Session-interne Verifikation | ⬜ | |
