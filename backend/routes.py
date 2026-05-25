@@ -1700,6 +1700,7 @@ def edit_block():
     file_name = data.get('file_name', '').strip()
     title = data.get('title', '').strip()
     content = data.get('content', '').strip()
+    content = _sanitize_internal_headings(content)
     is_sub = data.get('is_sub', False)
     sub_id = data.get('sub_id', '')
 
@@ -1934,6 +1935,23 @@ def _auto_format_content(content: str) -> str:
     )
 
 
+def _sanitize_internal_headings(text: str) -> str:
+    """
+    Wandelt interne ###-Zeilen in ## um — verhindert Ghost-Blöcke.
+    Nur die erste Zeile (Block-Titel) darf ### haben.
+    """
+    if not text:
+        return text
+    lines = text.split('\n')
+    filtered = []
+    for line in lines:
+        if line.startswith('### '):
+            filtered.append('##' + line[3:])
+        else:
+            filtered.append(line)
+    return '\n'.join(filtered)
+
+
 @diskhub.route('/diskhub/add-box', methods=['POST'])
 def add_box():
     """
@@ -1975,6 +1993,7 @@ def add_box():
     title = data.get('title', '').strip()
     content = data.get('content', '').strip()
     content = _auto_format_content(content)
+    content = _sanitize_internal_headings(content)
     is_sub = data.get('is_sub', False)
     sub_id = data.get('sub_id', '')
 
