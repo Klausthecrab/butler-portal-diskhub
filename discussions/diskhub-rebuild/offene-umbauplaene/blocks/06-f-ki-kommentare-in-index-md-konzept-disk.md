@@ -1,4 +1,4 @@
-### #F: KI-Kommentare in index.md (Konzept diskutieren)
+### #F: KI-Kommentare in index.md (Konzept diskutieren) (✓ erledigt)
 *— · 24.05.2026*
 
 Abgeleitet aus diskhub-rebuild#box-17 (Index.md vs textboxen).
