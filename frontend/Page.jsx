@@ -267,7 +267,7 @@ function generateToc(blocksMd, indexMd) {
 }
 
 // Block-aware rendering for index.md — drei Zonen: Header, Content, Footer
-function renderIndexMd(md, mode, discussionId, indexFiles) {
+function renderIndexMd(md, mode, discussionId, indexFiles, hideDone = false) {
   if (!md) return ''
 
   if (mode === 'footer-only') {
@@ -344,6 +344,11 @@ function renderIndexMd(md, mode, discussionId, indexFiles) {
   // Alle Blöcke rendern
   for (let bIdx = 0; bIdx < blocks.length; bIdx++) {
     const block = blocks[bIdx]
+    // #30: done-Blöcke überspringen wenn hideDone aktiv — verhindert Geister-Connector-Linien
+    if (hideDone) {
+      const bIsDone = !!block.result || block.heading.includes('(✓ erledigt)')
+      if (bIsDone) continue
+    }
     result += renderBlock(block, bIdx === latestOpenIndex, bIdx, discussionId, indexFiles)
   }
 
@@ -677,7 +682,7 @@ function parseCreatedDate(readme) {
   return m ? m[1] : ''
 }
 
-function BlocksSection({ md, discussionId, isSub, subId, blocksFiles, onConvertToSub, onEditBlock, onDeleteBlock }) {
+function BlocksSection({ md, discussionId, isSub, subId, blocksFiles, onConvertToSub, onEditBlock, onDeleteBlock, hideDone }) {
   blocksFiles = blocksFiles || []
   const blocks = useMemo(() => parseBlocksMd(md), [md])
   // #41: Neu = unten — chronologische Reihenfolge (neuestes Element zuletzt)
@@ -695,6 +700,14 @@ function BlocksSection({ md, discussionId, isSub, subId, blocksFiles, onConvertT
     if (md) return <div className={styles.markdownContent} dangerouslySetInnerHTML={{ __html: renderMarkdown(md) }} />
     return null
   }
+
+  // #30: done-Elemente vor dem Rendern filtern (statt CSS display:none), damit Connector-Linien nicht als Geister stehen bleiben
+  const filteredBlocks = hideDone
+    ? reversedBlocks.filter(({ block }) => {
+        const h = block.heading.replace(/^###\s+/, '').trim()
+        return !h.includes('(✓ erledigt)')
+      })
+    : reversedBlocks
 
   const startEditing = (idx, headingText, content) => {
     setEditingIndex(idx)
@@ -772,7 +785,7 @@ const saveEdit = (idx, file_name) => {
 
   return (
     <div>
-      {reversedBlocks.map(({ block, originalIdx }, displayIdx) => {
+      {filteredBlocks.map(({ block, originalIdx }, displayIdx) => {
         const headingText = block.heading.replace(/^###\s+/, '').trim()
         const isDone = headingText.includes('(✓ erledigt)')
 
@@ -1176,6 +1189,11 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
       const entryIndex = parseInt(toggleBtn.getAttribute('data-entry-index'), 10)
       if (isNaN(entryIndex)) return
 
+      // Scroll-Position vor Re-Render speichern
+      const scrollYBefore = window.scrollY
+      const targetRect = toggleBtn.getBoundingClientRect()
+      console.debug('[TOGGLE] entryIndex=%d scrollY=%d btnTop=%d', entryIndex, scrollYBefore, Math.round(targetRect.top + scrollYBefore))
+
       // Optimistic UI: sofort umschalten, API im Hintergrund
       const wasDone = toggleBtn.textContent.trim() === '✅'
       const card = toggleBtn.closest('[data-status]')
@@ -1214,17 +1232,21 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                 if (lines[li].startsWith('### ')) {
                   if (found === idx) {
                     const hasDone = lines[li].includes('(✓ erledigt)')
+                    const oldLine = lines[li]
                     if (done && !hasDone) {
                       lines[li] = lines[li].replace(/\s*$/, ' (✓ erledigt)')
                     } else if (!done && hasDone) {
                       lines[li] = lines[li].replace(/\s*\(✓ erledigt\)/, '')
                     }
+                    console.debug('[PATCH] idx=%d found=%d done=%s hasDone=%s → "%s" (was "%s")', idx, found, done, hasDone, lines[li].trim(), oldLine.trim())
                     break
                   }
                   found++
                 }
               }
-              return lines.join('\n')
+              const result = lines.join('\n')
+              console.debug('[PATCH] md changed?', result !== md ? 'YES' : 'NO')
+              return result
             }
             if (activeSubView && subViewData?.index) {
               setSubViewData(prev => {
@@ -1237,6 +1259,15 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                 return { ...prev, index: patchIndex(prev.index, entryIndex, newIsDone) }
               })
             }
+            // Scroll-Position nach Re-Render prüfen + stabilisieren
+            requestAnimationFrame(() => {
+              const after = window.scrollY
+              console.debug('[TOGGLE] scroll after re-render: %d (was %d) diff=%d', after, scrollYBefore, after - scrollYBefore)
+              if (Math.abs(after - scrollYBefore) > 50) {
+                window.scrollTo({ top: scrollYBefore, behavior: 'instant' })
+                console.debug('[TOGGLE] scroll stabilisiert auf %d', scrollYBefore)
+              }
+            })
           } else {
             // Fehler → Rollback
             card.setAttribute('data-status', wasDone ? 'done' : 'open')
@@ -1869,8 +1900,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 </div>
                               </>
                             )}
-                            <div className={styles.doneFilter} data-hide-done={hideDone ? 'true' : 'false'}>
-                              {subViewData.readme_body ? (
+                            {subViewData.readme_body ? (
                               <div className={styles.markdownContent}
                                 dangerouslySetInnerHTML={{
                                   __html: renderMarkdown(
@@ -1898,6 +1928,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 onConvertToSub={handleConvertToSub}
                                 onEditBlock={handleEditBlock}
                                 onDeleteBlock={handleDeleteBlock}
+                                hideDone={hideDone}
                                 />
                               </div>
                             )}
@@ -1908,10 +1939,9 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                             )}
                             {subViewData.index && (
                               <div className={styles.markdownContent}
-                                dangerouslySetInnerHTML={{ __html: renderIndexMd(subViewData.index, undefined, discussion.id, subViewData.index_files || []) }}
+                                dangerouslySetInnerHTML={{ __html: renderIndexMd(subViewData.index, undefined, discussion.id, subViewData.index_files || [], hideDone) }}
                               />
                             )}
-                            </div>
                             {/* Box hinzufügen — Sub-View */}
                             <div className={styles.addBoxSection}>
                               <div className={styles.sectionLabel}>➕ Neue Textbox</div>
@@ -2025,8 +2055,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                               </div>
                             </>
                           )}
-                          <div className={styles.doneFilter} data-hide-done={hideDone ? 'true' : 'false'}>
-                            {data.readme_body ? (
+                          {data.readme_body ? (
                             <div className={styles.markdownContent}
                               dangerouslySetInnerHTML={{
                                 __html: renderMarkdown(
@@ -2060,15 +2089,15 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 onConvertToSub={handleConvertToSub}
                                 onEditBlock={handleEditBlock}
                                 onDeleteBlock={handleDeleteBlock}
+                                hideDone={hideDone}
                               />
                             </div>
                           )}
                           {data.index && (
                             <div className={styles.markdownContent}
-                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, 'footer-only', discussion.id, data.index_files || []) }}
+                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, 'footer-only', discussion.id, data.index_files || [], hideDone) }}
                             />
                           )}
-                          </div>
                           {data.subs && data.subs.map((sub, idx) => {
                             const subNum = String(idx + 1).padStart(2, '0')
                             const isExpanded = expandedSubs.has(sub.id)

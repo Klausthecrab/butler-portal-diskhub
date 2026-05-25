@@ -746,11 +746,6 @@
   background: #991b1b !important;
 }
 
-/* #30: Erledigte ausblenden — Globaler Toggle */
-.doneFilter[data-hide-done="true"] [data-status="done"] {
-  display: none !important;
-}
-
 /* Toggle in discStats */
 .hideDoneToggle {
   display: inline-flex;

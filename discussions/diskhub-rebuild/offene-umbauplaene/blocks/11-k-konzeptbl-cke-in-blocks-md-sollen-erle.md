@@ -1,4 +1,4 @@
-### #K: Konzeptblöcke in blocks.md sollen „erledigt"-Status bekommen
+### #K: Konzeptblöcke in blocks.md sollen „erledigt"-Status bekommen (✓ erledigt)
 *— · 24.05.2026*
 
 > **Quelle:** Max (Feedback zu #I — Fortschritts-Doku ohne erledigt-Marker)
