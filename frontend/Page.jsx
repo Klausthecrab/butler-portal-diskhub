@@ -1222,58 +1222,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
         .then(d => {
           if (d.status === 'ok') {
             setErrorMsg('✅ Status aktualisiert' + (d.sha ? ' (' + d.sha.slice(0, 7) + ')' : ''))
-            // Kein Re-Fetch, kein setSubViewData — Index-Markdown-String local patchen,
-            // damit renderIndexMd() beim Re-Render den korrekten Status zeigt.
-            // data.index/subViewData.index ist ein Markdown-String, kein Array.
-            const patchIndex = (md, idx, done) => {
-              if (!md) return md
-              const lines = md.split('\n')
-              let found = 0
-              for (let li = 0; li < lines.length; li++) {
-                if (lines[li].startsWith('### ')) {
-                  if (found === idx) {
-                    const hasDone = lines[li].includes('(✓ erledigt)')
-                    const oldLine = lines[li]
-                    if (done && !hasDone) {
-                      lines[li] = lines[li].replace(/\s*$/, ' (✓ erledigt)')
-                    } else if (!done && hasDone) {
-                      lines[li] = lines[li].replace(/\s*\(✓ erledigt\)/, '')
-                    }
-                    console.debug('[PATCH] idx=%d found=%d done=%s hasDone=%s → "%s" (was "%s")', idx, found, done, hasDone, lines[li].trim(), oldLine.trim())
-                    setDebugLog(prev => [...prev.slice(-4), { text: `[Patch] idx=${idx} found=${found} → ${done ? '✅' : '⬜'} was="${oldLine.trim().slice(0, 60)}"`, ts: Date.now() }])
-                    break
-                  }
-                  found++
-                }
-              }
-              const result = lines.join('\n')
-              console.debug('[PATCH] md changed?', result !== md ? 'YES' : 'NO')
-              if (result !== md) setDebugLog(prev => [...prev.slice(-4), { text: `[Patch] md CHANGED ✓`, ts: Date.now() }])
-              return result
-            }
-            if (activeSubView && subViewData?.index) {
-              setSubViewData(prev => {
-                if (!prev) return prev
-                return { ...prev, index: patchIndex(prev.index, entryIndex, newIsDone) }
-              })
-            } else if (!activeSubView && data?.index) {
-              setData(prev => {
-                if (!prev) return prev
-                return { ...prev, index: patchIndex(prev.index, entryIndex, newIsDone) }
-              })
-            }
-            // Scroll-Position nach Re-Render prüfen + stabilisieren
-            requestAnimationFrame(() => {
-              const after = window.scrollY
-              const diff = after - scrollYBefore
-              const text = diff > 50 ? `[Scroll] sprang um ${diff}px → stabilisiert auf ${scrollYBefore}` : `[Scroll] stabil (${diff}px)`
-              console.debug('[TOGGLE] scroll after re-render: %d (was %d) diff=%d', after, scrollYBefore, diff)
-              setDebugLog(prev => [...prev.slice(-4), { text, ts: Date.now() }])
-              if (Math.abs(diff) > 50) {
-                window.scrollTo({ top: scrollYBefore, behavior: 'instant' })
-                console.debug('[TOGGLE] scroll stabilisiert auf %d', scrollYBefore)
-              }
-            })
+            setDebugLog(prev => [...prev.slice(-4), { text: `[Toggle] API ok — DOM bleibt optimistisch`, ts: Date.now() }])
           } else {
             // Fehler → Rollback
             card.setAttribute('data-status', wasDone ? 'done' : 'open')

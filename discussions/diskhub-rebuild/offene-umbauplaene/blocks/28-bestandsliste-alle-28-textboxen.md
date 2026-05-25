@@ -20,9 +20,9 @@ Liste aller Textboxen in `offene-umbauplaene/blocks/`, erstellt 25.05.2026 als A
 | 13 | 12-29-ui-layout-preview-auf-30-35 | #29: UI-Layout: Preview auf 30-35 % | ⬜ | ⬜ |
 | 14 | 13-30-zwei-phasen-button-in-sub-entwickeln | #30: Zwei-Phasen-Button "In Sub entwickeln" | ⬜ | ⬜ |
 | 15 | 14-31-technisch-korrekte-referenz-im-pfad-b | #31: Technisch korrekte Referenz im Pfad-Button | ✅ | ✅ |
-| 16 | 15-32-prompt-vorlagen-bei-neue-textbox | #32: Prompt-Vorlagen bei "+ Neue Textbox" | ⬜ | |
-| 17 | 16-34-diskussions-struktur-konzept-archiv | #34: Diskussions-Struktur-Konzept / Archiv | ⬜ | |
-| 18 | 17-35-lightbox-f-r-bilder | #35: Lightbox für Bilder | ⬜ | |
+| 16 | 15-32-prompt-vorlagen-bei-neue-textbox | #32: Prompt-Vorlagen bei "+ Neue Textbox" | ⬜ | ⬜ |
+| 17 | 16-34-diskussions-struktur-konzept-archiv | #34: Diskussions-Struktur-Konzept / Archiv | ⬜ | ⬜ |
+| 18 | 17-35-lightbox-f-r-bilder | #35: Lightbox für Bilder | ⬜ | ⬜ |
 | 19 | 18-36-strg-v-aus-zwischenablage-screenshots | #36: STRG+V aus Zwischenablage (Screenshots) in Diskussionen | ⬜ | |
 | 20 | 19-37-bild-modal-eigenst-ndiger-strg-v-uplo | #37: Bild-Modal — Eigenständiger STRG+V/Upload-Dialog für Screenshots | ⬜ | |
 | 21 | 20-39-dead-code-cleanup-alten-button-pendin | #39: Dead Code Cleanup — Alten 📷-Button + pendingImage-Logik entfernen | ⬜ | |
