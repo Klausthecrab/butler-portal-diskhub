@@ -125,6 +125,18 @@ const [hideDone, setHideDone] = useState(false)
 
 **Was NICHT getestet werden konnte:** Diskussionen mit sichtbaren ✓-Karten im Hauptview (20 ✓ in DiskHub Rebuild liegen im `footer-only`-index.md, Memory Trimmer nutzt Sub-Entitäten ohne `data-status`). Die CSS-Mechanik ist intakt — sobald ein Block mit `data-status="done"` im Wrapper liegt, wird er bei aktivem Toggle ausgeblendet.
 
+### Feedback von Kazzle (25.05.2026)
+
+Der Toggle funktioniert grundsätzlich — die ✓-Karten werden unsichtbar. Aber optisch sieht es nicht aus wie "sauber rausgefiltert". Zwei Probleme:
+
+1. **Platzhalter-Abstände bleiben** — Die ausgeblendeten Elemente hinterlassen ihre Margins/Paddings im Layout. Es klafft ein Loch wo vorher die Karte war, statt dass die verbleibenden Elemente sauber zusammenrücken.
+
+2. **Verbindungslinien (┌─) stehen leer im Raum** — Die `.blockConnector`-Divs und `.connectorLine`-Elemente, die separat von den Karten gerendert werden, haben kein `data-status` und bleiben sichtbar. Nach dem Ausblenden hängen sie als einzelne Striche in der Luft — ohne Karte am Ende.
+
+Erwartung: Es sollte aussehen "als hätte es dort nie andere Einträge gegeben". Die verbleibenden ●-Karten rücken lückenlos nach.
+
+**Lösungsrichtung:** Statt CSS-`display:none` müssten die done-Elemente vor dem Rendern aus den Arrays gefiltert werden. Dann entstehen sie gar nicht erst im DOM — kein Platzhalter, keine Connector-Geister. Die `renderBlock()`-HTML-Strings und die `BlocksSection`-JSX müssten `hideDone` berücksichtigen. Das ist aufwändiger (Re-Render bei Toggle) aber optisch sauber. Steht aktuell nicht auf dem Plan — #30 ist mit dem CSS-Ansatz als erste Iteration abgeschlossen.
+
 ---
 
 **Ursprüngliche Analyse (vor Umsetzung):**
