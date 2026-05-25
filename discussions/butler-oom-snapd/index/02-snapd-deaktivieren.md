@@ -1,0 +1,1 @@
+### Sub: Snapd deaktivieren || systemctl stop/disable/mask (offen)

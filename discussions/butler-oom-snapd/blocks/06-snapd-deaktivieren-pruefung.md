@@ -1,4 +1,4 @@
-### #3: Kann snapd komplett deaktiviert werden?
+### #6: Kann snapd komplett deaktiviert werden?
 *— · 25.05.2026*
 
 **Problem**

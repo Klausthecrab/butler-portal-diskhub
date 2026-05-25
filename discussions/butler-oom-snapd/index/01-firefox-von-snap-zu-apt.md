@@ -1,0 +1,1 @@
+### Sub: Firefox-Umzug || Snap → apt — 8 Schritte (1 erledigt · 7 offen)
