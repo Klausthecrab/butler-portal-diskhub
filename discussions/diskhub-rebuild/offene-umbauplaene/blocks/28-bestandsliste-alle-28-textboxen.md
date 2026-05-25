@@ -1,4 +1,4 @@
-### Bestandsliste — alle 28 Textboxen
+### Bestandsliste — alle 28 Textboxen (✓ erledigt)
 *— · 24.05.2026*
 
 Liste aller Textboxen in `offene-umbauplaene/blocks/`, erstellt 25.05.2026 als Arbeitsgrundlage für Prüfung.
