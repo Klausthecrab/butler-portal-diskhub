@@ -1,4 +1,4 @@
-### UI Müll / zersplitterte Karten — Ghost-Blöcke durch ### im Content
+### UI Müll / zersplitterte Karten — Ghost-Blöcke durch ### im Content (✓ erledigt)
 *— · 25.05.2026*
 
 **Problem**
@@ -14,12 +14,16 @@ Systemisch: Der Parser splittet global — ohne Rücksicht auf Dateigrenzen. Die
 **Betroffene Sicht**
 Kazzle sieht im UI eine zersplitterte, unübersichtliche Kartenwüste. Die visuelle Struktur verspricht vollwertige Einzelthemen — aber beim Aufklappen sind es nur Abschnitte einer einzigen Box. Das verwirrt und stört.
 
-**Lösungsrichtung (technisch)**
-Zwei Ansätze stehen zur Wahl:
+**Lösung**
+31.A: Backend-Konvertierung — `_sanitize_internal_headings()` wandelt interne `###` automatisch in `##` um bevor die Datei geschrieben wird. Greift in `edit_block()` und `add_box()`. Implementiert und live.
+31.B: Parser-seitig — `parseBlocksMd()` im Einzeldateien-Modus nur erste `###` pro Datei als Block-Titel werten. Noch offen.
 
-1. **Backend-seitig:** Der `edit-block`/`add-box`-Endpoint in routes.py wandelt interne `###`-Zeilen automatisch in `##` um, BEVOR die Datei geschrieben wird. Ghost-`###` landen gar nicht erst auf der Platte.
-
-2. **Parser-seitig:** `parseBlocksMd()` in Page.jsx splittet im Einzeldateien-Modus (wenn `blocks_files[]` existiert) nicht mehr global, sondern wertet nur die erste `###` pro Datei als Block-Titel. Alle weiteren `###` bleiben Content — egal was in der Datei steht.
+**Fortschritt (25.05.2026):**
+- [x] Ursache identifiziert: interne `###` in box-30 erzeugten 10 Ghost-Blöcke
+- [x] Box-30 behoben: interne `###` zu `##` umgewandelt
+- [x] Option 31.A umgesetzt: Backend-Konvertierung in routes.py
+- [x] Verifiziert: add-box + edit-block wandeln interne `###` automatisch um
+- [x] Option 31.B dokumentiert als Alternative (Parser-seitig)
 
 **Status**
-🔜 offen — Entscheidung steht aus.
+✅ erledigt

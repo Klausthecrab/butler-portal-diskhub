@@ -11,8 +11,8 @@ Liste aller Textboxen in `offene-umbauplaene/blocks/`, erstellt 25.05.2026 als A
 | 4 | 03-c-sub-diskussionen-adressierbar-machen-b | #C: Sub-Diskussionen adressierbar machen (🔗-Button) | ✅ | ✅ |
 | 5 | 04-d-einfache-index-md-eintr-ge-zu-textboxe | #D: Einfache index.md-Einträge zu Textboxen migrieren | ✅ | ✅ |
 | 6 | 05-e-index-md-eintr-ge-auf-sonderrolle-limi | #E: Index.md-Einträge auf Sonderrolle limitieren (mit mir diskutieren) | ⬜ | |
-| 7 | 06-f-ki-kommentare-in-index-md-konzept-disk | #F: KI-Kommentare in index.md (Konzept diskutieren) | ⬜ | |
-| 8 | 07-g-live-scan-statt-hartcodierter-beschrei | #G: Live-Scan statt hartcodierter Beschreibung (niedrige Prio) | ⬜ | |
+| 7 | 06-f-ki-kommentare-in-index-md-konzept-disk | #F: KI-Kommentare in index.md (Konzept diskutieren) | ⬜ | später |
+| 8 | 07-g-live-scan-statt-hartcodierter-beschrei | #G: Live-Scan statt hartcodierter Beschreibung (niedrige Prio) | ⬜ | später |
 | 9 | 08-h-datei-architektur-einzeldateien-statt- | #H: Datei-Architektur — Einzeldateien statt Sammeldateien | ✅ | ✅ |
 | 10 | 09-i-pfad-button-format-selbst-erkl-rende-r | #I: Pfad-Button-Format — Selbst-erklärende Referenz für KI-Sessions | ✅ | ✅ |
 | 11 | 10-j-umbauplan-element-semantik-phasenmodel | #J: Umbauplan — Element-Semantik & Phasenmodell | ✅ | ✅ |
@@ -31,7 +31,7 @@ Liste aller Textboxen in `offene-umbauplaene/blocks/`, erstellt 25.05.2026 als A
 | 24 | 23-44-prompt-baukasten-im-webhook | #44: Prompt-Baukasten im Webhook | ⬜ | ⬜ |
 | 25 | 24-45-auto-r-ckkanal | #45: Auto-Rückkanal | ⬜ | ⬜ |
 | 26 | 25-47-session-interne-verifikation | #47: Session-interne Verifikation | ⬜ | ⬜ |
-| 27 | 26-48-status-single-source-of-truth-manuell | #48: Status Single Source of Truth — Manual. Status-Zeilen aus READMEs entfernen | ⬜ | |
+| 27 | 26-48-status-single-source-of-truth-manuell | #48: Status Single Source of Truth — Manual. Status-Zeilen aus READMEs entfernen | ⬜ | ⬜ |
 | 28 | 27-phase-3-migration-zu-einzeldateien-h | Phase 3 — Migration zu Einzeldateien (#H) | ✅ | ✅ |
 
 **Insgesamt:** 28 Textboxen · 6 ✅ erledigt · 20 ⬜ offen · 1 offen · 1 erledigt (nicht ⬜-Format).
