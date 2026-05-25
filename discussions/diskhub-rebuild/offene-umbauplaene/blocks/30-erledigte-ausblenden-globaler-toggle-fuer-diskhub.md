@@ -1,4 +1,4 @@
-### Erledigte ausblenden — Globaler Toggle für DiskHub
+### Erledigte ausblenden — Globaler Toggle für DiskHub (✓ erledigt)
 *— · 24.05.2026*
 
 **Diskussion mit Kazzle:** Ein globaler Kippschalter (oben im Header) der alle als `✓ erledigt` markierten Elemente aus der Ansicht ausblendet. Betrifft Textboxen in blocks.md und index.md-Einträge gleichermaßen.
@@ -144,3 +144,43 @@ Erwartung: Es sollte aussehen "als hätte es dort nie andere Einträge gegeben".
 - Blocks werden in React-JSX gerendert → sauber via `.filter()` machbar
 - Index-Einträge sind HTML-String (`dangerouslySetInnerHTML`) → CSS-Weg einfacher: `.hide-done [data-status="done"] { display: none; }`
 - Hybrid-Ansatz empfohlen: React-State + Filter für Blocks, CSS-Klasse für Index-Einträge
+
+---
+
+## ✅ Verifikation (25.05.2026 — live getestet)
+
+### JS-Filter statt CSS display:none (Polishing-Runde)
+
+Auf Kazzles Feedback hin umgesetzt: done-Elemente werden **vor dem Rendern aus den Arrays gefiltert**, statt via CSS display:none versteckt. Keine Geister-Connector-Linien, keine Platzhalter-Lücken.
+
+**Änderungen:**
+
+1. **Page.jsx — BlocksSection:**
+   - Prop `hideDone` hinzugefügt
+   - `filteredBlocks` vor dem `.map()`: done-Einträge werden aus dem Array gefiltert, Connector + Card entstehen gar nicht erst im DOM
+   - `hideDone` als Prop an beiden Aufrufstellen (Main + Sub View) übergeben
+
+2. **Page.jsx — renderIndexMd:**
+   - Parameter `hideDone` hinzugefügt
+   - Im Rendering-Loop: done-Blöcke via `continue` überspringen — Connector wird nicht generiert
+
+3. **Page.jsx — Wrapper entfernt:**
+   - Beide `<div className={styles.doneFilter} data-hide-done={...}>` Wrapper (Sub View + Main View) entfernt — CSS-Klasse wird nicht mehr gebraucht
+
+4. **Page.module.css:**
+   - `.doneFilter[data-hide-done="true"] [data-status="done"] { display: none !important }` entfernt
+
+5. **Dashboard V3-Kopie:**
+   - Noch nicht migriert — kein separates DiskHub-Frontend in V3 vorhanden
+
+6. **Build + Neustart:**
+   - `npm run build` → ✅ 0 Fehler, 5038 Module, 16s
+   - Dashboard auf Port 8090 neugestartet
+   - DiskHub-API antwortet (✅ Health-Check OK)
+   - Browser-Check: Toggle sichtbar, `hideDone`-State im JS-Code aktiv
+
+**Ergebnis (Kazzle 25.05.2026):**
+
+> "Sehr gut. Mein UI gefühlt entspricht meinen erwartungen." ✅
+
+Toggle AN: ✓-Karten + ihre Connector-Linien existieren nicht im DOM → kein Loch, keine Geister-Striche. Sieht aus "als hätte es dort nie andere Einträge gegeben". 🧠
