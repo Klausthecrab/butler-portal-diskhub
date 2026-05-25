@@ -582,10 +582,11 @@ def get_discussion(discussion_id):
             result['index'] = '\n\n'.join(index_parts)
         result['index_files'] = index_files
         # #20: Dynamischer Status aus index-Content
-        index_status = _parse_index_status(result['index'])
-        if index_status['erledigt'] + index_status['offen'] > 0:
-            header['done_count'] = index_status['erledigt']
-            header['open_count'] = index_status['offen']
+        if 'index' in result:
+            index_status = _parse_index_status(result['index'])
+            if index_status['erledigt'] + index_status['offen'] > 0:
+                header['done_count'] = index_status['erledigt']
+                header['open_count'] = index_status['offen']
     else:
         index_path = os.path.join(folder, 'index.md')
         if os.path.isfile(index_path):

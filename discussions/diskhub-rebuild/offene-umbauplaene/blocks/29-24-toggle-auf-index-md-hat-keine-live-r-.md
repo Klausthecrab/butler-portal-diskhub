@@ -148,11 +148,88 @@ cd ~/repos/butler-portal-diskhub && git add -A && git commit -m "fix: main view 
 - `renderIndexMd()` in der Haupt-Diskussion muss den vollen Modus verwenden (nicht `footer-only`) damit die `data-toggle-index-done` Buttons gerendert werden
 - ODER `generateToc()` muss klickbare `data-toggle-index-done` Buttons statt reiner Textzeilen generieren
 
-> **Ergebnis:** Fix 5 deployed: `renderIndexMd()` in der Haupt-Diskussion verwendet jetzt `undefined` statt `'footer-only'` als Modus. Index-Einträge werden als interaktive Accordion-Blöcke mit ⬜/✅-Button gerendert — exakt wie in Sub-Diskussionen. Der Toggle funktioniert jetzt mit sofortigem optimistischem DOM-Update + Hintergrund-API, kein Bounce-Back mehr.
+> **Ergebnis:** Fix 5 deployed: `renderIndexMd()` in der Haupt-Diskussion verwendet jetzt `undefined` statt `'footer-only'` als Modus. Index-Einträge werden als interaktive Accordion-Blöcke mit ⬜/✅-Button gerendert — exakt wie in Sub-Diskussionen. Der Toggle ist jetzt klickbar (vorher nicht) — aber das Live-Verhalten ist noch defekt (siehe Feedback unten).
 
 ---
 
 **Dieser Eintrag ist erledigt — Fix 5 umgesetzt (25.05.2026, 17:45 Uhr).**
+
+**⚠️ Nachträglicher Korrektur-Hinweis (25.05.2026):** Der Fix war NUR die Sichtbarkeit der Toggle-Buttons. Das Toggle-Verhalten selbst (optimistischer DOM → kein Re-Render) ist weiterhin defekt. Siehe "Kazzle's Feedback nach Fix 5" unten.
+
+---
+
+## Kazzle's Feedback nach Fix 5 (25.05.2026)
+
+**Live-Test nach Fix 5 + Registry-Start + Dashboard-Neustart:**
+- Toggle-Buttons sind jetzt sichtbar ✅ (Fix 5 hat das gelöst)
+- Aber der Klick fühlt sich immer noch kaputt an ❌
+
+## Haupt-Diskussion: Screen-Reset + Bounce-Back
+Klick auf ⬜/✅ → Button wechselt kurz → dann setzt die gesamte Seite zurück. Der Screen springt nach oben (Scroll-Position verloren), der Toggle-Status ist weg. Fühlt sich an wie ein Page-Reload.
+
+**Verdacht:** Der optimistische DOM-Update (Fix 4) wird durch einen Re-Render überschrieben. Mögliche Trigger: `setErrorMsg()`, `setDebugLog()` oder `dangerouslySetInnerHTML` im Main-View-Index-Renderer spannen den gesamten Block neu auf.
+
+## Sub-Diskussion: Änderung unsichtbar bis Exit+Re-Entry
+Klick auf ⬜/✅ → kein sichtbarer Farbwechsel. Der neue Status (z.B. grüne Titelleiste bei ✅) erscheint erst wenn man die Sub-Diskussion schließt und wieder öffnet.
+
+**Verdacht:** `setSubViewData()` oder ein anderer State-Change rendert den gesamten Sub-View neu. Der `dangerouslySetInnerHTML`-Block überschreibt dabei den optimistischen DOM.
+
+## Bekannte Dokumentation (deckt sich mit Fix 3/Fix 4)
+Die Symptome sind identisch mit den bereits dokumentierten Fixes 3 und 4 (Zeile 22-29, Zeile 54-61). Der `dangerouslySetInnerHTML`-Re-Render wurde damals identifiziert, aber Fix 4 (nur optimistischer DOM ohne State-Update) hat das Problem nur für den Fall gelöst *dass ein Button geklickt wird* — und da die Buttons bis Fix 5 gar nicht existierten, war Fix 4 nie aktiv getestet. Jetzt wo die Buttons da sind, zeigt sich dass Fix 4 allein nicht reicht.
+
+**Nächste Schritte — Toggle-Live-Verhalten reparieren:**
+
+Der Toggle ist jetzt sichtbar, aber das Live-Feedback (optimistischer DOM, kein Re-Render) ist defekt. Zwei Symptome, eine Ursache: `dangerouslySetInnerHTML` überschreibt nach API-Response den optimistischen DOM.
+
+**Option A — Re-Render verhindern (minimaler Eingriff):**
+Ursache finden warum `renderIndexMd()` nach API-Response neu gerendert wird. Verdacht: `setErrorMsg('✅ Status aktualisiert')` triggert React-Re-Render, der den `dangerouslySetInnerHTML`-Block neu aufspannt. Wenn der Re-Render verhindert wird, bleibt der optimistische DOM (Fix 4) stehen.
+- Ziel: Kein State-Change (ausser setDebugLog) im Toggle-Success-Pfad
+- Risiko: Scroll-Sprung könnte auch vom `dangerouslySetInnerHTML` selbst kommen (React ersetzt den gesamten HTML-Block bei jedem Render, auch ohne State-Change durch Parent)
+
+**Option B — Scroll-Position stabilisieren (Quick-Win):**
+Im Toggle-Handler vor dem DOM-Update `window.scrollY` speichern, nach dem DOM-Update per `window.scrollTo()` wiederherstellen. Schützt vor Scroll-Sprung, aber behebt nicht das Bounce-Back.
+- Aufwand: ~5 Zeilen im globalen Click-Handler
+- Bounce-Back bleibt, aber Scroll-Sprung ist weg → fühlt sich besser an
+
+**Option C — Echte React-Komponente statt dangerouslySetInnerHTML (grundlegend):**
+Analog zu `BlocksSection` eine `IndexSection`-React-Komponente bauen. Statt `renderIndexMd()` als string-basiertes HTML zu rendern, parst sie die `###`-Blöcke in echte React-Komponenten. Toggle wird dann via React-State + `useState` gesteuert — kein Re-Render-Problem, kein DOM-Override.
+- Aufwand: ~200 Zeilen neue Komponente, Test + Build
+- Beseitigt die Ursache endgültig
+- Nachteil: Größerer Eingriff, Risiko von Nebenwirkungen
+
+**Empfehlung:** Option A zuerst versuchen (minimaler Eingriff, sofort testbar). Wenn das nicht reicht → Option B als Pflaster. Wenn beides nicht hilft → Option C.
+
+## Learnings aus Fix 5
+
+## Dashboard-Server: Python 3.12 Pflicht
+
+Flask ist nur für Python 3.12 (`/usr/bin/python3.12`) installiert (system-level via `--break-system-packages`). Das Hermes-Venv (Python 3.11) und das Registry-Venv haben kein Flask. Server nie mit `python3` (alias) starten — immer explizit:
+
+```bash
+cd ~/repos/butler-dashboard-v3/backend && /usr/bin/python3.12 server.py
+```
+
+## Registry-Boot-Order: Dashboard braucht Registry
+
+Das Dashboard lädt Portal-Backends (diskhub, projekte, etc.) NUR beim Start aus der butler-registry (Port 8025). Läuft die Registry nicht, registriert der dynamische Loader keine Blueprints → alle API-Routen fallen ins SPA-Catchall → leeres UI.
+
+**Korrekter Neustart:**
+
+```bash
+# 1. Registry starten (wenn tot)
+cd ~/repos/butler-registry && /usr/bin/python3.12 server.py
+# 2. Warten bis healthy
+curl -s http://localhost:8025/api/health  # → {"status":"healthy"}
+# 3. Dashboard neustarten
+kill $(lsof -ti:8090)
+cd ~/repos/butler-dashboard-v3/backend && /usr/bin/python3.12 server.py
+```
+
+**Wichtig:** `pkill -f "python3.*server.py"` killt Registry UND Dashboard (gleicher Process-Name). Stattdessen Port-spezifisch killen: `kill $(lsof -ti:PORT)`.
+
+## Delay-Effekt: Fix war korrekt, UI trotzdem leer
+
+Fix 5 (footer-only → undefined) war von Anfang an korrekt. Kazzle sah ein leeres UI weil die Registry nach einem Server-Neustart nicht mehr lief — das Dashboard hatte beim Start keinen diskhub-Blueprint geladen. Erst nach Registry-Start + Dashboard-Neustart war der Fix sichtbar.
 
 ---
 
