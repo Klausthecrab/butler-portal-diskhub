@@ -117,3 +117,17 @@ curl -s http://localhost:8090/assets/Page-DF2k4hvb.js | grep 'DOM bleibt optimis
 - Alternative: nach dem Build `send_from_directory` in server.py prüfen — evtl. wird index.html einmalig gecached
 - Workaround: `?v=2` Cache-Buster in der URL testen
 - Workaround: `window.location.reload(true)` im Browser erzwingen
+
+---
+
+**Übergabe-Prompt für neue Hermi-Session:**
+
+> Lies die Textbox #24 in der Sub-Diskussion "Offene Umbauplaene" (Diskhub Rebuild):
+> `~/repos/butler-portal-diskhub/discussions/diskhub-rebuild/offene-umbauplaene/blocks/29-24-toggle-auf-index-md-hat-keine-live-r-.md`
+>
+> Fix 4 ist deployt (Build + Server-Neustart), per curl auf localhost:8090 verifiziert — der neue Code ist LIVE. Aber Kazzle sieht keine Debug-Leiste und spürt keine Verbesserung. Finde raus warum.
+>
+> **Vorgehen:**
+> 1. Erstelle einen Plan was du prüfen willst (siehe "Nächste Schritte" in der Textbox)
+> 2. Erkläre Kazzle den Plan
+> 3. Warte auf seine finale Freigabe — starte nichts ohne OK
