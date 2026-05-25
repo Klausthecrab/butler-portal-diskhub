@@ -7,7 +7,7 @@
 
 ## ✅ Umsetzung (24.05.2026)
 
-### Ansatz: CSS-Toggle-Klasse statt JS-Filter
+## Ansatz: CSS-Toggle-Klasse statt JS-Filter
 
 Elemente haben bereits `data-status="done"` (gesetzt in `renderBlock()` für index.md-Einträge und in `BlocksSection`-JSX für blocks.md-Blöcke). Statt die Render-Logik umzubauen oder Arrays zu filtern, wird ein CSS-Attributselektor verwendet:
 
@@ -15,7 +15,7 @@ Elemente haben bereits `data-status="done"` (gesetzt in `renderBlock()` für ind
 - **Toggle AUS:** Keine Wirkung → Elemente sind wieder sichtbar
 - **Kein API-Call, kein Re-Render** — pure CSS, instantan
 
-### UI-Effekt (was der User sieht)
+## UI-Effekt (was der User sieht)
 
 In der `discStats`-Zeile (wo `18 ✓ · 5 ●` steht) erscheint ein neuer Kippschalter:
 
@@ -29,7 +29,7 @@ Erstellt 24.05.2026 · 18 ✓ · 5 ● · [☐ Erledigte ausblenden]
 
 Funktioniert in der Hauptansicht UND in Sub-Ansichten (beide haben `discStats` + denselben Aufbau).
 
-### Betroffene Dateien
+## Betroffene Dateien
 
 | Datei | Änderung |
 |-------|----------|
@@ -37,7 +37,7 @@ Funktioniert in der Hauptansicht UND in Sub-Ansichten (beide haben `discStats` +
 | `frontend/Page.jsx` | ✚ State `hideDone` + Toggle in `discStats` + Wrapper `<div>` um filterbare Blöcke |
 | Dashboard-V3-Kopie (selbe Datei) | Gleiches Patch-Set |
 
-### Code-Änderungen im Detail
+## Code-Änderungen im Detail
 
 #### 1. Page.module.css (Zeile ~749, nach den data-status-Regeln)
 
@@ -87,7 +87,7 @@ const [hideDone, setHideDone] = useState(false)
 
 `butler-dashboard-v3/frontend/src/portals/diskhub/Page.jsx` bekommt exakt dieselben Patches. Manuell kopieren — CI-Sync existiert (noch) nicht.
 
-### Verifikation
+## Verifikation
 
 1. `npm run build` → keine Fehler
 2. Dashboard neustarten (Port 8090 kill + python3 server.py)
@@ -98,7 +98,7 @@ const [hideDone, setHideDone] = useState(false)
 7. Neue ✓-Markierung bei laufendem Toggle → Karte verschwindet sofort (Optimistic UI)
 8. Browser-Refresh → Toggle zurück auf AUS (State ist session-scoped)
 
-### Bekannte Einschränkung
+## Bekannte Einschränkung
 
 **TOC zeigt weiterhin alle Einträge** — `generateToc()` rendert als Markdown-String, die Einträge haben kein `data-status`-Attribut. Der TOC dient als Navigation und zeigt daher auch nach Toggle-AN alle Einträge. Wer das als störend empfindet, müsste `generateToc()` um einen Post-Processing-Filter erweitern — steht nicht auf dem Plan.
 
@@ -125,7 +125,7 @@ const [hideDone, setHideDone] = useState(false)
 
 **Was NICHT getestet werden konnte:** Diskussionen mit sichtbaren ✓-Karten im Hauptview (20 ✓ in DiskHub Rebuild liegen im `footer-only`-index.md, Memory Trimmer nutzt Sub-Entitäten ohne `data-status`). Die CSS-Mechanik ist intakt — sobald ein Block mit `data-status="done"` im Wrapper liegt, wird er bei aktivem Toggle ausgeblendet.
 
-### Feedback von Kazzle (25.05.2026)
+## Feedback von Kazzle (25.05.2026)
 
 Der Toggle funktioniert grundsätzlich — die ✓-Karten werden unsichtbar. Aber optisch sieht es nicht aus wie "sauber rausgefiltert". Zwei Probleme:
 
@@ -149,7 +149,7 @@ Erwartung: Es sollte aussehen "als hätte es dort nie andere Einträge gegeben".
 
 ## ✅ Verifikation (25.05.2026 — live getestet)
 
-### JS-Filter statt CSS display:none (Polishing-Runde)
+## JS-Filter statt CSS display:none (Polishing-Runde)
 
 Auf Kazzles Feedback hin umgesetzt: done-Elemente werden **vor dem Rendern aus den Arrays gefiltert**, statt via CSS display:none versteckt. Keine Geister-Connector-Linien, keine Platzhalter-Lücken.
 
