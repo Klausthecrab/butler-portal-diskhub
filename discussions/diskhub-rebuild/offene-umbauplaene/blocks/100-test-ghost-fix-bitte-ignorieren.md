@@ -1,14 +1,14 @@
-### TEST Ghost-Fix — bitte ignorieren
+### TEST Ghost-Fix — via edit-block
 *— · 25.05.2026*
 
 **Problem**
-Test: interner ###-Header
+Edit-Block-Pfad testen.
 
-## Interner Header — sollte ## werden
-Das ist Content unter einem internen Header.
+## Sollte zu ## werden
+Das ist ein interner Header.
 
-## Noch ein Header
-Noch mehr Content.
+## Auch der
+Und noch einer.
 
 **Status**
 🔜 offen
