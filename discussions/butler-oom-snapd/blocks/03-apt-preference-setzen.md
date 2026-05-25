@@ -11,9 +11,14 @@ Ohne Preference bevorzugt apt ggf. die Snap-Version oder ignoriert das PPA. Wir 
    ```
 2. Verifikation: `apt policy firefox` zeigt Priority 1001
 
+**Durchgeführt**
+- Preference-Datei angelegt: `/etc/apt/preferences.d/mozilla-firefox`
+- Inhalt: `Package: *` / `Pin: release o=LP-PPA-mozillateam` / `Pin-Priority: 1001`
+- Verifiziert via `cat`
+
 **Risiken**
 - Falsche Preference kann andere Pakete blockieren — hier nur auf Mozilla-PPA begrenzt
 - Rückgängig: `sudo rm /etc/apt/preferences.d/mozilla-firefox`
 
 **Status**
-🔜 offen
+✅ erledigt
