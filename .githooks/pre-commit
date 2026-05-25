@@ -1,0 +1,48 @@
+#!/bin/bash
+# Pre-Commit Hook: Verhindert Ghost-Blöcke in DiskHub Textboxen
+#
+# Prüft: Jede blocks/*.md Datei darf maximal 1x `### ` enthalten
+#        (1x für den Block-Titel, keine internen `###` = Ghost-Blöcke)
+#
+# Fehlschlag: Commit wird abgebrochen mit Liste der betroffenen Dateien
+#
+# Install: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+# Alle staged blocks/*.md Dateien (auch in Sub-Diskussionen)
+staged_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^discussions/.*/blocks/[^/]+\.md$' || true)
+
+if [ -z "$staged_files" ]; then
+    exit 0
+fi
+
+has_errors=0
+
+for file in $staged_files; do
+    if [ ! -f "$file" ]; then
+        continue
+    fi
+
+    count=$(grep -c '^### ' "$file" 2>/dev/null || true)
+    if [ "$count" -gt 1 ]; then
+        echo -e "${RED}❌ Ghost-Block-Risiko: $file${NC}"
+        echo -e "${YELLOW}   $count x ### gefunden — maximal 1 erlaubt (Block-Titel)${NC}"
+        echo -e "${YELLOW}   Interne Überschriften zu ## oder ** ändern:${NC}"
+        grep -n '^### ' "$file" | tail -n +2 | while read -r line; do
+            echo -e "${CYAN}     $line${NC}"
+        done
+        has_errors=1
+    fi
+done
+
+if [ "$has_errors" -eq 1 ]; then
+    echo ""
+    echo -e "${RED}❌ Commit abgebrochen. Fixe die ### → ## in den genannten Dateien.${NC}"
+    exit 1
+fi
