@@ -1,4 +1,4 @@
-### Option B: Parser ignoriert interne ### im Einzeldateien-Modus
+### 31.B — Parser ignoriert interne ### im Einzeldateien-Modus
 *— · 25.05.2026*
 
 **Ansatz**
