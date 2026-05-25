@@ -1,4 +1,4 @@
-### Option A: Backend wandelt interne ### automatisch in ## um (✓ erledigt)
+### 31.A — Backend wandelt interne ### automatisch in ## um (✓ erledigt)
 *— · 25.05.2026*
 
 **Ansatz**

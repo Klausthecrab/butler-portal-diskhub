@@ -5,8 +5,8 @@ Liste aller Textboxen in `offene-umbauplaene/blocks/`, erstellt 25.05.2026 als A
 
 | # | Dateiname | Titel | Status | Geprüft |
 |---|-----------|-------|--------|---------|
-| 1 | 00-49-neue-offene-punkte-werden-unformatiert | #49 neue "offene Punkte" werden unformatiert angelegt | offen | |
-| 2 | 01-a-semantik-regeln-f-r-textbox-vs-sub-dis | #A: Semantik-Regeln für Textbox vs. Sub-Diskussion definieren | erledigt | |
+| 1 | 00-49-neue-offene-punkte-werden-unformatiert | #49 neue "offene Punkte" werden unformatiert angelegt | offen | ✅ |
+| 2 | 01-a-semantik-regeln-f-r-textbox-vs-sub-dis | #A: Semantik-Regeln für Textbox vs. Sub-Diskussion definieren | erledigt | ✅ |
 | 3 | 02-b-index-md-eintr-ge-adressierbar-machen- | #B: Index.md-Einträge adressierbar machen (🔗-Button) | ✅ | ✅ |
 | 4 | 03-c-sub-diskussionen-adressierbar-machen-b | #C: Sub-Diskussionen adressierbar machen (🔗-Button) | ✅ | ✅ |
 | 5 | 04-d-einfache-index-md-eintr-ge-zu-textboxe | #D: Einfache index.md-Einträge zu Textboxen migrieren | ✅ | ✅ |
