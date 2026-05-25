@@ -1045,6 +1045,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   const [selectedSet, setSelectedSet] = useState(new Set())
   const [userNotes, setUserNotes] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
+  const [debugLog, setDebugLog] = useState([])
   const [generatedBlock, setGeneratedBlock] = useState('')
   const [triggeredAt, setTriggeredAt] = useState(null)
   const [showReadmeModal, setShowReadmeModal] = useState(false)
@@ -1189,15 +1190,15 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
       const entryIndex = parseInt(toggleBtn.getAttribute('data-entry-index'), 10)
       if (isNaN(entryIndex)) return
 
-      // Scroll-Position vor Re-Render speichern
-      const scrollYBefore = window.scrollY
-      const targetRect = toggleBtn.getBoundingClientRect()
-      console.debug('[TOGGLE] entryIndex=%d scrollY=%d btnTop=%d', entryIndex, scrollYBefore, Math.round(targetRect.top + scrollYBefore))
-
       // Optimistic UI: sofort umschalten, API im Hintergrund
       const wasDone = toggleBtn.textContent.trim() === '✅'
       const card = toggleBtn.closest('[data-status]')
       const newIsDone = !wasDone
+
+      // Scroll-Position vor Re-Render speichern + Debug-Log
+      const scrollYBefore = window.scrollY
+      setDebugLog(prev => [...prev.slice(-4), { text: `[Toggle] idx=${entryIndex} was=${wasDone ? '✅' : '⬜'} → ${newIsDone ? '✅' : '⬜'} scrollY=${scrollYBefore}`, ts: Date.now() }])
+
       // data-status toggeln → CSS färbt Header grün/grau
       card.setAttribute('data-status', newIsDone ? 'done' : 'open')
       // details open toggeln (erledigt = aufgeklappt, offen = zu)
@@ -1239,6 +1240,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                       lines[li] = lines[li].replace(/\s*\(✓ erledigt\)/, '')
                     }
                     console.debug('[PATCH] idx=%d found=%d done=%s hasDone=%s → "%s" (was "%s")', idx, found, done, hasDone, lines[li].trim(), oldLine.trim())
+                    setDebugLog(prev => [...prev.slice(-4), { text: `[Patch] idx=${idx} found=${found} → ${done ? '✅' : '⬜'} was="${oldLine.trim().slice(0, 60)}"`, ts: Date.now() }])
                     break
                   }
                   found++
@@ -1246,6 +1248,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
               }
               const result = lines.join('\n')
               console.debug('[PATCH] md changed?', result !== md ? 'YES' : 'NO')
+              if (result !== md) setDebugLog(prev => [...prev.slice(-4), { text: `[Patch] md CHANGED ✓`, ts: Date.now() }])
               return result
             }
             if (activeSubView && subViewData?.index) {
@@ -1262,8 +1265,11 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
             // Scroll-Position nach Re-Render prüfen + stabilisieren
             requestAnimationFrame(() => {
               const after = window.scrollY
-              console.debug('[TOGGLE] scroll after re-render: %d (was %d) diff=%d', after, scrollYBefore, after - scrollYBefore)
-              if (Math.abs(after - scrollYBefore) > 50) {
+              const diff = after - scrollYBefore
+              const text = diff > 50 ? `[Scroll] sprang um ${diff}px → stabilisiert auf ${scrollYBefore}` : `[Scroll] stabil (${diff}px)`
+              console.debug('[TOGGLE] scroll after re-render: %d (was %d) diff=%d', after, scrollYBefore, diff)
+              setDebugLog(prev => [...prev.slice(-4), { text, ts: Date.now() }])
+              if (Math.abs(diff) > 50) {
                 window.scrollTo({ top: scrollYBefore, behavior: 'instant' })
                 console.debug('[TOGGLE] scroll stabilisiert auf %d', scrollYBefore)
               }
@@ -2571,6 +2577,13 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
           />
         )}
       </div>
+      {/* Debug-Log für Toggle-Testing — sichtbar für Kazzle */}
+      {debugLog.length > 0 && (
+        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#1a1a2e', color: '#a0ffa0', fontSize: 11, fontFamily: 'monospace', padding: '4px 8px', zIndex: 9999, borderTop: '1px solid #333', opacity: 0.9 }}>
+          {debugLog[debugLog.length - 1].text}
+          {debugLog.length > 1 && <span style={{ opacity: 0.4, marginLeft: 12 }}>+{debugLog.length - 1} ältere</span>}
+        </div>
+      )}
     </div>
   )
 }
