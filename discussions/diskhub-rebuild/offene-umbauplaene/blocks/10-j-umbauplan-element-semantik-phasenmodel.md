@@ -1,4 +1,4 @@
-### #J: Umbauplan — Element-Semantik & Phasenmodell
+### #J: Umbauplan — Element-Semantik & Phasenmodell (✓ erledigt)
 *— · 24.05.2026*
 
 Synthese aus der Diskussion zu #A (Semantik-Regeln) und #E (Sonderrollen). Definiert die Reihenfolge des Umbaus.
