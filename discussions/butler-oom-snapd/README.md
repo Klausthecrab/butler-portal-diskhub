@@ -7,8 +7,8 @@ Am 25.05.2026 um ~05:27 ist der Butler komplett eingefroren. Der OOM-Killer hat 
 **Verdacht:** snapd (Watchdog-Timeout um 05:27:29) hat einen I/O-Hang verursacht, der das gesamte System blockiert hat.
 
 **Geplanter Weg:**
-1. Symptome analysieren & Ursache verstehen
+1. Symptome analysieren und Ursache verstehen
 2. Firefox aus Snap rausziehen (Lesezeichen erhalten)
-3. Prüfen ob snapd komplett weg kann
+3. Pruefen ob snapd komplett weg kann
 4. Snapd deaktivieren
-5. Verifizieren dass alles sauber läuft
+5. Verifizieren dass alles sauber laeuft
