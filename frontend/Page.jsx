@@ -1203,8 +1203,24 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
         .then(d => {
           if (d.status === 'ok') {
             setErrorMsg('✅ Status aktualisiert' + (d.sha ? ' (' + d.sha.slice(0, 7) + ')' : ''))
-            // Kein fetchDiscussionData / setSubViewData — optimistisches UI hat DOM bereits aktualisiert.
-            // Re-Render würde den optimistischen Zustand überschreiben und Position zurückspringen lassen.
+            // Kein Re-Fetch, kein setSubViewData — Daten optimistisch im State updaten,
+            // damit der unvermeidbare Re-Render (setErrorMsg, etc.) den korrekten Status zeigt
+            // und nicht auf den alten data.index zurückfällt.
+            if (activeSubView && subViewData?.index) {
+              setSubViewData(prev => {
+                if (!prev) return prev
+                const idx = [...prev.index]
+                idx[entryIndex] = { ...idx[entryIndex], done: newIsDone }
+                return { ...prev, index: idx }
+              })
+            } else if (!activeSubView && data?.index) {
+              setData(prev => {
+                if (!prev) return prev
+                const idx = [...prev.index]
+                idx[entryIndex] = { ...idx[entryIndex], done: newIsDone }
+                return { ...prev, index: idx }
+              })
+            }
           } else {
             // Fehler → Rollback
             card.setAttribute('data-status', wasDone ? 'done' : 'open')

@@ -1,4 +1,4 @@
-### #I: Pfad-Button-Format — Selbst-erklärende Referenz für KI-Sessions
+### #I: Pfad-Button-Format — Selbst-erklärende Referenz für KI-Sessions (✓ erledigt)
 *— · 24.05.2026*
 
 > **Quelle:** `diskhub-rebuild/blocks/09-pfad-button-format` — 🔗-Button-Format-Entscheidung
