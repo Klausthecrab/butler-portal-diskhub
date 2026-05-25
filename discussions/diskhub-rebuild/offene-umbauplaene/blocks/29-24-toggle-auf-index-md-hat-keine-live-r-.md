@@ -39,15 +39,15 @@ Der ⬜/✅-Status-Toggle auf index.md-Einträgen funktioniert technisch (API �
 
 **Aktueller Stand (25.05.2026, 15:50 Uhr):**
 
-### Analyse der beiden Verdachtsmomente
+## Analyse der beiden Verdachtsmomente
 
 **Verdacht A (Server/Cache):** Durch Hermis Test (vorherige Session) wurde bestätigt: Der optimistische DOM-Clock funktioniert (sofortiges ✅) → der neue Code läuft teilweise. Aber nach API-Response kommt Re-Render → Toggle bounce-back. Das deutet auf ein CODE-Problem hin, nicht auf Server/Build.
 
 **Verdacht B (||-Separator in patchIndex()):** FALSE ALARM. Die tatsächlichen index-Einträge in `discussions/*/*/index/*.md` sehen so aus:
 ```
-### #27: Chronologische Sortierung (✓ erledigt) || Einträge in korrekter Reihenfolge
-### #12: Kurzbeschreibung (✓ erledigt) || README-Präambel als Preview
-### #20: Status-Zähler (✓ erledigt)
+## #27: Chronologische Sortierung (✓ erledigt) || Einträge in korrekter Reihenfolge
+## #12: Kurzbeschreibung (✓ erledigt) || README-Präambel als Preview
+## #20: Status-Zähler (✓ erledigt)
 ```
 Das `||` steht IMMER vor dem Status-Marker. `patchIndex()` hängt mit `replace(/\s*$/, ' (✓ erledigt)')` ans ZEILENENDE an — nach dem `||`-Teil, also genau korrekt. Der Backend-Code in `routes.py` macht exakt dasselbe. ✅ Kein Problem.
 
@@ -60,7 +60,7 @@ Das Kernproblem ist `dangerouslySetInnerHTML`. Der Toggle macht:
 
 Der hideDone-Toggle (Ausblenden ✓) hat dieses Problem NICHT, weil `BlocksSection` echte React-Komponenten nutzt. Der Checkbox-Change macht nur `setHideDone()` → React diffed die Komponenten sauber.
 
-### Fix 4 — patchIndex() + State-Update komplett rausgeworfen
+## Fix 4 — patchIndex() + State-Update komplett rausgeworfen
 
 **Ansatz:** Wie hideDone — kein State-Update nach API-Response. Nur noch optimistischer DOM + Hintergrund-API ohne Re-Render.
 
@@ -95,7 +95,7 @@ curl -s http://localhost:8090/assets/Page-DF2k4hvb.js | grep 'DOM bleibt optimis
 
 **Hardlinks:** `~/repos/butler-portal-diskhub/frontend/Page.jsx` und `~/repos/butler-dashboard-v3/frontend/src/portals/diskhub/Page.jsx` haben identische Inode (3280139) — Hardlink, Änderung gilt für beide.
 
-### Ungeklärtes Problem
+## Ungeklärtes Problem
 
 **Kazzle testet (25.05.2026, 15:50):**
 - Strg+F5 / Strg+Shift+R gemacht
