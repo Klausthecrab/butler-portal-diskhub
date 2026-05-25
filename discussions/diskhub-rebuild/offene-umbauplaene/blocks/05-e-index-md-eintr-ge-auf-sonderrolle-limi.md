@@ -1,4 +1,4 @@
-### #E: Index.md-Einträge auf Sonderrolle limitieren (mit mir diskutieren)
+### #E: Index.md-Einträge auf Sonderrolle limitieren (mit mir diskutieren) (✓ erledigt)
 *— · 24.05.2026*
 
 Abgeleitet aus diskhub-rebuild#box-17 (Index.md vs textboxen).
