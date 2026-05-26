@@ -1240,7 +1240,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
         const contentEl = card?.querySelector('[class*="blockContent"]')
         const heading = headingEl?.textContent?.trim() || ''
         const content = contentEl?.textContent?.trim() || ''
-        handleConvertToSub(heading, content)
+        handleConvertToSub(heading, content, 'index_entry')
         return
       }
 
@@ -1660,8 +1660,8 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   }
 
   // Box zu Sub-Diskussion konvertieren — startet Session mit Box-Content (#17)
-  const handleConvertToSub = (boxTitle, boxContent) => {
-    console.log('[DISKHUB] handleConvertToSub', { boxTitle, discussion_id: discussion.id, t: Math.floor(Date.now() / 1000) })
+  const handleConvertToSub = (boxTitle, boxContent, elementType = 'box') => {
+    console.log('[DISKHUB] handleConvertToSub', { boxTitle, elementType, discussion_id: discussion.id, t: Math.floor(Date.now() / 1000) })
     setPreviewState('starting')
     setTriggeredAt(Math.floor(Date.now() / 1000))
     fetch(`${API}/start-box-to-sub`, {
@@ -1671,6 +1671,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
         discussion_id: discussion.id,
         box_title: boxTitle,
         box_content: boxContent,
+        element_type: elementType,
         is_sub: !!activeSubView,
         sub_id: activeSubView || undefined,
       }),
@@ -2039,7 +2040,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                               e.stopPropagation()
                                               const subTitle = readmeTitle(sub.readme) || sub.name
                                               const subContent = sub.readme || ''
-                                              handleConvertToSub(subTitle, subContent)
+                                              handleConvertToSub(subTitle, subContent, 'sub_discussion')
                                             }}
                                             title="💬 Session starten — Diskutiert diese Sub-Diskussion mit Hermi im Discord (rechtes Preview-Panel)"
                                           >💬</button>

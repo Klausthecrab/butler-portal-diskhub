@@ -48,7 +48,22 @@ Ein neuer Galerie-Block-Typ: Ein `###`-Block in blocks.md enthält mehrere Bilde
 ✅ **Phase 4 — STRG+V im Haupt-Formular: Multi-Image** — beide addBox-Formulare (Main + Sub-View) sammeln alle Bilder, senden als `images[]`
 ✅ **Phase 5 — Thumbnail-Strip-Rendering** — BlocksSection erkennt >1 `![...](...)` → `.imageGalleryStrip` + Counter-Badge
 ✅ **Phase 6 — Lightbox mit Pfeil-Navigation** — `{images[], currentIndex}`, ◀▶ Buttons, "Bild Y von X", ←→ Keyboard
-🔜 **Phase 7 — Gesamt-Verifikation** — Test-Upload mit 3 Bildern ist noch offen (importlib-Cache beim ersten Versuch, Neustart erfolgt)
+✅ **Phase 7 — Verifikation:** Test-Upload mit 3 Test-PNGs via curl erfolgreich
+  - Block `113-galerie-test-3-bilder.md` enthält `📷 Galerie Test 3 Bilder` + 3× `![alt](url)` ✅
+  - 3 Asset-Dateien (`bild-2605-2/3/4.png`) in assets/ gespeichert ✅
+  - Backend-Änderung erforderte `__pycache__`-Leerung + Dashboard-Neustart (importlib-Cache) ✅
+  - Build (16s) + Dashboard-Restart erfolgreich ✅
+  - **UI-Test ausstehend** — Sub-View "offene-umbauplaene" lässt sich per Browser schwer öffnen; Rendering-Logik (Gallery-Strip, Lightbox-Navi) ist implementiert aber nicht live im Browser bestätigt
+
+**Verifizierte Zielbedingungen:**
+- [x] Drei Bilder via API → **ein** Block mit allen drei Bildern + 📷-Präfix
+- [x] Ein Bild einfügen (wie bisher) → **ein** normaler Bild-Block (via curl einzeln bestätigt)
+- [ ] Block aufgeklappt: Strip zeigt Thumbnails + "3 Bilder"-Zähler *(UI-Test offen)*
+- [ ] Klick auf Thumbnail → Lightbox mit Pfeilen, "Bild 1 von 3" *(UI-Test offen)*
+- [ ] STRG+V von mehreren Bildern im Haupt-Formular → **ein** Galerie-Block *(manuell prüfbar)*
+- [ ] Galerie-Block zugeklappt → kein Unterschied zu normalen Blöcken *(UI-Test offen)*
+
+**Bekannte Einschränkung:** importlib-Cache beim Dashboard — nach routes.py-Änderungen muss `__pycache__` geleert + Dashboard neugestartet werden.
 
 **Status**
 🔜 offen
