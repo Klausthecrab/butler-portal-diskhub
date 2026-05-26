@@ -478,7 +478,7 @@ function renderBlock(block, isHot, blockIdx, discussionId, indexFiles) {
     summaryTitle = escapedHeading
   }
   html += `<details${hasResult ? ' open' : ''}>`
-  html += `<summary class="${styles.blockHeader}"><h3 title="${escapedHeading}">${subBadge}${summaryTitle}${statusBadge}</h3><button class="${styles.copyLinkBtn}" data-copy-entry data-ref="${escapedRef}" title="Referenz kopieren: ${escapedRef}">🔗</button><button class="${styles.copyLinkBtn}" data-toggle-index-done data-entry-index="${blockIdx}" title="${hasResult ? 'Als offen markieren' : 'Als erledigt markieren'}">${hasResult ? '✅' : '⬜'}</button></summary>`
+  html += `<summary class="${styles.blockHeader}"><h3 title="${escapedHeading}">${subBadge}${summaryTitle}${statusBadge}</h3><button class="${styles.copyLinkBtn}" data-start-index-session data-entry-index="${blockIdx}" title="💬 Session starten — Diskutiert diesen Punkt mit Hermi im Discord, die Session erscheint rechts im Preview-Panel">💬</button><button class="${styles.copyLinkBtn}" data-copy-entry data-ref="${escapedRef}" title="Referenz kopieren: ${escapedRef}">🔗</button><button class="${styles.copyLinkBtn}" data-toggle-index-done data-entry-index="${blockIdx}" title="${hasResult ? 'Als offen markieren' : 'Als erledigt markieren'}">${hasResult ? '✅' : '⬜'}</button></summary>`
   html += `<div class="${styles.blockContent}">${renderMarkdown(content)}</div>`
   if (result) {
     // Ergebnis-Zeile rendern
@@ -832,6 +832,9 @@ const saveEdit = (idx, file_name) => {
         // #40: Bild-Blöcke immer sichtbar ohne Accordion
         const isImageBlock = headingText.startsWith('📷')
         const headerClass = isImageBlock ? styles.imageBlockHeader : styles.blockHeader
+        const imgMatches = content.match(/!\[.*?\]\(.*?\)/g)
+        const imageCount = imgMatches ? imgMatches.length : 0
+        const isGallery = imageCount > 1
 
         return (
           <div key={displayIdx} className={styles.blockWrapper}>
@@ -886,10 +889,10 @@ const saveEdit = (idx, file_name) => {
                     </button>
                   </div>
                 </div>
-              ) : (
-                <div className={styles.blockContent}
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
-                />
+              ) : (<div className={isGallery ? styles.imageGalleryStrip : styles.blockContent}>
+                  {isGallery && <div className={styles.galleryCounter}>{imageCount} Bild{imageCount !== 1 ? 'er' : ''}</div>}
+                  <div dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />
+                </div>
               )}
 
               <div className={styles.blockActions}>
@@ -972,10 +975,10 @@ const saveEdit = (idx, file_name) => {
                     </button>
                   </div>
                 </div>
-              ) : (
-                <div className={styles.blockContent}
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
-                />
+              ) : (<div className={isGallery ? styles.imageGalleryStrip : styles.blockContent}>
+                  {isGallery && <div className={styles.galleryCounter}>{imageCount} Bild{imageCount !== 1 ? 'er' : ''}</div>}
+                  <div dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />
+                </div>
               )}
 
               <div className={styles.blockActions}>
@@ -1223,9 +1226,24 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   // Sync ref for drag handler
   useEffect(() => { splitRatioRef.current = splitRatio }, [splitRatio])
 
-  // Globaler Click-Handler: data-toggle-index-done (index.md Status-Toggle)
+  // Globaler Click-Handler: data-start-index-session + data-toggle-index-done
   useEffect(() => {
     const handler = (e) => {
+      // data-start-index-session (💬-Button für index.md-Einträge)
+      const sessionBtn = e.target.closest('[data-start-index-session]')
+      if (sessionBtn) {
+        e.preventDefault()
+        const entryIndex = parseInt(sessionBtn.getAttribute('data-entry-index'), 10)
+        if (isNaN(entryIndex)) return
+        const card = sessionBtn.closest('[data-status]')
+        const headingEl = card?.querySelector('h3')
+        const contentEl = card?.querySelector('[class*="blockContent"]')
+        const heading = headingEl?.textContent?.trim() || ''
+        const content = contentEl?.textContent?.trim() || ''
+        handleConvertToSub(heading, content)
+        return
+      }
+
       const toggleBtn = e.target.closest('[data-toggle-index-done]')
       if (!toggleBtn) return
       const entryIndex = parseInt(toggleBtn.getAttribute('data-entry-index'), 10)
@@ -2940,7 +2958,7 @@ export default function Page() {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState(null)
   const [copiedSub, setCopiedSub] = useState(null)
-  const [lightboxImage, setLightboxImage] = useState(null)
+  const [lightboxImages, setLightboxImages] = useState(null)
 
   const fetchList = useCallback(() => {
     setLoading(true)
@@ -2977,10 +2995,20 @@ export default function Page() {
         setTimeout(() => { btn.textContent = origText }, 2000)
         return
       }
-      // Lightbox: Klick auf skalierte Bilder (#35)
+      // Lightbox: Klick auf skalierte Bilder (#35 + #110 Galerie)
       const img = e.target.closest('img')
       if (img && !img.closest('[class*="imageModal"]') && !img.closest('[class*="lightbox"]')) {
-        setLightboxImage(img.src)
+        // Prüfen ob das Bild in einer Galerie-Strip steckt
+        const gallery = img.closest('[class*="imageGalleryStrip"]')
+        if (gallery) {
+          const allImages = Array.from(gallery.querySelectorAll('img')).map(im => im.src)
+          const clickedIndex = allImages.indexOf(img.src)
+          if (allImages.length > 1) {
+            setLightboxImages({ images: allImages, currentIndex: clickedIndex >= 0 ? clickedIndex : 0 })
+            return
+          }
+        }
+        setLightboxImages({ images: [img.src], currentIndex: 0 })
         return
       }
       }
