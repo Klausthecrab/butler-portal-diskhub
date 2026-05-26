@@ -1,4 +1,4 @@
-### #50: Sub-Diskussion-Verschachtelung — UI zeigt keine Sub-Subs an
+### #50: Sub-Diskussion-Verschachtelung — UI zeigt keine Sub-Subs an (✓ erledigt)
 
 *— · 25.05.2026*
 
