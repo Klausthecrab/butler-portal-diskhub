@@ -38,3 +38,10 @@ was Hermi mit dem Inhalt macht.
 - Offener-Punkt-Button → Prompt enthält Punkt-Beschreibung
 - Sub-Button → Prompt enthält Sub-Kontext
 - Rückkanal: Session-Start liefert 200/204, Webhook erreicht Discord
+
+## Fortschritt (26.05.2026):
+- [x] **Schritt 1** — 💬-Button in renderBlock() für index.md-Einträge (data-start-index-session) + globaler Click-Handler im SplitViewModal. Liest Heading + Content aus dem DOM, ruft handleConvertToSub() auf.
+- [x] **Schritt 2** — 💬-Button in Sub-Diskussionsliste (neben ✅/⬜ + 🔗). Übergibt sub.readme als Content + readmeTitle als Titel.
+- [x] **Schritt 3** — Backend start_box_to_sub() um element_type-Parameter erweitert. Vier Typen: box, index_entry, sub_discussion, image — je mit eigenem Prompt (Label + Task-Beschreibung).
+- [x] **Schritt 4** — Hover-Over-Infotexte (title-Attribut) in allen neuen Buttons: erklären was passiert, wo die Session landet, was Hermi macht.
+- [ ] **Schritt 5 offen** — Frontend handleConvertToSub() muss element_type im POST-Body mitschicken. Danach: Build + Restart + Verifikation.
