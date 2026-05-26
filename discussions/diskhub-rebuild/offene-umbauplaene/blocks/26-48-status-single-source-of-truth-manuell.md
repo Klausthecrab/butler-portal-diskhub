@@ -40,6 +40,31 @@
 >>
 >> **UI-Risiko:** Keins. Das Frontend zeigt nur zwei Integer an (`done_count` / `open_count`). Solange Werte >0 kommen, sieht es normal aus. Erst wenn beide 0 wären (weil keine Daten aggregiert werden), würde `0 ✓ · 0 ●` erscheinen — kein Crash, aber unschön.
 
+**Fortschritt (26.05.2026) — Umsetzung durch Hermi:**
+
+**S.09 ✅** Ghost-Block-Prüfung: 1 Ghost in `104-sub-diskussionen-pruefung.md` (`###`→`##` gefixt). Keine weiteren Ghosts.
+
+**S.08 ✅** `_parse_index_status()` → `_parse_status()` umbenannt. Regex von `### #\d+:` auf alle `^### `-Zeilen erweitert. Neue Funktion `_get_md_content(folder, name)` für Ordner/Fallback-Logik. Neue Funktion `_compute_status(folder)` aggregiert index + blocks.
+
+**S.07 ✅** Level-1-Aggregation: Nach Sub-Lese-Loop summiert Hauptebene alle Sub-Status. Nur aktiv wenn `sub_path` leer (Hauptansicht).
+
+**S.03 ✅** `**Status:** 12 erledigt · 0 offen` aus `offene-umbauplaene/README.md` entfernt. Ersetzt durch Hinweis auf dynamische Aggregation.
+
+**S.04 ✅** `**Status:** 19 erledigt · 0 offen` aus `diskhub-rebuild/README.md` entfernt. Gleicher Hinweis.
+
+**S.05 ✅** Verifikation via API:
+
+| Endpunkt | Ergebnis |
+|----------|----------|
+| `GET /diskhub/...?sub_path=offene-umbauplaene` | 55 ✓ · 19 ● (26 blocks ✅ + 29 index ✅ = 55 done, 19 blocks offen) |
+| `GET /diskhub/...` (Hauptebene) | 63 ✓ · 39 ● (1 eigen + 55+7 subs ✅ = 63, 19 eigen + 19+1 subs ● = 39) |
+| `GET /diskhub/...?sub_path=diskhub-regelwerk` | 7 ✓ · 1 ● |
+| `GET /diskhub/health` | 200 OK |
+
+**UI-Risiko bestätigt:** Keine Frontend-Änderungen. `done_count`/`open_count` aus `data.parsed` — UI aktualisiert automatisch.
+
+**Bekannte Einschränkung:** `blocks/` und `index/` Ordner erscheinen als leere Subs im API-Response. Kosmetisch, kein Funktionsproblem.
+
 ---
 
 💬 **Sub-Diskussion fortsetzen**
