@@ -2005,10 +2005,12 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                               const override = subOverrides[sub.id]
                                               if (override === 'done') {
                                                 setSubOverrides(prev => ({...prev, [sub.id]: 'open'}))
-                                              } else if (override === 'open' || (!sub.status?.offen && sub.status?.erledigt > 0)) {
+                                              } else if (override === 'open') {
                                                 setSubOverrides(prev => ({...prev, [sub.id]: 'done'}))
                                               } else {
-                                                setSubOverrides(prev => ({...prev, [sub.id]: 'done'}))
+                                                // Kein Override → umgekehrt zur Auto-Erkennung
+                                                const isAutoDone = sub.status?.erledigt > 0 && sub.status?.offen === 0
+                                                setSubOverrides(prev => ({...prev, [sub.id]: isAutoDone ? 'open' : 'done'}))
                                               }
                                             }}
                                             title="Erledigt/Offen umschalten"
@@ -2300,10 +2302,12 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                       const override = subOverrides[sub.id]
                                       if (override === 'done') {
                                         setSubOverrides(prev => ({...prev, [sub.id]: 'open'}))
-                                      } else if (override === 'open' || (!sub.status?.offen && sub.status?.erledigt > 0)) {
+                                      } else if (override === 'open') {
                                         setSubOverrides(prev => ({...prev, [sub.id]: 'done'}))
                                       } else {
-                                        setSubOverrides(prev => ({...prev, [sub.id]: 'done'}))
+                                        // Kein Override → umgekehrt zur Auto-Erkennung
+                                        const isAutoDone = sub.status?.erledigt > 0 && sub.status?.offen === 0
+                                        setSubOverrides(prev => ({...prev, [sub.id]: isAutoDone ? 'open' : 'done'}))
                                       }
                                     }}
                                     title="Erledigt/Offen umschalten"
