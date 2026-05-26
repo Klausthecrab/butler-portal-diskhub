@@ -1,4 +1,4 @@
-### #29: UI-Layout: Preview auf 30-35 %
+### #29: UI-Layout: Preview auf 30-35 % (✓ erledigt)
 
 *— · 22.05.2026*
 
