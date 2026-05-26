@@ -10,7 +10,7 @@ Zum Abhaken nach Sichtung und Bewertung.
 | 1 | Textbox buttons | gesichtet | |
 | 2 | feedback | gesichtet | |
 | 3 | feedback zu "+Textbox" | gesichtet | |
-| 4 | Feedback unsortiert | | |
+| 4 | Feedback unsortiert | gesichtet | |
 | 5 | Ohne Bild | | |
 | 6 | 📷 Bild-Rendering Fix #38 | | |
 | 7 | feedback | | |

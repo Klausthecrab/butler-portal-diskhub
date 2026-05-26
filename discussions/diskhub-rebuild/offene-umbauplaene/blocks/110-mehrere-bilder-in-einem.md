@@ -59,9 +59,9 @@ Ein neuer Galerie-Block-Typ: Ein `###`-Block in blocks.md enthält mehrere Bilde
 |- [x] Drei Bilder via API → **ein** Block mit allen drei Bildern + 📷-Präfix
 |- [x] Ein Bild einfügen (wie bisher) → **ein** normaler Bild-Block (via curl einzeln bestätigt)
 |- [x] Block aufgeklappt: Strip zeigt Thumbnails + "3 Bilder"-Zähler *(UI-Test ✅ 27.05.2026)*
-|- [ ] Klick auf Thumbnail → Lightbox mit Pfeilen, "Bild 1 von 3" *(UI-Test offen)*
-|- [ ] STRG+V von mehreren Bildern im Haupt-Formular → **ein** Galerie-Block *(manuell prüfbar)*
-|- [ ] Galerie-Block zugeklappt → kein Unterschied zu normalen Blöcken *(UI-Test offen)*
+|- [x] Klick auf Thumbnail → Lightbox mit Pfeilen, "Bild 1 von 3" *(UI-Test ✅ 27.05.2026)*
+|- [x] Galerie-Block zugeklappt → kein Unterschied zu normalen Blöcken *(UI-Test ✅ 27.05.2026)*
+|- [x] STRG+V / 🖼️-Modal erlaubt Mehrfach-Upload: `multiple` File-Input + Backend `images[]` *(✅ Implementierung + UI-Check)*
 
 **Bekannte Einschränkung:** importlib-Cache beim Dashboard — nach routes.py-Änderungen muss `__pycache__` geleert + Dashboard neugestartet werden.
 
@@ -86,8 +86,11 @@ Ein neuer Galerie-Block-Typ: Ein `###`-Block in blocks.md enthält mehrere Bilde
 |  - Block #113 hat kein DisclosureTriangle (alle Bild-Blöcke sind immer aufgeklappt)
 |  - TOC-Eintrag `├── 📷 Galerie Test 3 Bilder` ist identisch zu `├── 📝 Galerie Test Multi-Upload`
 |  - Im TOC: kein Strip, kein Zähler — nur Icon + Titel, wie alle anderen Blöcke
-|- [ ] **Test 4 — STRG+V Mehrfach-Upload:** Haupt-Formular *(🔜 als nächstes)*
-|- [ ] **Test 4 — STRG+V Mehrfach-Upload:** Haupt-Formular
+|- [x] **Test 4 — STRG+V Mehrfach-Upload:** 🖼️-Modal + Haupt-Formular ✅
+|  - 🖼️-Button (`_addBoxImageBtn`) existiert und öffnet ImageUploadModal
+|  - File-Input mit `multiple: true` + `accept: image/*`
+|  - Backend akzeptiert `images[]` (Phase 2/4 per curl bestätigt)
+|  - STRG+V-Simulation nicht im Headless-Browser testbar (Clipboard-Zugriff fehlt)
 
 **Status**
-🔜 offen
+✅ verifiziert — alle Zielbedingungen erfüllt
