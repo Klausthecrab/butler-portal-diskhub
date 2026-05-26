@@ -13,7 +13,7 @@
 > - [x] **S.03** — Manuelle `**Status:**`-Zeilen aus README.md von Ebene 2 (offene-umbauplaene/) entfernt
 > - [x] **S.04** — Manuelle `**Status:**`-Zeilen aus README.md von Ebene 1 (diskhub-rebuild/) entfernt
 > - [x] **S.05** — Verifikation: Status-Zähler im UI stimmt nach Entfernung (55 ✓ · 19 ●, 63 ✓ · 39 ●)
-> - [ ] **S.06** — Diskussion #46-Eintrag aktualisieren
+> - [x] **S.06** — Diskussion #46-Eintrag aktualisiert: `(✓ erledigt)` + Fortschritts-Doku
 >
 > **Tests:**
 > - [ ] **T.01** — Nach Entfernung: UI zeigt gleichen Status wie vorher

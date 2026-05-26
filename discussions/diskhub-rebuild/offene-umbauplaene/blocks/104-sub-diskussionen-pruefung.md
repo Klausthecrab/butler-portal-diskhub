@@ -1,4 +1,4 @@
-### Sub-Diskussionen — Bestandsaufnahme und Prüfung
+### Sub-Diskussionen — Bestandsaufnahme und Prüfung (✓ erledigt)
 *— · 25.05.2026*
 
 **Was sind Sub-Diskussionen?**
