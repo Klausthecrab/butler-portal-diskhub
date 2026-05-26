@@ -1,4 +1,4 @@
-### UI: Textboxen maximalbreite / länge für titel
+### UI: Textboxen maximalbreite / länge für titel (✓ erledigt)
 *— · 25.05.2026*
 
 **Problem**
