@@ -1947,7 +1947,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                             )}
                             {/* #107: Sub-subs ohne Label, in Mixed-List */}
                             {subViewData.subs && subViewData.subs.length > 0 && (
-                                {subViewData.subs
+                              <>{subViewData.subs
                                   .filter(sub => {
                                     if (!hideDone) return true
                                     const override = subOverrides[sub.id]
@@ -2070,7 +2070,8 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                     </div>
                                   )
                                 })}
-                            )}
+                              </>)}
+                            </div>
                             {/* Box hinzufügen — Sub-View */}
                             <div className={styles.addBoxSection}>
                               <div className={styles.sectionLabel}>➕ Neue Textbox</div>
@@ -2357,6 +2358,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                           </div>
                             )
                           })}
+                          </div>
                           {/* Box hinzufügen — Main-View */}
                           <div className={styles.addBoxSection}>
                             <div className={styles.sectionLabel}>➕ Neue Textbox</div>

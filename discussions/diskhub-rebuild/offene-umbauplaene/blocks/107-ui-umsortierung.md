@@ -42,3 +42,25 @@ Textboxen= abgerundete Ecken. Sub-Diskussion= nicht abgerundete Ecken.
 
 **Status**
 🔜 offen
+
+**Fortschritt (26.05.2026)**
+**Punkt 5 (✅) — Backend-Filter:**
+- `routes.py` beide Sub-Lese-Loops (Zeile 226, 640): `blocks` und `index` zur exclude-Liste hinzugefügt
+- `sub_name not in ('assets', 'blocks', 'index')`
+- API-Verifikation: `GET /diskhub/diskhub-rebuild?sub_path=offene-umbauplaene` → echte Subs (`low-prio-zurueckgestellt`) noch da, `blocks`/`index` rausgefiltert ✅
+- Dashboard-Restart mit PYTHONPATH-Pattern
+
+**Punkt 3 (✅) — TOC nach oben:**
+- SUB-VIEW: `generateToc()`-Block vor `BlocksSection` verschoben (Page.jsx)
+- MAIN-VIEW: war bereits korrekt (TOC vor Blocks)
+- Git Commit `9877d9b` (Lösung spezifiziert)
+
+**Punkt 4 (✅) — Gemischte Liste:**
+- `"📝 Blöcke"` und `"📂 Sub-Diskussionen"` Labels entfernt (Page.jsx, MAIN + SUB-VIEW)
+- Blocks + Subs in einem `<div>`-Wrapper, keine Sektions-Trenner
+- Index zwischen TOC und Mixed-List (als Dokumentation)
+- Build: `vite build` erfolgreich (15.9s) ✅
+
+**Noch offen:**
+- Punkt 1 (Akkordeon-Vereinheitlichung)
+- Punkt 2 (Farbschema)
