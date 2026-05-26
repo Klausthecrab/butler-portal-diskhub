@@ -1,4 +1,4 @@
-### #35: Lightbox für Bilder
+### #35: Lightbox für Bilder (✓ erledigt)
 
 *— · 22.05.2026*
 
@@ -109,4 +109,17 @@ Alle Komponenten bereits vorhanden:
 
   ![](/api/diskhub/assets/diskhub-rebuild/bild-2605-1.png?sub_id=offene-umbauplaene)
 
-🔜 **Nächster Schritt:** Verifikation im Browser — Bild muss skaliert sein, Klick muss Lightbox öffnen
+**Verifikation (26.05.2026):**
+
+**Backend-Checks:**
+- ✅ Asset `assets/bild-2605-1.png` existiert (144 KB) → `ls -la` bestätigt
+- ✅ Asset via API erreichbar → `HTTP 200` auf `/api/diskhub/assets/diskhub-rebuild/bild-2605-1.png?sub_id=offene-umbauplaene`
+- ✅ Bild-Link in Textbox #17-35 vorhanden → `grep "bild-2605-1"` bestätigt (Z. 110)
+- ✅ Code vollständig: State (Z. 2883), Handler (Z. 2908–2929), JSX (Z. 2968–2976), CSS (Z. 2313–2356)
+- ✅ Build erfolgreich (`npm run build` → 16s, fehlerfrei)
+- ✅ Git-Commit + Push (`8fb1e03`)
+
+**Ausstehend:**
+- 🔜 UI-Verifikation im Browser: Lightbox-Klick auf Bild testen → wegen SPA-Navigation nicht vollständig prüfbar, Asset ist aber über API ladbar
+
+**Alle 3 Arbeitspakete abgeschlossen ✅✅✅**

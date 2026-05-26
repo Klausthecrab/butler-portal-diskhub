@@ -2394,45 +2394,62 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                               onPaste={e => {
                                 const items = e.clipboardData?.items
                                 if (!items) return
+                                const newFiles = []
                                 for (const item of items) {
                                   if (item.type.startsWith('image/')) {
                                     const file = item.getAsFile()
                                     if (file && file.size <= 5 * 1024 * 1024) {
-                                      setPendingImage(file)
-                                      e.preventDefault()
+                                      newFiles.push(file)
                                     }
-                                    break
                                   }
+                                }
+                                if (newFiles.length > 0) {
+                                  setPendingImages(prev => [...prev, ...newFiles])
+                                  e.preventDefault()
                                 }
                               }}
                             />
-                            {/* Bild-Vorschau */}
-                            {pendingImage && (
-                              <div className={styles.pendingImagePreview}>
-                                <img
-                                  src={URL.createObjectURL(pendingImage)}
-                                  alt="Vorschau"
-                                  className={styles.pendingImageThumb}
-                                />
-                                <span className={styles.pendingImageName}>{pendingImage.name}</span>
-                                <button
-                                  className={styles.pendingImageRemove}
-                                  onClick={() => setPendingImage(null)}
-                                  title="Bild entfernen"
-                                >
-                                  ✕
-                                </button>
+                            {/* Bild-Vorschau(en) */}
+                            {pendingImages.length > 0 && (
+                              <div className={styles.pendingImagesPreview}>
+                                {pendingImages.map((file, i) => (
+                                  <div key={i} className={styles.pendingImagePreview}>
+                                    <img
+                                      src={URL.createObjectURL(file)}
+                                      alt="Vorschau"
+                                      className={styles.pendingImageThumb}
+                                    />
+                                    <span className={styles.pendingImageName}>{file.name}</span>
+                                    <button
+                                      className={styles.pendingImageRemove}
+                                      onClick={() => setPendingImages(prev => prev.filter((_, j) => j !== i))}
+                                      title="Bild entfernen"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                ))}
+                                <span className={styles.pendingImageCount}>{pendingImages.length} Bild{pendingImages.length !== 1 ? 'er' : ''}</span>
                               </div>
                             )}
                             <input
                               ref={boxImageInputRef}
                               type="file"
                               accept="image/*"
+                              multiple
                               style={{ display: 'none' }}
                               onChange={e => {
-                                const file = e.target.files?.[0]
-                                if (file && file.size <= 5 * 1024 * 1024) {
-                                  setPendingImage(file)
+                                const files = e.target.files
+                                if (files) {
+                                  const newFiles = []
+                                  for (const file of files) {
+                                    if (file.size <= 5 * 1024 * 1024) {
+                                      newFiles.push(file)
+                                    }
+                                  }
+                                  if (newFiles.length > 0) {
+                                    setPendingImages(prev => [...prev, ...newFiles])
+                                  }
                                 }
                                 e.target.value = ''
                               }}
@@ -2759,7 +2776,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
 // ─── Image Upload Modal (#37) ──────────────────────────────────────────────────
 
 function ImageUploadModal({ discussionId, activeSubView, subId, onClose, onSuccess }) {
-  const [pendingImage, setPendingImage] = useState(null)
+  const [pendingImages, setPendingImages] = useState([])
   const [title, setTitle] = useState('')
   const [loading, setLoading] = useState(false)
   const fileInputRef = useRef(null)
@@ -2777,34 +2794,45 @@ function ImageUploadModal({ discussionId, activeSubView, subId, onClose, onSucce
   const handlePaste = useCallback((e) => {
     const items = e.clipboardData?.items
     if (!items) return
+    const newFiles = []
     for (const item of items) {
       if (item.type.startsWith('image/')) {
         const file = item.getAsFile()
         if (file && file.size <= 5 * 1024 * 1024) {
-          setPendingImage(file)
-          e.preventDefault()
+          newFiles.push(file)
         }
-        break
       }
+    }
+    if (newFiles.length > 0) {
+      setPendingImages(prev => [...prev, ...newFiles])
+      e.preventDefault()
     }
   }, [])
 
   const handleFileChange = (e) => {
-    const file = e.target.files?.[0]
-    if (file && file.size <= 5 * 1024 * 1024) {
-      setPendingImage(file)
+    const files = e.target.files
+    if (files) {
+      const newFiles = []
+      for (const file of files) {
+        if (file.size <= 5 * 1024 * 1024) {
+          newFiles.push(file)
+        }
+      }
+      if (newFiles.length > 0) {
+        setPendingImages(prev => [...prev, ...newFiles])
+      }
     }
     e.target.value = ''
   }
 
   const handleSubmit = () => {
-    if (!pendingImage) return
+    if (pendingImages.length === 0) return
     setLoading(true)
 
     const formData = new FormData()
     formData.append('discussion_id', discussionId)
     formData.append('title', title.trim())
-    formData.append('image', pendingImage)
+    pendingImages.forEach(file => formData.append('images', file))
     formData.append('is_sub', activeSubView ? 'true' : 'false')
     if (activeSubView && subId) formData.append('sub_id', subId)
 
@@ -2841,35 +2869,43 @@ function ImageUploadModal({ discussionId, activeSubView, subId, onClose, onSucce
       <div className={styles.imageModalContent}>
         <button className={styles.imageModalClose} onClick={onClose}>✕</button>
         <div className={styles.imageModalBody}>
-          {!pendingImage ? (
+          {pendingImages.length === 0 ? (
             <div className={styles.imageDropzone}>
               <div className={styles.imageDropzoneIcon}>📷</div>
-              <div className={styles.imageDropzoneText}>STRG+V zum Einfügen</div>
+              <div className={styles.imageDropzoneText}>STRG+V zum Einfügen — mehrere Bilder möglich</div>
               <div className={styles.imageDropzoneSub}>oder</div>
               <button className={styles.imageUploadBtn} onClick={() => fileInputRef.current?.click()}>
-                Datei auswählen
+                Datei(en) auswählen
               </button>
             </div>
           ) : (
             <div className={styles.imagePreviewArea}>
-              <img
-                src={URL.createObjectURL(pendingImage)}
-                alt="Vorschau"
-                className={styles.imagePreview}
-              />
-              <button
-                className={styles.imagePreviewRemove}
-                onClick={() => setPendingImage(null)}
-                title="Bild entfernen"
-              >
-                ✕
-              </button>
+              <div className={styles.imagePreviewStrip}>
+                {pendingImages.map((file, i) => (
+                  <div key={i} className={styles.imagePreviewItem}>
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt="Vorschau"
+                      className={styles.imagePreview}
+                    />
+                    <button
+                      className={styles.imagePreviewRemove}
+                      onClick={() => setPendingImages(prev => prev.filter((_, j) => j !== i))}
+                      title="Bild entfernen"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <span className={styles.pendingImageCount}>{pendingImages.length} Bild{pendingImages.length !== 1 ? 'er' : ''}</span>
             </div>
           )}
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
+            multiple
             style={{ display: 'none' }}
             onChange={handleFileChange}
           />
@@ -2884,7 +2920,7 @@ function ImageUploadModal({ discussionId, activeSubView, subId, onClose, onSucce
             <button
               className={styles.imageSubmitBtn}
               onClick={handleSubmit}
-              disabled={loading || !pendingImage}
+              disabled={loading || pendingImages.length === 0}
             >
               {loading ? '⏳' : '✅ Bestätigen'}
             </button>
