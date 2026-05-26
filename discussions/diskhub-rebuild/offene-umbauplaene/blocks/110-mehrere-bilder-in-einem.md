@@ -56,20 +56,38 @@ Ein neuer Galerie-Block-Typ: Ein `###`-Block in blocks.md enthält mehrere Bilde
   - **UI-Test ausstehend** — Sub-View "offene-umbauplaene" lässt sich per Browser schwer öffnen; Rendering-Logik (Gallery-Strip, Lightbox-Navi) ist implementiert aber nicht live im Browser bestätigt
 
 **Verifizierte Zielbedingungen:**
-- [x] Drei Bilder via API → **ein** Block mit allen drei Bildern + 📷-Präfix
-- [x] Ein Bild einfügen (wie bisher) → **ein** normaler Bild-Block (via curl einzeln bestätigt)
-- [ ] Block aufgeklappt: Strip zeigt Thumbnails + "3 Bilder"-Zähler *(UI-Test offen)*
-- [ ] Klick auf Thumbnail → Lightbox mit Pfeilen, "Bild 1 von 3" *(UI-Test offen)*
-- [ ] STRG+V von mehreren Bildern im Haupt-Formular → **ein** Galerie-Block *(manuell prüfbar)*
-- [ ] Galerie-Block zugeklappt → kein Unterschied zu normalen Blöcken *(UI-Test offen)*
+|- [x] Drei Bilder via API → **ein** Block mit allen drei Bildern + 📷-Präfix
+|- [x] Ein Bild einfügen (wie bisher) → **ein** normaler Bild-Block (via curl einzeln bestätigt)
+|- [x] Block aufgeklappt: Strip zeigt Thumbnails + "3 Bilder"-Zähler *(UI-Test ✅ 27.05.2026)*
+|- [ ] Klick auf Thumbnail → Lightbox mit Pfeilen, "Bild 1 von 3" *(UI-Test offen)*
+|- [ ] STRG+V von mehreren Bildern im Haupt-Formular → **ein** Galerie-Block *(manuell prüfbar)*
+|- [ ] Galerie-Block zugeklappt → kein Unterschied zu normalen Blöcken *(UI-Test offen)*
 
 **Bekannte Einschränkung:** importlib-Cache beim Dashboard — nach routes.py-Änderungen muss `__pycache__` geleert + Dashboard neugestartet werden.
 
 **UI-Test Session (26.05.2026):**
-- Navigation zur Sub-View: Diskhub Rebuild → Hauptkarte klicken → Popup öffnet README → **Sub-Diskussion "Offene Umbauplaene" als Accordion aufklappen (DisclosureTriangle)** → dann erscheint **"→ Vollständige Ansicht" Button** → klicken öffnet Sub-View mit Block-Liste
-- Sub-Karten (#02 Offene Umbaupläne) sind zugeklappt (Accordion) — erst aufklappen macht den "→ Vollständige Ansicht"-Button sichtbar
-- UI-Tests ab hier noch nicht ausgeführt — nächste Session startet mit Test 1 in der Sub-View
-- Block #113 (Galerie Test 3 Bilder) existiert via API ✅
+|- Navigation zur Sub-View: Diskhub Rebuild → Hauptkarte klicken → Popup öffnet README → **Sub-Diskussion "Offene Umbauplaene" als Accordion aufklappen (DisclosureTriangle)** → dann erscheint **"→ Vollständige Ansicht" Button** → klicken öffnet Sub-View mit Block-Liste
+|- Sub-Karten (#02 Offene Umbaupläne) sind zugeklappt (Accordion) — erst aufklappen macht den "→ Vollständige Ansicht"-Button sichtbar
+|- UI-Tests ab hier noch nicht ausgeführt — nächste Session startet mit Test 1 in der Sub-View
+|- Block #113 (Galerie Test 3 Bilder) existiert via API ✅
+
+**UI-Tests (27.05.2026):**
+|- [x] **Test 1 — Galerie-Block aufgeklappt:** Strip zeigt 3 Thumbnails + "3 Bilder"-Zähler ✅
+|  - 2× `.imageGalleryStrip` gefunden (Block #110 und #113)
+|  - Block #113: 3 Thumbnails (bild-2605-2/3/4.png) + `.galleryCounter` "3 Bilder"
+|  - DOM-Check per Console bestätigt
+|- [x] **Test 2 — Lightbox mit Pfeil-Navigation:** Klick auf Thumbnail → ◀▶ + "Bild 1 von 3" ✅
+|  - Lightbox geöffnet mit 3 Thumbnails + ◀▶ Nav-Buttons
+|  - Counter "Bild 1 von 3" (startet korrekt auf erstem Bild)
+|  - ArrowRight → wechselt zu "Bild 2 von 3" (bild-2605-3.png)
+|  - ArrowLeft → zurück zu "Bild 1 von 3"
+|  - ✕ Close-Button schließt Lightbox
+|- [x] **Test 3 — Galerie-Block zugeklappt:** Kein Unterschied zu normalen Blöcken ✅
+|  - Block #113 hat kein DisclosureTriangle (alle Bild-Blöcke sind immer aufgeklappt)
+|  - TOC-Eintrag `├── 📷 Galerie Test 3 Bilder` ist identisch zu `├── 📝 Galerie Test Multi-Upload`
+|  - Im TOC: kein Strip, kein Zähler — nur Icon + Titel, wie alle anderen Blöcke
+|- [ ] **Test 4 — STRG+V Mehrfach-Upload:** Haupt-Formular *(🔜 als nächstes)*
+|- [ ] **Test 4 — STRG+V Mehrfach-Upload:** Haupt-Formular
 
 **Status**
 🔜 offen

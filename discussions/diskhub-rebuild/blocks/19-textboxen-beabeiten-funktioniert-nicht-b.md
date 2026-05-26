@@ -1,4 +1,4 @@
-### Textboxen beabeiten funktioniert nicht (button)
+### Textboxen beabeiten funktioniert nicht (button) (✓ erledigt)
 *— · 26.05.2026*
 
 **Problem**
@@ -17,4 +17,4 @@ Der ✏️ Bearbeiten-Button funktioniert einwandfrei:
 Der Button funktioniert. Block kann als erledigt geschlossen werden.
 
 **Status**
-🔜 offen
+✅ erledigt
