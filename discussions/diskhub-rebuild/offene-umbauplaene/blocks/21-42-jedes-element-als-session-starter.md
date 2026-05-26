@@ -1,4 +1,4 @@
-### #42: Jedes Element als Session-Starter
+### #42: Jedes Element als Session-Starter (✓ erledigt)
 
 *— · 24.05.2026*
 
@@ -52,4 +52,9 @@ was Hermi mit dem Inhalt macht.
 - [x] **Schritt 5a** — handleConvertToSub() um elementType-Parameter erweitert, schickt element_type im POST-Body mit
 - [x] **Schritt 5b** — data-start-index-session Handler ruft mit 'index_entry', Sub-Button mit 'sub_discussion' auf
 - [x] **Schritt 5c** — Frontend-Build (16s), Dashboard+Registry-Neustart ✅. API-Verifikation: health ok, DiskHub-Liste liefert JSON.
-- [ ] **Schritt 6** — Tests: alle Button-Typen + Rückkanal-Verifikation noch offen
+- [x] **Schritt 6** — Tests: alle Button-Typen + Rückkanal-Verifikation
+  - [x] **6a:** Bild-Block-Erkennung fixen — heading-Präfix `📷` → `element_type: 'image'` (Page.jsx Z. 901+987)
+  - [x] **6b:** index_entry-Test: API-Response 200, 3×204 Webhook, Session in state.db ✅
+  - [x] **6c:** sub_discussion-Test: API-Response 200, 3×204 Webhook, Session in state.db ✅
+  - [x] **6d:** image-Test: API-Response 200, 3×204 Webhook, Session in state.db ✅
+  - [x] **6e:** Rückkanal-Verifikation via state.db — alle 3 Sessions angelegt ✅

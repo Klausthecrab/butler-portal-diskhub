@@ -898,7 +898,7 @@ const saveEdit = (idx, file_name) => {
               <div className={styles.blockActions}>
                 <button
                   className={styles.convertBtn}
-                  onClick={() => onConvertToSub?.(headingText, content)}
+                  onClick={() => onConvertToSub?.(headingText, content, headingText.startsWith('📷') ? 'image' : 'box')}
                   title="💬 Startet eine Discord-Session mit dem Inhalt dieser Textbox. Die Session wird im rechten Preview-Panel geöffnet — Hermes geht den Text Schritt für Schritt mit dir durch, diskutiert Ideen, sammelt Feedback und leitet konkrete Vorschläge für neue Sub-Diskussionen ab. Diese können später übernommen werden."
                 >
                   💬 In Sub entwickeln
@@ -984,7 +984,7 @@ const saveEdit = (idx, file_name) => {
               <div className={styles.blockActions}>
                 <button
                   className={styles.convertBtn}
-                  onClick={() => onConvertToSub?.(headingText, content)}
+                  onClick={() => onConvertToSub?.(headingText, content, headingText.startsWith('📷') ? 'image' : 'box')}
                   title="💬 Startet eine Discord-Session mit dem Inhalt dieser Textbox. Die Session wird im rechten Preview-Panel geöffnet — Hermes geht den Text Schritt für Schritt mit dir durch, diskutiert Ideen, sammelt Feedback und leitet konkrete Vorschläge für neue Sub-Diskussionen ab. Diese können später übernommen werden."
                 >
                   💬 In Sub entwickeln
