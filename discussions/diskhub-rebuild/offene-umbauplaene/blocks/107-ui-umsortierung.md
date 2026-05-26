@@ -1,4 +1,4 @@
-### UI umsortierung
+### UI umsortierung (✓ erledigt)
 *— · 26.05.2026*
 
 **Problem**
