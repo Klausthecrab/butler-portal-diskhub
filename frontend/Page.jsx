@@ -1073,6 +1073,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   const [subViewData, setSubViewData] = useState(null)
   const [subViewLoading, setSubViewLoading] = useState(false)
   const [expandedSubs, setExpandedSubs] = useState(new Set())
+  const [subOverrides, setSubOverrides] = useState({})
   // Box-Add Form
   const [boxTitle, setBoxTitle] = useState('')
   const [boxContent, setBoxContent] = useState('')
@@ -1912,7 +1913,15 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                             {subViewData.subs && subViewData.subs.length > 0 && (
                               <div className={styles.blocksSection}>
                                 <div className={styles.sectionLabel}>📂 Sub-Diskussionen</div>
-                                {subViewData.subs.map((sub, idx) => {
+                                {subViewData.subs
+                                  .filter(sub => {
+                                    if (!hideDone) return true
+                                    const override = subOverrides[sub.id]
+                                    if (override === 'done') return false
+                                    if (override === 'open') return true
+                                    return !(sub.status?.erledigt > 0 && sub.status?.offen === 0)
+                                  })
+                                  .map((sub, idx) => {
                                   const subNum = String(idx + 1).padStart(2, '0')
                                   const isExpanded = expandedSubs.has(sub.id)
                                   const subDate = parseCreatedDate(sub.readme)
@@ -1945,11 +1954,12 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                             })
                                           }}}
                                         >
-                                          <h3 id={`sub-${sub.id}`} className={styles.subDocTitle}>📂 #{subNum}: {readmeTitle(sub.readme) || sub.name}
-                                            {sub.status?.erledigt > 0 && sub.status?.offen === 0 && (
+<h3 id={`sub-${sub.id}`} className={styles.subDocTitle}>
+                                            <span className={styles.subIconCheck}>{(subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)) ? '✅' : '📂'}</span> #{subNum}: {readmeTitle(sub.readme) || sub.name}
+                                            {(subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)) && (
                                               <span className={`${styles.badge} ${styles.badgeDone}`}>✓ {sub.status.erledigt} erledigt</span>
                                             )}
-                                            {sub.status?.offen > 0 && (
+                                            {(subOverrides[sub.id] === 'open' || sub.status?.offen > 0) && subOverrides[sub.id] !== 'done' && (
                                               <span className={`${styles.badge} ${styles.badgeOpen}`}>● {sub.status.offen} offen</span>
                                             )}
                                           </h3>
@@ -1957,7 +1967,24 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                             className={styles.copyLinkBtn}
                                             onClick={(e) => {
                                               e.stopPropagation()
-                                              const ref = discussion.id + '/' + activeSubView + '/' + sub.id
+                                              const override = subOverrides[sub.id]
+                                              if (override === 'done') {
+                                                setSubOverrides(prev => ({...prev, [sub.id]: 'open'}))
+                                              } else if (override === 'open' || (!sub.status?.offen && sub.status?.erledigt > 0)) {
+                                                setSubOverrides(prev => ({...prev, [sub.id]: 'done'}))
+                                              } else {
+                                                setSubOverrides(prev => ({...prev, [sub.id]: 'done'}))
+                                              }
+                                            }}
+                                            title="Erledigt/Offen umschalten"
+                                          >{(subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)) ? '✅' : '⬜'}</button>
+                                          <button
+                                            className={styles.copyLinkBtn}
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              const subId = sub.id
+                                              const parentId = discussion.id + '/' + (activeSubView || '')
+                                              const ref = parentId.replace(/\/+$/, '') + '/' + subId
                                               navigator.clipboard.writeText(ref)
                                               onCopySub(sub.id)
                                               setTimeout(() => onCopySub(null), 2000)
@@ -2165,7 +2192,15 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                               dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, undefined, discussion.id, data.index_files || [], hideDone) }}
                             />
                           )}
-                          {data.subs && data.subs.map((sub, idx) => {
+                          {data.subs && data.subs
+                            .filter(sub => {
+                              if (!hideDone) return true
+                              const override = subOverrides[sub.id]
+                              if (override === 'done') return false
+                              if (override === 'open') return true
+                              return !(sub.status?.erledigt > 0 && sub.status?.offen === 0)
+                            })
+                            .map((sub, idx) => {
                             const subNum = String(idx + 1).padStart(2, '0')
                             const isExpanded = expandedSubs.has(sub.id)
                             const subDate = parseCreatedDate(sub.readme)
@@ -2198,14 +2233,30 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                     })
                                   }}}
                                 >
-                                  <h3 id={`sub-${sub.id}`} className={styles.subDocTitle}>📂 #{subNum}: {readmeTitle(sub.readme) || sub.name}
-                                    {sub.status?.erledigt > 0 && sub.status?.offen === 0 && (
+                                  <h3 id={`sub-${sub.id}`} className={styles.subDocTitle}>
+                                    <span className={styles.subIconCheck}>{(subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)) ? '✅' : '📂'}</span> #{subNum}: {readmeTitle(sub.readme) || sub.name}
+                                    {(subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)) && (
                                       <span className={`${styles.badge} ${styles.badgeDone}`}>✓ {sub.status.erledigt} erledigt</span>
                                     )}
-                                    {sub.status?.offen > 0 && (
+                                    {(subOverrides[sub.id] === 'open' || sub.status?.offen > 0) && subOverrides[sub.id] !== 'done' && (
                                       <span className={`${styles.badge} ${styles.badgeOpen}`}>● {sub.status.offen} offen</span>
                                     )}
                                   </h3>
+                                  <button
+                                    className={styles.copyLinkBtn}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      const override = subOverrides[sub.id]
+                                      if (override === 'done') {
+                                        setSubOverrides(prev => ({...prev, [sub.id]: 'open'}))
+                                      } else if (override === 'open' || (!sub.status?.offen && sub.status?.erledigt > 0)) {
+                                        setSubOverrides(prev => ({...prev, [sub.id]: 'done'}))
+                                      } else {
+                                        setSubOverrides(prev => ({...prev, [sub.id]: 'done'}))
+                                      }
+                                    }}
+                                    title="Erledigt/Offen umschalten"
+                                  >{(subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)) ? '✅' : '⬜'}</button>
                                   <button
                                     className={styles.copyLinkBtn}
                                     onClick={(e) => {

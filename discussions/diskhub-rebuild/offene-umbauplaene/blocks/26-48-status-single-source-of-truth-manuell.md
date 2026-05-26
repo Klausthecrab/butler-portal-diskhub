@@ -1,4 +1,4 @@
-### #48: Status Single Source of Truth — Manuelle Status-Zeilen aus READMEs entfernen
+### #48: Status Single Source of Truth — Manuelle Status-Zeilen aus READMEs entfernen (✓ erledigt)
 *— · 24.05.2026*
 
 > **Quelle:** Max (Diskussion #46 — Erwartungsbeschreibung Single Source of Truth für Status, 24.05.2026)
