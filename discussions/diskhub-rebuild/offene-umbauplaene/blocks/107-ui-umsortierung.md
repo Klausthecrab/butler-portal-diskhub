@@ -61,10 +61,6 @@ Textboxen= abgerundete Ecken. Sub-Diskussion= nicht abgerundete Ecken.
 - Index zwischen TOC und Mixed-List (als Dokumentation)
 - Build: `vite build` erfolgreich (15.9s) ✅
 
-**Noch offen:**
-- Punkt 1 (Akkordeon-Vereinheitlichung)
-- Punkt 2 (Farbschema)
-
 **Fortschritt (26.05.2026) — Teil 2**
 **Punkt 1 (✅) — Einheitliches Akkordeon:**
 - `subDocArrow` (▸/▾) aus Sub-Headers entfernt (MAIN-VIEW + SUB-VIEW)
