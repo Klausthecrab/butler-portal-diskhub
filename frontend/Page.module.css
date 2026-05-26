@@ -1548,6 +1548,8 @@ details[open] .titleOpen {
 .chatImage {
   max-width: 100%;
   max-height: 300px;
+  object-fit: contain;
+  cursor: zoom-in;
   border-radius: 8px;
   border: 1px solid #334155;
   margin: 6px 0;
@@ -1857,7 +1859,7 @@ details[open] .titleOpen {
 .markdownContent em { color: #94a3b8; }
 .markdownContent a { color: #818cf8; text-decoration: none; }
 .markdownContent a:hover { text-decoration: underline; }
-.markdownContent img { max-width: 100%; border-radius: 8px; border: 1px solid #334155; margin: 8px 0; }
+
 
 /* ─── Sub-Start Dialog (C.3) ─── */
 .subDialogOverlay {
@@ -2305,5 +2307,50 @@ details[open] .titleOpen {
 
 .imageSubmitBtn:disabled {
   opacity: 0.4;
-  cursor: not-allowed;
+}
+
+/* ─── Lightbox-Overlay für skalierte Bilder (#35) ─── */
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.lightboxContainer {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightboxClose {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+}
+
+.lightboxClose:hover {
+  color: #818cf8;
+}
+
+.lightboxImage {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
 }

@@ -24,17 +24,17 @@ Textboxen= abgerundete Ecken. Sub-Diskussion= nicht abgerundete Ecken.
   - Offen → neutrales Standard-Farbschema
 - **Prüfbar:** Eine erledigte Sub-Diskussion zeigt grün, eine offene zeigt Standardfarbe.
 
-### 3) Reihenfolge: Inhaltsverzeichnis → Boxen & Subs
+## 3) Reihenfolge: Inhaltsverzeichnis → Boxen & Subs
 - In **jeder** Diskussionsebene (Haupt + Subs) gilt: Inhaltsverzeichnis (Index/TOC) wird **oberhalb** von Boxen und Sub-Diskussionen gerendert.
 - **Prüfbar:** Scrollt man auf eine Diskussion, sieht man zuerst das Inhaltsverzeichnis, darunter die Liste der Textboxen und Sub-Diskussionen.
 
-### 4) Gemischte Darstellung
+## 4) Gemischte Darstellung
 - Sub-Diskussionen und Textboxen werden in **einer** gemeinsamen Liste dargestellt, nicht getrennt.
 - **Sortierung:** Aufsteigend nach Nummer (Präfix im Dateinamen, z.B. `01-`, `02-`, `107-`). Fallback: chronologisch nach Erstelldatum.
 - Neue Elemente (höchste Nummer) = **unten**.
 - **Prüfbar:** In der Liste sind Sub X, Box Y und Sub Z durcheinander sortiert nach ihrer Nummer, nicht nach Typ getrennt.
 
-### 5) `blocks/` und `index/` Ordner unsichtbar machen
+## 5) \`blocks/\` und \`index/\` Ordner unsichtbar machen
 - Die Ordner `blocks/` und `index/` werden nicht als eigene Sub-Diskussionen im UI gelistet.
 - **Begründung:** Sie sind interne Strukturordner, kein Inhalt für den User.
 - **Prüfbar:** Eine Sub-Diskussion zeigt nur ihre echten Subs + Textboxen, nicht die Ordner `blocks` und `index` als eigene Einträge.

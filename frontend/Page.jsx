@@ -2894,6 +2894,7 @@ export default function Page() {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState(null)
   const [copiedSub, setCopiedSub] = useState(null)
+  const [lightboxImage, setLightboxImage] = useState(null)
 
   const fetchList = useCallback(() => {
     setLoading(true)
@@ -2918,7 +2919,7 @@ export default function Page() {
     }
   }, [selected])
 
-  // Globaler Click-Handler für [data-copy-entry] und [data-toggle-index-done] Buttons (#B)
+  // Globaler Click-Handler für [data-copy-entry], [data-toggle-index-done] und Lightbox (#35)
   useEffect(() => {
     const handler = (e) => {
       const btn = e.target.closest('[data-copy-entry]')
@@ -2928,6 +2929,12 @@ export default function Page() {
         const origText = btn.textContent
         btn.textContent = '✅'
         setTimeout(() => { btn.textContent = origText }, 2000)
+        return
+      }
+      // Lightbox: Klick auf skalierte Bilder (#35)
+      const img = e.target.closest('img')
+      if (img && !img.closest('[class*="imageModal"]') && !img.closest('[class*="lightbox"]')) {
+        setLightboxImage(img.src)
         return
       }
       }
@@ -2970,6 +2977,16 @@ export default function Page() {
 
       {selected && (
         <SplitViewModal discussion={selected} onClose={() => setSelected(null)} copiedSub={copiedSub} onCopySub={setCopiedSub} />
+      )}
+
+      {/* Lightbox-Overlay für skalierte Bilder (#35) */}
+      {lightboxImage && (
+        <div className={styles.lightboxOverlay} onClick={() => setLightboxImage(null)}>
+          <div className={styles.lightboxContainer} onClick={e => e.stopPropagation()}>
+            <button className={styles.lightboxClose} onClick={() => setLightboxImage(null)}>✕</button>
+            <img src={lightboxImage} alt="" className={styles.lightboxImage} />
+          </div>
+        </div>
       )}
     </div>
   )
