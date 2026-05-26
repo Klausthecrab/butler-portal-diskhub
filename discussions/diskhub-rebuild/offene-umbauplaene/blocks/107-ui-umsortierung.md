@@ -18,7 +18,7 @@ Textboxen= abgerundete Ecken. Sub-Diskussion= nicht abgerundete Ecken.
 - **Optischer Unterschied:** Textboxen haben `border-radius` (abgerundet), Sub-Diskussionen haben `border-radius: 0` (eckig).
 - **Gilt für:** Haupt-Diskussion **und** jede verschachtelte Sub-Diskussion (Punkt 3).
 
-### 2) Farbschema von Sub-Diskussionen
+## 2) Farbschema von Sub-Diskussionen
 - Sub-Diskussionen übernehmen die gleiche Status-Farbgebung wie Textboxen:
   - Erledigt (`(✓ erledigt)` im Titel) → grüner Header / grüne Border
   - Offen → neutrales Standard-Farbschema
