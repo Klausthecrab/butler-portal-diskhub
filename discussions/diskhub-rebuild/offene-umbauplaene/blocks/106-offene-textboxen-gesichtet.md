@@ -7,7 +7,7 @@
 | 14 | #31: Technisch korrekte Referenz im Pfad-Button | gesichtet |
 | 17 | #35: Lightbox für Bilder | gesichtet |
 | 20 | #39: Dead Code Cleanup — Alten 📷-Button + pendingImage-Logik | gesichtet |
-| 21 | #42: Jedes Element als Session-Starter | |
+| 21 | #42: Jedes Element als Session-Starter | gesichtet |
 | 22 | #43: Plan-Phase vor Umsetzung | |
 | 23 | #44: Prompt-Baukasten im Webhook | |
 | 24 | #45: Auto-Rückkanal | |
