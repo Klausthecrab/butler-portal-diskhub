@@ -65,5 +65,11 @@ Ein neuer Galerie-Block-Typ: Ein `###`-Block in blocks.md enthält mehrere Bilde
 
 **Bekannte Einschränkung:** importlib-Cache beim Dashboard — nach routes.py-Änderungen muss `__pycache__` geleert + Dashboard neugestartet werden.
 
+**UI-Test Session (26.05.2026):**
+- Navigation zur Sub-View: Diskhub Rebuild → Hauptkarte klicken → Popup öffnet README → **Sub-Diskussion "Offene Umbauplaene" als Accordion aufklappen (DisclosureTriangle)** → dann erscheint **"→ Vollständige Ansicht" Button** → klicken öffnet Sub-View mit Block-Liste
+- Sub-Karten (#02 Offene Umbaupläne) sind zugeklappt (Accordion) — erst aufklappen macht den "→ Vollständige Ansicht"-Button sichtbar
+- UI-Tests ab hier noch nicht ausgeführt — nächste Session startet mit Test 1 in der Sub-View
+- Block #113 (Galerie Test 3 Bilder) existiert via API ✅
+
 **Status**
 🔜 offen
