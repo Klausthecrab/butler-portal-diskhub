@@ -1102,7 +1102,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   const [boxLoading, setBoxLoading] = useState(false)
   const [pendingImages, setPendingImages] = useState([])
   const [showImageModal, setShowImageModal] = useState(false)
-  const [hideDone, setHideDone] = useState(false)
+  const [hideDone, setHideDone] = useState(true)
   const [tocMode, setTocMode] = useState('all')
   window.__setTocMode = setTocMode
 
