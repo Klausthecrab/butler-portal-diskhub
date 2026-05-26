@@ -269,7 +269,16 @@ function generateToc(blocksMd, indexMd, subs = [], tocMode = 'all') {
 
   let html = '<hr style="border:none;border-top:1px solid #2d3a4e;margin:24px 0 16px 0;opacity:0.5">'
   html += '<div class="miniToc">'
-  html += '<div class="tocHeading">📋 Inhaltsverzeichnis</div>'
+  html += '<div class="tocHeading" style="display:flex;align-items:center;justify-content:space-between">'
+  html += '<span>📋 Inhaltsverzeichnis</span>'
+  html += '<span style="display:flex;gap:6px;font-size:0.75rem">'
+  for (const m of ['all', 'open', 'done']) {
+    const label = m === 'all' ? 'Alle' : m === 'open' ? 'Nur Offene' : 'Nur ✅'
+    const isActive = tocMode === m
+    html += `<button onclick="window.__setTocMode('${m}')" style="background:${isActive ? '#334155' : 'transparent'};color:#cbd5e1;border:1px solid #475569;border-radius:4px;padding:2px 8px;cursor:pointer;font-weight:${isActive ? '600' : '400'}">${label}</button>`
+  }
+  html += '</span>'
+  html += '</div>'
   for (const item of filtered) {
     let prefix
     if (item.done) {
@@ -1092,6 +1101,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   const [showImageModal, setShowImageModal] = useState(false)
   const [hideDone, setHideDone] = useState(false)
   const [tocMode, setTocMode] = useState('all')
+  window.__setTocMode = setTocMode
 
   // Sub-Override-Helper: override vor automatischer Erkennung
   const getSubDone = useCallback((subId, status) => {
@@ -1108,8 +1118,8 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
 
   // Split-View Resizer
   const [splitRatio, setSplitRatio] = useState(() => {
-    try { return parseFloat(localStorage.getItem('diskhub-split-ratio') || '55') || 55 }
-    catch (e) { return 55 }
+    try { return parseFloat(localStorage.getItem('diskhub-split-ratio') || '65') || 65 }
+    catch (e) { return 65 }
   })
   const [isDragging, setIsDragging] = useState(false)
   const splitViewRef = useRef(null)
@@ -1880,7 +1890,12 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                   )}
                                   <span className={styles.statsSep}>·</span>
                                   <label className={styles.hideDoneToggle}>
-                                    <input type="checkbox" checked={hideDone} onChange={e => setHideDone(e.target.checked)} />
+                                    <input type="checkbox" checked={hideDone} onChange={e => {
+                                      const checked = e.target.checked
+                                      setHideDone(checked)
+                                      if (checked) setTocMode('open')
+                                      else setTocMode('all')
+                                    }} />
                                     <span className={styles.hideDoneLabel}>Ausblenden ✓</span>
                                   </label>
                                 </div>
@@ -1918,22 +1933,6 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 />
                               </div>
                             )}
-                            <div style={{display:'flex',gap:'6px',margin:'12px 0',fontSize:'0.75rem'}}>
-                              {['all','open','done'].map(m => (
-                                <button key={m}
-                                  onClick={() => setTocMode(m)}
-                                  style={{
-                                    background: tocMode === m ? '#334155' : 'transparent',
-                                    color: '#cbd5e1',
-                                    border: '1px solid #475569',
-                                    borderRadius: '4px',
-                                    padding: '2px 8px',
-                                    cursor: 'pointer',
-                                    fontWeight: tocMode === m ? '600' : '400',
-                                  }}
-                                >{m === 'all' ? 'Alle' : m === 'open' ? 'Nur Offene' : 'Nur ✅'}</button>
-                              ))}
-                            </div>
                             {generateToc(subViewData.blocks, subViewData.index, subViewData.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) && (
                               <div className={styles.markdownContent}
                                 dangerouslySetInnerHTML={{ __html: generateToc(subViewData.blocks, subViewData.index, subViewData.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) }}
@@ -2180,7 +2179,12 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 )}
                                 <span className={styles.statsSep}>·</span>
                                 <label className={styles.hideDoneToggle}>
-                                  <input type="checkbox" checked={hideDone} onChange={e => setHideDone(e.target.checked)} />
+                                  <input type="checkbox" checked={hideDone} onChange={e => {
+                                      const checked = e.target.checked
+                                      setHideDone(checked)
+                                      if (checked) setTocMode('open')
+                                      else setTocMode('all')
+                                    }} />
                                   <span className={styles.hideDoneLabel}>Ausblenden ✓</span>
                                 </label>
                               </div>
@@ -2203,22 +2207,6 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                             />
                           ) : null}
                           {/* TOC */}
-                          <div style={{display:'flex',gap:'6px',margin:'12px 0',fontSize:'0.75rem'}}>
-                            {['all','open','done'].map(m => (
-                              <button key={m}
-                                onClick={() => setTocMode(m)}
-                                style={{
-                                  background: tocMode === m ? '#334155' : 'transparent',
-                                  color: '#cbd5e1',
-                                  border: '1px solid #475569',
-                                  borderRadius: '4px',
-                                  padding: '2px 8px',
-                                  cursor: 'pointer',
-                                  fontWeight: tocMode === m ? '600' : '400',
-                                }}
-                              >{m === 'all' ? 'Alle' : m === 'open' ? 'Nur Offene' : 'Nur ✅'}</button>
-                            ))}
-                          </div>
                           {generateToc(data.blocks, data.index, data.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) && (
                             <div className={styles.markdownContent}
                               dangerouslySetInnerHTML={{ __html: generateToc(data.blocks, data.index, data.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) }}

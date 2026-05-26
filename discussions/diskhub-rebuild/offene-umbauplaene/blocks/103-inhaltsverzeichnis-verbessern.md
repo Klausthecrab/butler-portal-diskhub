@@ -58,11 +58,13 @@ Prüfbar: Switch auf "Nur Offene" → TOC zeigt weniger Einträge. Switch auf "N
 
 **Feinschliff (offen)**
 
-**Schritt 5: TOC-Switch in "📋 Inhaltsverzeichnis"-Kopfzeile integrieren** 🔜
-Die 3 Buttons [Alle] [Nur Offene] [Nur ✅] liegen aktuell zwischen Diskussionstext und Trennlinie. Sie sollen in dieselbe Zeile wie "📋 Inhaltsverzeichnis" wandern — rechtsbündig neben der Überschrift.
+**Schritt 5: TOC-Switch in "📋 Inhaltsverzeichnis"-Kopfzeile integriert** ✅ (26.05.2026)
+Die 3 Buttons [Alle] [Nur Offene] [Nur ✅] liegen jetzt rechtsbündig in derselben Zeile wie "📋 Inhaltsverzeichnis". Die alte Button-Leiste oberhalb des TOC wurde entfernt.
+Prüfbar: TOC-Header zeigt 📋 Inhaltsverzeichnis links, [Alle] [Nur Offene] [Nur ✅] rechts in einer Zeile.
 
-**Schritt 6: "Ausblenden ✓" steuert TOC-Switch mit** 🔜
-Wenn der globale "Ausblenden ✓"-Toggle aktiviert wird, soll automatisch der TOC-Switch auf "Nur Offene" springen. Wird "Ausblenden ✓" deaktiviert, geht der TOC-Switch zurück auf "Alle". So sind Karten-Ansicht und TOC immer synchron.
+**Schritt 6: "Ausblenden ✓" steuert TOC-Switch mit** ✅ (26.05.2026)
+Wenn "Ausblenden ✓" aktiviert wird, springt der TOC-Switch automatisch auf "Nur Offene". Wird es deaktiviert, geht der TOC zurück auf "Alle". Karten-Ansicht und TOC sind synchron.
+Prüfbar: "Ausblenden ✓" anklicken → TOC zeigt nur 20 offene Items (statt 22). Wieder deaktivieren → TOC zeigt wieder alle 22 Items.
 
 **Status**
-✅ erledigt (26.05.2026 — Schritte 1–4 implementiert, Schritte 5–6 geplant)
+✅ erledigt (26.05.2026 — alle 6 Schritte implementiert & verifiziert)
