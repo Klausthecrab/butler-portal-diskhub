@@ -11,7 +11,7 @@
 | 22 | #43: Plan-Phase vor Umsetzung | gesichtet |
 | 23 | #44: Prompt-Baukasten im Webhook | gesichtet |
 | 28 | #50: Sub-Diskussion-Verschachtelung — UI zeigt keine Sub-Subs | gesichtet |
-| 33 | 31.B — Parser ignoriert interne ### im Einzeldateien-Modus | |
-| 34 | 31.C Ghost-Prävention — 3-Schichten-Strategie | |
+| 33 | 31.B — Parser ignoriert interne ### im Einzeldateien-Modus | gesichtet |
+| 34 | 31.C Ghost-Prävention — 3-Schichten-Strategie | gesichtet |
 | 100 | UI: Textboxen maximalbreite / länge für titel | |
 | 103 | inhaltsverzeichnis verbessern | |
