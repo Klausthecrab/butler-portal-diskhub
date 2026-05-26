@@ -1103,7 +1103,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   const [pendingImages, setPendingImages] = useState([])
   const [showImageModal, setShowImageModal] = useState(false)
   const [hideDone, setHideDone] = useState(true)
-  const [tocMode, setTocMode] = useState('all')
+  const [tocMode, setTocMode] = useState('open')
   window.__setTocMode = setTocMode
 
   // Sub-Override-Helper: override vor automatischer Erkennung
