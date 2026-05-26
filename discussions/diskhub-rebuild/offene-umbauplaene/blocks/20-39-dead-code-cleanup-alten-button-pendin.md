@@ -42,3 +42,10 @@
 - [x] **C.09** — Alle 4 Platzhalter von `"Inhalt (Markdown)..."` auf `"Inhalt (Markdown) — Bilder per STRG+V"` aktualisiert (editBlockModal ×2, addBox Sub-View, addBox Main-View)
 - [-] **C.07b** — Übersprungen, weil 🖼️-Button noch `addBoxImageBtn`-CSS-Klasse nutzt
 - [x] **C.08** — Build 16.07s ✅, Health-Check: `{"discussions_count": 6, "status": "ok"}`
+
+**Verifikation (26.05.2026):**
+- ✅ **📷-Button weg** — `addBoxActions` zeigt nur noch 2 Buttons: `➕ Box hinzufügen` | `🖼️`
+- ✅ **🖼️-Button funktioniert** — Klick öffnet `ImageModalOverlay` (Modal sichtbar ✅)
+- ✅ **Neuer Platzhalter** — Textarea zeigt `"Inhalt (Markdown) — Bilder per STRG+V"`
+- ✅ **Keine Regression** — `pendingImage`-Logik, `onPaste`, Vorschau und `handleAddBox`-Branch unverändert
+- ⚠️ **Committed** — `8da6a6b`

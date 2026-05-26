@@ -13,16 +13,21 @@
 
 ## Plan L.01 — CSS für Bild-Skalierung
 
-**Status: ✅ Bereits umgesetzt (Vorsicht: doppelte Regel)**
+**Status: ✅ Bereits umgesetzt — doppelte Regel bereits entfernt**
 
 Die CSS-Regeln existieren bereits in `Page.module.css`:
 
 - `.blockContent img` (Z. 1078): `max-width: 100%; max-height: 400px; object-fit: contain; cursor: zoom-in; border-radius: 8px; border: 1px solid #334155; margin: 8px 0;`
 - `.markdownContent img` (Z. 1844): Gleiche Regeln nochmal
 
-**Was noch zu tun ist:**
-1. Doppelte `.markdownContent img`-Regel in Z. 1860 entfernen (die ohne `object-fit`/`cursor: zoom-in`)
-2. Prüfen ob `.chatImage` (für Discord-CDN-Bilder, Z. 526, CSS Z. 1549) auch `cursor: zoom-in` bekommen soll
+**Status der Unterpunkte (26.05.2026):**
+- ❌ Doppelte `.markdownContent img`-Regel — **existiert nicht mehr,** bereits entfernt bei früherem Edit. OK.
+- ✅ `.chatImage` hat bereits `cursor: zoom-in` + `object-fit: contain`. Nichts zu tun.
+
+**Fortschritt (26.05.2026):**
+- [x] L.01 verifiziert: Keine doppelten Regeln, alle img-Regeln haben korrekte Properties ✅
+- [ ] L.02 — Lightbox-Komponente (🔜 als nächstes)
+- [ ] L.03 — Beispielbild (🔜 nach L.02)
 
 **Zielbedingung:** Jedes `<img>` im Content-Bereich hat `max-height: 400px` + `cursor: zoom-in`. Keine doppelten CSS-Regeln.
 
@@ -30,7 +35,21 @@ Die CSS-Regeln existieren bereits in `Page.module.css`:
 
 ## Plan L.02 — Lightbox-Komponente
 
-**Ansatz: Event-Delegation (kein Umbau von `renderMarkdown()`)**
+**Status: ✅ Bereits vollständig implementiert (26.05.2026)**
+
+Alle Komponenten bereits vorhanden:
+- `lightboxImage`-State in Page-Komponente (Z. 2883) ✅
+- Globaler Click-Handler im useEffect mit Event-Delegation (Z. 2908-2929) ✅
+  - Prüft `img.closest('[class*="imageModal"]')` (kein Triggger im ImageUpload-Modal)
+  - Prüft `img.closest('[class*="lightbox"]')` (kein Endlos-Loop)
+  - Setzt `setLightboxImage(img.src)` ✅
+- Overlay-JSX im Return (Z. 2968-2976) ✅
+- Alle 5 CSS-Klassen in Page.module.css (Z. 2313-2356) ✅
+
+**Fortschritt (26.05.2026):**
+- [x] L.01 — CSS-Skalierung: bereits korrekt, kein Handlungsbedarf ✅
+- [x] L.02 — Lightbox-Komponente: **komplett implementiert** ✅
+- [ ] L.03 — Beispielbild: 🔜 noch zu erledigen
 
 `renderMarkdown()` liefert HTML-Strings, die via `dangerouslySetInnerHTML` eingesetzt werden. React-Click-Handler direkt auf `<img>` sind in dem Modus nicht möglich. Stattdessen: **ein globaler Click-Listener auf Container-Ebene**.
 
