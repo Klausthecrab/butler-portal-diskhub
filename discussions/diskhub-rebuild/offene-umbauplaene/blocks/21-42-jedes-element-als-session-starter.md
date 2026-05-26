@@ -32,7 +32,12 @@ Jeder neue (und bestehende) Button kriegt ein title-Attribut, das
 genau erklärt: was passiert, wo die Session landet (rechtes Panel),
 was Hermi mit dem Inhalt macht.
 
-**Schritt 5 — Tests**
+**Schritt 5 — Frontend-Anbindung + element_type**
+- **5a:** handleConvertToSub() akzeptiert dritten Parameter elementType (default 'box')
+- **5b:** index_entry-Button ruft handleConvertToSub(title, content, 'index_entry') auf
+- **5c:** sub_discussion-Button ruft handleConvertToSub(title, readme, 'sub_discussion') auf
+
+**Schritt 6 — Tests**
 - Textbox-Button → Prompt enthält Box-Inhalt
 - Bild-Button → Prompt enthält Bild-Referenz
 - Offener-Punkt-Button → Prompt enthält Punkt-Beschreibung
@@ -44,4 +49,7 @@ was Hermi mit dem Inhalt macht.
 - [x] **Schritt 2** — 💬-Button in Sub-Diskussionsliste (neben ✅/⬜ + 🔗). Übergibt sub.readme als Content + readmeTitle als Titel.
 - [x] **Schritt 3** — Backend start_box_to_sub() um element_type-Parameter erweitert. Vier Typen: box, index_entry, sub_discussion, image — je mit eigenem Prompt (Label + Task-Beschreibung).
 - [x] **Schritt 4** — Hover-Over-Infotexte (title-Attribut) in allen neuen Buttons: erklären was passiert, wo die Session landet, was Hermi macht.
-- [x] **Schritt 5** — handleConvertToSub() akzeptiert dritten Parameter elementType (default 'box'). index_entry- und sub_discussion-Buttons übergeben korrekten Typ. Build (16s), Dashboard+Registry-Restart ✅. API-Verifikation: health ok, DiskHub-Liste liefert JSON.
+- [x] **Schritt 5a** — handleConvertToSub() um elementType-Parameter erweitert, schickt element_type im POST-Body mit
+- [x] **Schritt 5b** — data-start-index-session Handler ruft mit 'index_entry', Sub-Button mit 'sub_discussion' auf
+- [x] **Schritt 5c** — Frontend-Build (16s), Dashboard+Registry-Neustart ✅. API-Verifikation: health ok, DiskHub-Liste liefert JSON.
+- [ ] **Schritt 6** — Tests: alle Button-Typen + Rückkanal-Verifikation noch offen
