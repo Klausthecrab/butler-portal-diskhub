@@ -1,4 +1,4 @@
-### neue textbox erstellen an random stelle
+### neue textbox erstellen an random stelle (✓ erledigt)
 *— · 25.05.2026*
 
 **Problem**
