@@ -5,7 +5,7 @@
 |---|-------|-----------|
 | 12 | #29: UI-Layout: Preview auf 30-35 % | in bearbeitung |
 | 14 | #31: Technisch korrekte Referenz im Pfad-Button | gesichtet |
-| 17 | #35: Lightbox für Bilder | |
+| 17 | #35: Lightbox für Bilder | gesichtet |
 | 20 | #39: Dead Code Cleanup — Alten 📷-Button + pendingImage-Logik | |
 | 21 | #42: Jedes Element als Session-Starter | |
 | 22 | #43: Plan-Phase vor Umsetzung | |
