@@ -1917,9 +1917,16 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 dangerouslySetInnerHTML={{ __html: renderMarkdown(subViewData.readme) }}
                               />
                             ) : null}
+                            {/* #107: TOC comes before blocks in sub-view */}
+                            {generateToc(subViewData.blocks, subViewData.index, subViewData.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) && (
+                              <div className={styles.markdownContent}
+                                dangerouslySetInnerHTML={{ __html: generateToc(subViewData.blocks, subViewData.index, subViewData.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) }}
+                              />
+                            )}
+                            {/* Blocks section after TOC — #107: ohne Label, in Mixed-List */}
+                            <div>
                             {subViewData.blocks && (
                               <div className={styles.blocksSection}>
-                                <div className={styles.sectionLabel}>📝 Blöcke</div>
                                 <BlocksSection
                                 md={subViewData.blocks}
                                 discussionId={discussion.id}
@@ -1933,20 +1940,13 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 />
                               </div>
                             )}
-                            {generateToc(subViewData.blocks, subViewData.index, subViewData.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) && (
-                              <div className={styles.markdownContent}
-                                dangerouslySetInnerHTML={{ __html: generateToc(subViewData.blocks, subViewData.index, subViewData.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) }}
-                              />
-                            )}
                             {subViewData.index && (
                               <div className={styles.markdownContent}
                                 dangerouslySetInnerHTML={{ __html: renderIndexMd(subViewData.index, undefined, discussion.id, subViewData.index_files || [], hideDone) }}
                               />
                             )}
-                            {/* ── SUB-SUBS (verschachtelte Diskussionen) ── */}
+                            {/* #107: Sub-subs ohne Label, in Mixed-List */}
                             {subViewData.subs && subViewData.subs.length > 0 && (
-                              <div className={styles.blocksSection}>
-                                <div className={styles.sectionLabel}>📂 Sub-Diskussionen</div>
                                 {subViewData.subs
                                   .filter(sub => {
                                     if (!hideDone) return true
@@ -2070,7 +2070,6 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                     </div>
                                   )
                                 })}
-                              </div>
                             )}
                             {/* Box hinzufügen — Sub-View */}
                             <div className={styles.addBoxSection}>
@@ -2212,9 +2211,16 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                               dangerouslySetInnerHTML={{ __html: generateToc(data.blocks, data.index, data.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) }}
                             />
                           )}
+                          {/* Index — zwischen TOC und Mixed-List */}
+                          {data.index && (
+                            <div className={styles.markdownContent}
+                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, undefined, discussion.id, data.index_files || [], hideDone) }}
+                            />
+                          )}
+                          {/* #107: Mixed list — blocks + subs ohne Label */}
+                          <div>
                           {data.blocks && (
                             <div className={styles.blocksSection}>
-                              <div className={styles.sectionLabel}>📝 Blöcke</div>
                               <BlocksSection
                                 md={data.blocks}
                                 discussionId={discussion.id}
@@ -2227,11 +2233,6 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 hideDone={hideDone}
                               />
                             </div>
-                          )}
-                          {data.index && (
-                            <div className={styles.markdownContent}
-                              dangerouslySetInnerHTML={{ __html: renderIndexMd(data.index, undefined, discussion.id, data.index_files || [], hideDone) }}
-                            />
                           )}
                           {data.subs && data.subs
                             .filter(sub => {

@@ -49,6 +49,17 @@ def init_diskhub(data_dir=None):
     os.makedirs(DISCUSSIONS_DIR, exist_ok=True)
 
 
+# ── Sortier-Helfer für Dateien mit numerischem Präfix ──────────────────────────
+
+def _file_sort_key(fname):
+    """Numerische Sortierung für NN-name.md Dateien.
+    Dateien ohne numerisches Präfix fallen auf lexikografischen String-Vergleich zurück."""
+    m = re.match(r'^(\d+)', fname)
+    if m:
+        return (0, int(m.group(1)))
+    return (1, fname)
+
+
 # ── Aktivitäts-Logging ─────────────────────────────────────────────────────────
 
 def _log_activity(action, details=None):
@@ -212,7 +223,7 @@ def _scan_discussions():
         subs = []
         for sub_name in sorted(os.listdir(folder)):
             sub_folder = os.path.join(folder, sub_name)
-            if os.path.isdir(sub_folder) and not sub_name.startswith('.') and sub_name != 'assets':
+            if os.path.isdir(sub_folder) and not sub_name.startswith('.') and sub_name not in ('assets', 'blocks', 'index'):
                 sub_status = _compute_status(sub_folder)
                 if sub_status['erledigt'] + sub_status['offen'] == 0:
                     sub_status = _parse_readme_status(os.path.join(sub_folder, 'README.md'))
@@ -557,7 +568,8 @@ def get_discussion(discussion_id):
     # Blöcke (#H: Einzeldateien aus blocks/ oder Fallback blocks.md)
     blocks_dir = os.path.join(folder, 'blocks')
     if os.path.isdir(blocks_dir):
-        md_files = sorted([f for f in os.listdir(blocks_dir) if f.endswith('.md')])
+        md_files = sorted([f for f in os.listdir(blocks_dir) if f.endswith('.md')], key=_file_sort_key)
+        print(f"DEBUG: blocks_dir={blocks_dir}, count={len(md_files)}, first={md_files[:3]}, last={md_files[-3:]}")
         blocks_parts = []
         blocks_files = []
         for fname in md_files:
@@ -586,7 +598,7 @@ def get_discussion(discussion_id):
     # index/ Ordner (#H) oder Fallback index.md
     index_dir = os.path.join(folder, 'index')
     if os.path.isdir(index_dir):
-        md_files = sorted([f for f in os.listdir(index_dir) if f.endswith('.md')])
+        md_files = sorted([f for f in os.listdir(index_dir) if f.endswith('.md')], key=_file_sort_key)
         index_parts = []
         index_files = []
         for fname in md_files:
@@ -626,7 +638,7 @@ def get_discussion(discussion_id):
     subs = []
     for sub_name in sorted(os.listdir(folder)):
         sub_folder = os.path.join(folder, sub_name)
-        if os.path.isdir(sub_folder) and not sub_name.startswith('.') and sub_name != 'assets':
+        if os.path.isdir(sub_folder) and not sub_name.startswith('.') and sub_name not in ('assets', 'blocks', 'index'):
             sub_data = {'id': sub_name, 'name': sub_name.replace('-', ' ').title()}
             sub_readme_content = _get_md_content(sub_folder, 'README')
             if sub_readme_content:
@@ -1871,7 +1883,7 @@ def edit_index_title():
     # #H: Einzeldateien aus index/ Ordner
     index_dir = os.path.join(target_dir, 'index')
     if os.path.isdir(index_dir):
-        md_files = sorted([f for f in os.listdir(index_dir) if f.endswith('.md')])
+        md_files = sorted([f for f in os.listdir(index_dir) if f.endswith('.md')], key=_file_sort_key)
         if entry_index < 0 or entry_index >= len(md_files):
             return jsonify({'error': f'entry_index {entry_index} ungültig (0-{len(md_files)-1})'}), 400
         filepath = os.path.join(index_dir, md_files[entry_index])

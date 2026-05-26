@@ -5,7 +5,6 @@
 |---|-------|-----------|
 | 12 | #29: UI-Layout: Preview auf 30-35 % | in bearbeitung |
 | 14 | #31: Technisch korrekte Referenz im Pfad-Button | gesichtet |
-| 15 | #32: Prompt-Vorlagen bei "+ Neue Textbox" | |
 | 17 | #35: Lightbox für Bilder | |
 | 20 | #39: Dead Code Cleanup — Alten 📷-Button + pendingImage-Logik | |
 | 21 | #42: Jedes Element als Session-Starter | |
