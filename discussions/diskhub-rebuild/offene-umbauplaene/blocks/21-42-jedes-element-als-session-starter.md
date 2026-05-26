@@ -44,4 +44,4 @@ was Hermi mit dem Inhalt macht.
 - [x] **Schritt 2** — 💬-Button in Sub-Diskussionsliste (neben ✅/⬜ + 🔗). Übergibt sub.readme als Content + readmeTitle als Titel.
 - [x] **Schritt 3** — Backend start_box_to_sub() um element_type-Parameter erweitert. Vier Typen: box, index_entry, sub_discussion, image — je mit eigenem Prompt (Label + Task-Beschreibung).
 - [x] **Schritt 4** — Hover-Over-Infotexte (title-Attribut) in allen neuen Buttons: erklären was passiert, wo die Session landet, was Hermi macht.
-- [ ] **Schritt 5 offen** — Frontend handleConvertToSub() muss element_type im POST-Body mitschicken. Danach: Build + Restart + Verifikation.
+- [x] **Schritt 5** — handleConvertToSub() akzeptiert dritten Parameter elementType (default 'box'). index_entry- und sub_discussion-Buttons übergeben korrekten Typ. Build (16s), Dashboard+Registry-Restart ✅. API-Verifikation: health ok, DiskHub-Liste liefert JSON.
