@@ -93,4 +93,4 @@ Ein neuer Galerie-Block-Typ: Ein `###`-Block in blocks.md enthält mehrere Bilde
 |  - STRG+V-Simulation nicht im Headless-Browser testbar (Clipboard-Zugriff fehlt)
 
 **Status**
-✅ verifiziert — alle Zielbedingungen erfüllt
+✅ erledigt

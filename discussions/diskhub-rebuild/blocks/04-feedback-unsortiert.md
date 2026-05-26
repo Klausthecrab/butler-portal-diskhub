@@ -1,4 +1,4 @@
-### Feedback unsortiert
+### Feedback unsortiert (✓ erledigt)
 *— · 22.05.2026*
 
 - promptvorschläge / templates unten bei der "+ neue textbox" ?
