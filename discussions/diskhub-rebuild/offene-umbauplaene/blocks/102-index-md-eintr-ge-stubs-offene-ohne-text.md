@@ -1,11 +1,11 @@
-### Index.md-Einträge (Stubs) — offene ohne Textbox-Erledigt-Marker
+### Index.md-Einträge (Stubs) — offene ohne Textbox-Erledigt-Marker (✓ erledigt)
 *— · 25.05.2026*
 
 **Problem**
 
 Diese Einträge leben im `index/`-Ordner als Stubs/Sonderrollen — keine echten Textboxen. Sie verweisen auf Textboxen in `blocks/` (via `→ Textbox #box-NN`), aber sind selbst keine. Kazzle kann im UI nicht erkennen ob das eigene Einträge oder Verweise sind.
 
-**Aktuelle Liste der offenen Index.md-Einträge (ohne ✓ erledigt)**
+**Gelöst: Alle 13 Stubs gelöscht, Daten in blocks-Textboxen intakt**
 
 | # | Titel | Verweis | Befund |
 |---|-------|--------|--------|
@@ -23,9 +23,5 @@ Diese Einträge leben im `index/`-Ordner als Stubs/Sonderrollen — keine echten
 | #47 | Session-interne Verifikation | → Textbox #box-25 | Stub gelöscht — war leerer Verweis, Textbox hatte gesamten Inhalt |
 | #48 | Status Single Source of Truth | → Textbox #box-26 | Stub gelöscht — war leerer Verweis, Textbox hatte gesamten Inhalt |
 
-**Insgesamt: 13 offene Index.md-Stubs**
-
-Jeder Stub ist ein separater Eintrag in `index/` (z.B. `34-30-zwei-phasen-button-in-sub-entwickeln-.md`). Sie erscheinen im 💬-Tab als eigene Accordion-Karten, sind aber keine aktiven Textboxen.
-
 **Status**
-🔜 offen
+✅ erledigt

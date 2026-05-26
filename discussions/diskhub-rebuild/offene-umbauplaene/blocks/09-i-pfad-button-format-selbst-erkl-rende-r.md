@@ -26,7 +26,7 @@ Der 🔗-Button in Textboxen, Bild-Blöcken, Sub-Diskussionen und index.md-Eintr
 | Textbox | `<diskussion>/blocks/<name>` | `diskhub-rebuild/blocks/09-pfad-button-format` |
 | Bild (📷-Block) | `<diskussion>/blocks/<name>` | `diskhub-rebuild/blocks/14-img-1-bild-rendering` |
 | Sub-Diskussion | `<diskussion>/<sub-slug>` | `diskhub-rebuild/offene-umbauplaene` |
-| index.md-Eintrag | `<diskussion>/index/<name>` | `diskhub-rebuild/index/00-01-datei-struktur` |
+|| index.md-Eintrag | `<diskussion>/index/<name>` | `diskhub-rebuild/diskhub-regelwerk/index/00-01-datei-struktur-erledigt-neue-ordner-s` |
 
 Vorteile des Pfad-Formats:
 - Stabile Referenz: Datei-Name ändert sich nie, auch bei Löschung nicht

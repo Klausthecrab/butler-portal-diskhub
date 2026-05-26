@@ -224,29 +224,28 @@ function renderBlocksMd(md) {
   return html
 }
 
-function generateToc(blocksMd, indexMd) {
-  /** Generiert Mini-TOC aus blocks.md + index.md (nur ###-Überschriften) */
-  if (!blocksMd && !indexMd) return ''
+function generateToc(blocksMd, indexMd, subs = []) {
+  /** Generiert Mini-TOC aus blocks.md + index.md (nur ###-Überschriften) + subs-Array */
+  if (!blocksMd && !indexMd && !subs.length) return ''
 
-  const items = [] // { type: 'block'|'sub', title }
+  const items = [] // { type: 'block'|'sub', title, href? }
 
-  // Aus blocks.md
+  // Aus blocks.md — jeder ###-Block bekommt box-N ID
   if (blocksMd) {
+    let boxIdx = 0
     for (const line of blocksMd.split('\n')) {
       if (line.startsWith('### ')) {
         const title = line.replace(/^###\s+/, '').replace(/\s*\|\|.*/, '').trim()
-        if (title) items.push({ type: 'block', title })
+        if (title) items.push({ type: 'block', title, href: `#box-${boxIdx}` })
+        boxIdx++
       }
     }
   }
 
-  // Aus index.md (nur Sub:-Einträge)
-  if (indexMd) {
-    for (const line of indexMd.split('\n')) {
-      if (line.startsWith('### Sub:')) {
-        const title = line.replace(/^###\s+Sub:\s*/, '').replace(/\s*\|\|.*/, '').trim()
-        if (title) items.push({ type: 'sub', title })
-      }
+  // Aus subs-Array (statt ### Sub: aus index.md zu parsen)
+  for (const sub of subs) {
+    if (sub.id && sub.name) {
+      items.push({ type: 'sub', title: sub.name, href: `#sub-${sub.id}` })
     }
   }
 
@@ -259,7 +258,7 @@ function generateToc(blocksMd, indexMd) {
     const isImage = item.title.startsWith('📷 ')
     const prefix = item.type === 'sub' ? '🗂️ ' : isImage ? '📷 ' : '📝 '
     const displayTitle = isImage ? item.title.replace(/^📷\s+/, '') : item.title
-    html += `<div class="tocItem">├── ${prefix}${displayTitle}</div>`
+    html += `<div class="tocItem"><a href="${item.href}" class="tocLink" onclick="event.preventDefault();var t=document.querySelector('${item.href}');if(t){t.scrollIntoView({behavior:'smooth'});}">├── ${prefix}${displayTitle}</a></div>`
   }
   html += '</div>'
   html += '<hr style="border:none;border-top:1px solid #2d3a4e;margin:16px 0 24px 0;opacity:0.5">'
@@ -1887,9 +1886,9 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 />
                               </div>
                             )}
-                            {generateToc(subViewData.blocks, subViewData.index) && (
+                            {generateToc(subViewData.blocks, subViewData.index, subViewData.subs) && (
                               <div className={styles.markdownContent}
-                                dangerouslySetInnerHTML={{ __html: generateToc(subViewData.blocks, subViewData.index) }}
+                                dangerouslySetInnerHTML={{ __html: generateToc(subViewData.blocks, subViewData.index, subViewData.subs) }}
                               />
                             )}
                             {subViewData.index && (
@@ -1934,7 +1933,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                             })
                                           }}}
                                         >
-                                          <h3 className={styles.subDocTitle}>📂 #{subNum}: {readmeTitle(sub.readme) || sub.name}
+                                          <h3 id={`sub-${sub.id}`} className={styles.subDocTitle}>📂 #{subNum}: {readmeTitle(sub.readme) || sub.name}
                                             {sub.status?.erledigt > 0 && sub.status?.offen === 0 && (
                                               <span className={`${styles.badge} ${styles.badgeDone}`}>✓ {sub.status.erledigt} erledigt</span>
                                             )}
@@ -2128,9 +2127,9 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                             />
                           ) : null}
                           {/* TOC */}
-                          {generateToc(data.blocks, data.index) && (
+                          {generateToc(data.blocks, data.index, data.subs) && (
                             <div className={styles.markdownContent}
-                              dangerouslySetInnerHTML={{ __html: generateToc(data.blocks, data.index) }}
+                              dangerouslySetInnerHTML={{ __html: generateToc(data.blocks, data.index, data.subs) }}
                             />
                           )}
                           {data.blocks && (
@@ -2187,7 +2186,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                     })
                                   }}}
                                 >
-                                  <h3 className={styles.subDocTitle}>📂 #{subNum}: {readmeTitle(sub.readme) || sub.name}
+                                  <h3 id={`sub-${sub.id}`} className={styles.subDocTitle}>📂 #{subNum}: {readmeTitle(sub.readme) || sub.name}
                                     {sub.status?.erledigt > 0 && sub.status?.offen === 0 && (
                                       <span className={`${styles.badge} ${styles.badgeDone}`}>✓ {sub.status.erledigt} erledigt</span>
                                     )}
@@ -2212,7 +2211,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                   <div className={styles.subDocBody}>
                                     {(() => {
                                       // TOC aus blocks.md + index.md generieren (#22)
-                                      const toc = generateToc(sub.blocks, sub.index)
+                                      const toc = generateToc(sub.blocks, sub.index, sub.subs || [])
                                       if (toc) {
                                         return (
                                           <div className={styles.markdownContent}

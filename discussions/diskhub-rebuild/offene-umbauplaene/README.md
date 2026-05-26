@@ -1,8 +1,8 @@
 # Offene Umbaupläne
 
-**Erstellt:** 21.05.2026 · **Zuletzt aktualisiert:** 22.05.2026  
-**Status:** 20 erledigt · 3 offen
+**Erstellt:** 21.05.2026 · **Zuletzt aktualisiert:** 26.05.2026  
+*Status wird dynamisch aus den Textboxen aggregiert (#48)*
 
-Sechs Kernpunkte aus der Architektur-Diskussion mit Max. Jeder Punkt beschreibt eine konkrete Änderung an der Datei-Struktur oder UI-Logik von DiskHub.
+Konkrete Änderungen an Datei-Struktur, UI-Logik und Features von DiskHub. Die ursprünglichen Sub-Diskussionen 01–07 (Architektur-Regelwerk) wurden nach `diskhub-regelwerk/` verschoben, die Subs 08–12 (UI-Tuning, alle erledigt) wurden in Textboxen umgewandelt.
 
-**Offen:** ● #21 Status-Trennung · ● #22 TOC im Sub-Akkordeon · ● #23 Box-Formular eingerahmt
+**Erledigt:** ✅ Nummerierung · ✅ Status-Auslese · ✅ Header-Box · ✅ Subs eingeklappt · ✅ Kurzbeschreibung · sowie alle Punkte aus `blocks/`

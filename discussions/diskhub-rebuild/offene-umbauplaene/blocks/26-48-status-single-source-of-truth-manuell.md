@@ -8,17 +8,37 @@
 > **Ziel:** Status wird nur auf der tiefsten Ebene gesetzt (Ebene 3). Alle Eltern-Ebenen leiten den Status dynamisch ab — kein manuelles `**Status:**` mehr in READMEs.
 >
 > **Sub-Punkte:**
-> - [ ] **S.01** — `_parse_index_status()` prüfen: Zählt es korrekt alle Ebenen inkl. Sub-Sub-Diskussionen?
-> - [ ] **S.02** — Frontend prüfen: Wird der aggregierte Status aus `_parse_index_status()` auf Ebene 1+2 korrekt angezeigt?
+> - [x] **S.01** — `_parse_index_status()` geprüft: Zählt NUR index/-Einträge (### #XX:), ignoriert blocks/-Einträge komplett. Keine Level-1-Aggregation (Hauptebene summiert keine Sub-Status). → **muss erweitert werden**
+> - [x] **S.02** — Frontend geprüft: Liest `data.parsed.done_count` / `open_count` aus API-Response. Werte werden korrekt angezeigt — Problem ist die Quelle (Backend), nicht das Frontend.
 > - [ ] **S.03** — Manuelle `**Status:**`-Zeilen aus README.md von Ebene 2 (offene-umbauplaene/) entfernen
 > - [ ] **S.04** — Manuelle `**Status:**`-Zeilen aus README.md von Ebene 1 (diskhub-rebuild/) entfernen
 > - [ ] **S.05** — Verifikation: Status-Zähler im UI stimmt nach Entfernung noch (vorher/nachher-Vergleich)
-> - [ ] **S.06** — Diskussion #46-Eintrag aktualisieren: `(✓ erledigt)` im Titel bleibt, aber erklären dass auf tieferer Ebene gesetzt wird
+> - [ ] **S.06** — Diskussion #46-Eintrag aktualisieren
 >
 > **Tests:**
 > - [ ] **T.01** — Nach Entfernung: UI zeigt gleichen Status wie vorher
 > - [ ] **T.02** — Neuen Punkt erledigen → Status auf Ebene 1+2 aktualisiert sich automatisch
 > - [ ] **T.03** — Rückkanal: Status-Werte via API-Endpunkt sind korrekt
+>
+>> **Analyse (26.05.2026) — Hermi nach Code-Review:**
+>>
+>> **Aktuelle Situation:** Die Status-Anzeige im UI ist bereits fehlerhaft. `_parse_index_status()` zählt nur index/-Einträge (36 Stück, alle ✅) und ignoriert blocks/-Einträge (39 Stück, 21 ✅ + 18 offen). Für `offene-umbauplaene` zeigt das UI `36 ✓ · 0 ●` statt korrekt `57 ✓ · 18 ●`.
+>>
+>> Die manuellen `**Status:**`-Zeilen in READMEs werden bereits vom dynamischen Parser überschrieben — sie sind totes Gewicht, kein Schaden.
+>>
+>> **Problem: Level-1-Aggregation fehlt.** Die Hauptebene `diskhub-rebuild` hat eigene 18 Blöcke + 1 index-Eintrag, aggregiert aber NICHT den Status von `offene-umbauplaene`. Wenn S.03+S.04 umgesetzt werden, zeigt `diskhub-rebuild` plötzlich `2 ✓ · 17 ●` statt des korrekten Gesamt-Status.
+>>
+>> **Lösungsweg (empfohlen):**
+>> 1. `_parse_index_status()` auf blocks/-Ordner erweitern — auch `### ` ohne `#XX:`-Präfix zählen (Regex: alle `^### `-Zeilen, nicht nur `### #(\d+):`)
+>> 2. Level-1-Aggregation bauen: Hauptebene summiert eigene Items + Subs-Status
+>> 3. Erst DANN die manuellen README-Zeilen entfernen
+>>
+>> **Neue offene Punkte:**
+>> - [ ] **S.07** — Level-1-Aggregation: Hauptebene summiert Sub-Status (recursive über Subs)
+>> - [ ] **S.08** — `_parse_index_status()` erweitern auf blocks/-Inhalt + alle `### `-Zeilen (nicht nur `#XX:`)
+>> - [ ] **S.09** — Ghost-Block-Prüfung: Alle blocks/-Dateien auf >1 `###` scannen vor der Umstellung
+>>
+>> **UI-Risiko:** Keins. Das Frontend zeigt nur zwei Integer an (`done_count` / `open_count`). Solange Werte >0 kommen, sieht es normal aus. Erst wenn beide 0 wären (weil keine Daten aggregiert werden), würde `0 ✓ · 0 ●` erscheinen — kein Crash, aber unschön.
 
 ---
 

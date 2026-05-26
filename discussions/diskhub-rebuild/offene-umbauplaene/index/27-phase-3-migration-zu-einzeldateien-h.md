@@ -31,7 +31,7 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 | Textbox-Dateien | 27 → blocks/00-* bis 26-* |
 | Index-Dateien | 48 → index/00-* bis 47-* |
 | Sammeldateien getrasht | 6 (blocks.md + index.md) |
-| Sub-Diskussionen migriert | 01-datei-struktur, 02-ui-struktur, 05–07 |
+| Sub-Diskussionen migriert | 01-datei-struktur, 02-ui-struktur, 05–07 (später nach diskhub-regelwerk/ verschoben) |
 | Subs ohne ###-Header | Übersprungen (08–12 hatten keine Blöcke) |
 
 ## Verifikation (7-Punkte-Plan + Erweiterungen)
@@ -61,7 +61,7 @@ Phase 3 (Migration-Script) + C.05 (Frontend sendet file_name) in einem Durchgang
 - [x] Call-Sites (Sub-View + Main-View): `data.index_files || []` übergeben
 - [x] Fallback auf `> entry-NR "titel"` für Diskussionen ohne index/-Ordner
 - [x] Build (16s) + Dashboard-Restart + API-Verifikation (48 index_files ✅)
-- Der 🔗-Button kopiert jetzt `diskhub-rebuild/index/00-01-datei-struktur-erledigt-neue-ordner-s` statt `> entry-1 "Datei-Struktur"`.
+- Der 🔗-Button kopiert jetzt `diskhub-rebuild/diskhub-regelwerk/index/00-01-datei-struktur-erledigt-neue-ordner-s` statt `> entry-1 "Datei-Struktur"`.
 
 **Punkt 5 — Status-Prüfung vor Migration** ✅
 - [x] 4 Diskussionen gescannt (diskhub-rebuild, gateway-standardisierung, memory-trimmer, registry-pythonpath-fix)

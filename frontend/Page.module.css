@@ -1959,6 +1959,16 @@ details[open] .titleOpen {
   line-height: 1.5;
 }
 
+.markdownContent .tocItem a.tocLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.markdownContent .tocItem a.tocLink:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
 /* ─── (entfernt: subCardSummary/Readme/Open — ersetzt durch subDocBlock-Akkordeon) ─── */
 
 /* ─── Box hinzufügen Formular (#16) ─── */

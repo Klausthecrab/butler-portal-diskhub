@@ -170,5 +170,18 @@ Sub-Akkordeon ohne "Vollständige Ansicht"-Link für Sub-Subs einbauen. Der Link
 - `activeSubView` ist jetzt ein Pfad-String (z.B. `"28-sub-diskussion/low-prio-zurueckgestellt"`)
 - Popstate schließt gesamten Sub-View (kein Stack — eine Ebene zurück folgt)
 
+**Verifikation (25.05.2026)**
+- Dashboard-Server neugestartet — Code live
+- API-Test Hauptansicht (`/diskhub-rebuild`): funktioniert ✅
+- API-Test Sub-View 1. Ebene (`?sub_path=offene-umbauplaene`): 13 Subs ✅
+- API-Test Sub-Sub 2. Ebene (`?sub_path=offene-umbauplaene/low-prio-zurueckgestellt`): Textbox #34 sichtbar ✅
+- API-Test Sub-Sub-Sub 3. Ebene (`?sub_path=offene-umbauplaene/low-prio-zurueckgestellt/test-verschachtelung`): Titel, Blocks, Index korrekt ✅
+- KeyError `'index'` bei leerem `index/`-Ordner gefunden und gefixt (routes.py Z. 584–588)
+- Textbox `#34: Diskussions-Struktur-Konzept / Archiv` von `offene-umbauplaene/blocks/` nach `low-prio-zurueckgestellt/blocks/` verschoben — taucht im Sub-Sub-View auf ✅
+- Dummy-Diskussion `test-verschachtelung` als Sub-Sub-Sub angelegt — bestätigt 3-Ebenen-Verschachtelung ✅
+
+**Limitation**
+Browser-Zurück (Popstate) schließt den gesamten Sub-View — eine Ebene zurück aus Sub-Sub erfordert einen Navigation-Stack. Folgt bei Bedarf.
+
 **Status**
-✅ erledigt — umgesetzt (25.05.2026)
+✅ erledigt — umgesetzt + verifiziert (25.05.2026)

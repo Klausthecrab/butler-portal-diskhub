@@ -117,22 +117,61 @@ def _parse_readme_status(readme_path):
     return status
 
 
-def _parse_index_status(index_content):
-    """Zählt erledigt/offen aus index.md (### #XX: Title (✓ erledigt)).
+def _parse_status(content):
+    """Zählt erledigt/offen aus Markdown-Content.
 
-    Parst dynamisch den aktuellen Inhalt — zählt ### #XX:-Einträge für
-    Gesamtzahl und (✓ erledigt)-Marker für erledigte Items.
+    Zählt alle ###-Headings (unabhängig von #XX:-Präfix) und
+    (✓ erledigt)-Marker. Funktioniert für index/- und blocks/-Inhalte.
     """
     result = {'erledigt': 0, 'offen': 0, 'summary': '', 'question': ''}
-    if not index_content:
+    if not content:
         return result
-    # Alle ### #XX: Einträge
-    items = re.findall(r'^### #(\d+):', index_content, re.MULTILINE)
-    # Davon mit ✓ erledigt
-    done = re.findall(r'^### #\d+:.*\(✓ erledigt\)', index_content, re.MULTILINE)
+    # Alle ### Headings
+    items = re.findall(r'^### ', content, re.MULTILINE)
+    # Davon mit ✓ erledigt (egal ob #XX: oder Buchstabe oder kein Präfix)
+    done = re.findall(r'^### .*\(✓ erledigt\)', content, re.MULTILINE)
     result['erledigt'] = len(done)
     result['offen'] = len(items) - len(done)
     return result
+
+
+def _get_md_content(folder, name):
+    """Liest Content aus <name>/ Ordner (neu) oder <name>.md (alt).
+
+    Gibt concatenierten String oder None.
+    """
+    dir_path = os.path.join(folder, name)
+    if os.path.isdir(dir_path):
+        parts = []
+        for fname in sorted(f for f in os.listdir(dir_path) if f.endswith('.md')):
+            try:
+                with open(os.path.join(dir_path, fname), 'r') as f:
+                    parts.append(f.read())
+            except Exception:
+                continue
+        if parts:
+            return '\n\n'.join(parts)
+    file_path = os.path.join(folder, f'{name}.md')
+    if os.path.isfile(file_path):
+        with open(file_path, 'r') as f:
+            return f.read()
+    return None
+
+
+def _compute_status(folder):
+    """Aggregiert erledigt/offen aus index + blocks eines Ordners."""
+    status = {'erledigt': 0, 'offen': 0, 'summary': '', 'question': ''}
+    index_content = _get_md_content(folder, 'index')
+    if index_content:
+        s = _parse_status(index_content)
+        status['erledigt'] = s['erledigt']
+        status['offen'] = s['offen']
+    blocks_content = _get_md_content(folder, 'blocks')
+    if blocks_content:
+        s = _parse_status(blocks_content)
+        status['erledigt'] += s['erledigt']
+        status['offen'] += s['offen']
+    return status
 
 
 def _scan_discussions():
@@ -167,30 +206,16 @@ def _scan_discussions():
                     last_modified = int(os.path.getmtime(p))
                     break
 
-        status = _parse_readme_status(readme_path)
-        # #20: Dynamischer Status aus index.md für Haupt-Diskussion
-        if os.path.isfile(index_path):
-            with open(index_path, 'r') as f:
-                idx_status = _parse_index_status(f.read())
-            if idx_status['erledigt'] + idx_status['offen'] > 0:
-                status = idx_status
+        status = _compute_status(folder)
 
         # Sub-Diskussionen
         subs = []
         for sub_name in sorted(os.listdir(folder)):
             sub_folder = os.path.join(folder, sub_name)
             if os.path.isdir(sub_folder) and not sub_name.startswith('.') and sub_name != 'assets':
-                sub_readme = os.path.join(sub_folder, 'README.md')
-                sub_index = os.path.join(sub_folder, 'index.md')
-                # #20: Dynamischer Status aus index.md, Fallback auf README
-                sub_status = {'erledigt': 0, 'offen': 0, 'summary': '', 'question': ''}
-                if os.path.isfile(sub_index):
-                    with open(sub_index, 'r') as f:
-                        idx_status = _parse_index_status(f.read())
-                    if idx_status['erledigt'] + idx_status['offen'] > 0:
-                        sub_status = idx_status
+                sub_status = _compute_status(sub_folder)
                 if sub_status['erledigt'] + sub_status['offen'] == 0:
-                    sub_status = _parse_readme_status(sub_readme)
+                    sub_status = _parse_readme_status(os.path.join(sub_folder, 'README.md'))
                 subs.append({
                     'id': sub_name,
                     'name': sub_name.replace('-', ' ').title(),
@@ -581,45 +606,49 @@ def get_discussion(discussion_id):
         if index_parts:
             result['index'] = '\n\n'.join(index_parts)
         result['index_files'] = index_files
-        # #20: Dynamischer Status aus index-Content
-        if 'index' in result:
-            index_status = _parse_index_status(result['index'])
-            if index_status['erledigt'] + index_status['offen'] > 0:
-                header['done_count'] = index_status['erledigt']
-                header['open_count'] = index_status['offen']
+        # #48: Combined Status aus index + blocks
+        combined = _compute_status(folder)
+        if combined['erledigt'] + combined['offen'] > 0:
+            header['done_count'] = combined['erledigt']
+            header['open_count'] = combined['offen']
     else:
         index_path = os.path.join(folder, 'index.md')
         if os.path.isfile(index_path):
             with open(index_path, 'r') as f:
                 result['index'] = f.read()
-            # #20: Dynamischer Status aus index.md statt hartcodiertem README-Wert
-            index_status = _parse_index_status(result['index'])
-            if index_status['erledigt'] + index_status['offen'] > 0:
-                header['done_count'] = index_status['erledigt']
-                header['open_count'] = index_status['offen']
+            # #48: Combined Status aus index + blocks
+            combined = _compute_status(folder)
+            if combined['erledigt'] + combined['offen'] > 0:
+                header['done_count'] = combined['erledigt']
+                header['open_count'] = combined['offen']
 
     # Sub-Diskussionen (nur bei Haupt-Ansicht oder wenn Sub selbst welche hat)
     subs = []
     for sub_name in sorted(os.listdir(folder)):
         sub_folder = os.path.join(folder, sub_name)
         if os.path.isdir(sub_folder) and not sub_name.startswith('.') and sub_name != 'assets':
-            sub_index = os.path.join(sub_folder, 'index.md')
-            sub_readme = os.path.join(sub_folder, 'README.md')
-            sub_blocks = os.path.join(sub_folder, 'blocks.md')
             sub_data = {'id': sub_name, 'name': sub_name.replace('-', ' ').title()}
-            if os.path.isfile(sub_index):
-                with open(sub_index, 'r') as f:
-                    sub_data['index'] = f.read()
-            if os.path.isfile(sub_readme):
-                with open(sub_readme, 'r') as f:
-                    sub_data['readme'] = f.read()
-            if os.path.isfile(sub_blocks):
-                with open(sub_blocks, 'r') as f:
-                    sub_data['blocks'] = f.read()
-            # #20: Dynamischer Status aus Sub-index.md
-            sub_data['status'] = _parse_index_status(sub_data.get('index', ''))
+            sub_readme_content = _get_md_content(sub_folder, 'README')
+            if sub_readme_content:
+                sub_data['readme'] = sub_readme_content
+            sub_blocks_content = _get_md_content(sub_folder, 'blocks')
+            if sub_blocks_content:
+                sub_data['blocks'] = sub_blocks_content
+            sub_index_content = _get_md_content(sub_folder, 'index')
+            if sub_index_content:
+                sub_data['index'] = sub_index_content
+            # #48: Combined Status aus index + blocks
+            sub_data['status'] = _compute_status(sub_folder)
             subs.append(sub_data)
     result['subs'] = subs
+
+    # #48: Level-1-Aggregation — Hauptebene summiert Sub-Status
+    if not sub_path:
+        for sub in subs:
+            s = sub.get('status', {})
+            if s.get('erledigt', 0) + s.get('offen', 0) > 0:
+                header['done_count'] = header.get('done_count', 0) + s['erledigt']
+                header['open_count'] = header.get('open_count', 0) + s['offen']
 
     _log_activity('view', {'discussion': discussion_id, 'sub_id': sub_path or None})
     return jsonify(result)
