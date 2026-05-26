@@ -2012,11 +2012,11 @@ def add_box():
       content (str, optional)
       is_sub (str, optional — 'true'/'false')
       sub_id (str, optional)
-      image (file, optional) — Bild-Datei (max 5MB, png/jpg/jpeg/gif/webp)
+      images (files, optional) — ein oder mehrere Bilder (max 5MB pro Stück, png/jpg/jpeg/gif/webp)
     """
     # ── Request parsen (JSON oder Multipart) ─────────────────────────────────
     data = request.get_json(silent=True) or {}
-    image_file = None
+    image_files = []
     is_multipart = False
 
     if not data.get('discussion_id'):
@@ -2027,7 +2027,7 @@ def add_box():
         data['content'] = request.form.get('content', '')
         data['is_sub'] = request.form.get('is_sub', 'false').lower() == 'true'
         data['sub_id'] = request.form.get('sub_id', '')
-        image_file = request.files.get('image')
+        image_files = request.files.getlist('images')
         is_multipart = True
 
     discussion_id = data.get('discussion_id', '')
@@ -2049,56 +2049,62 @@ def add_box():
     if not os.path.isdir(target_dir):
         return jsonify({'error': 'Diskussion nicht gefunden'}), 404
 
-    # ── Bild verarbeiten ──────────────────────────────────────────────────────
-    saved_image_path = None
+# ── Bilder verarbeiten (ein oder mehrere) ─────────────────────────────────
+    saved_image_paths = []
+    image_md_lines = []
     clean_title = title
 
-    if image_file and image_file.filename:
-        # 5MB-Limit prüfen
-        image_file.seek(0, os.SEEK_END)
-        size = image_file.tell()
-        image_file.seek(0)
-        if size > 5 * 1024 * 1024:
-            return jsonify({'error': 'Bild zu groß — maximal 5 MB erlaubt'}), 413
+    if image_files:
+        for image_file in image_files:
+            if not image_file or not image_file.filename:
+                continue
+            # 5MB-Limit prüfen
+            image_file.seek(0, os.SEEK_END)
+            size = image_file.tell()
+            image_file.seek(0)
+            if size > 5 * 1024 * 1024:
+                return jsonify({'error': f'Bild {image_file.filename} zu groß — maximal 5 MB erlaubt'}), 413
 
-        # Erlaubte Extensions
-        ext = image_file.filename.rsplit('.', 1)[-1].lower() if '.' in image_file.filename else 'png'
-        if ext not in ('png', 'jpg', 'jpeg', 'gif', 'webp'):
-            ext = 'png'
+            # Erlaubte Extensions
+            ext = image_file.filename.rsplit('.', 1)[-1].lower() if '.' in image_file.filename else 'png'
+            if ext not in ('png', 'jpg', 'jpeg', 'gif', 'webp'):
+                ext = 'png'
 
-        # assets/-Ordner anlegen
-        assets_dir = os.path.join(target_dir, 'assets')
-        os.makedirs(assets_dir, exist_ok=True)
+            # assets/-Ordner anlegen
+            assets_dir = os.path.join(target_dir, 'assets')
+            os.makedirs(assets_dir, exist_ok=True)
 
-        # Kollisionsfreien Dateinamen generieren
-        date_prefix = datetime.now(timezone.utc).strftime('%d%m')
-        counter = 1
-        while True:
-            filename = f'bild-{date_prefix}-{counter}.{ext}'
-            saved_image_path = os.path.join(assets_dir, filename)
-            if not os.path.exists(saved_image_path):
-                break
-            counter += 1
+            # Kollisionsfreien Dateinamen generieren
+            date_prefix = datetime.now(timezone.utc).strftime('%d%m')
+            counter = 1
+            while True:
+                filename = f'bild-{date_prefix}-{counter}.{ext}'
+                saved_image_path = os.path.join(assets_dir, filename)
+                if not os.path.exists(saved_image_path):
+                    break
+                counter += 1
 
-        image_file.save(saved_image_path)
+            image_file.save(saved_image_path)
+            saved_image_paths.append(saved_image_path)
 
-        # Default-Titel bei fehlendem title (Bild-Modal ohne Texteingabe)
-        if not title:
-            now_ts = datetime.now(timezone.utc).strftime('%d.%m.%Y')
-            title = f'Screenshot {now_ts}'
-            clean_title = title
+            # Absoluter API-Pfad: der Serve-Endpoint unter /api/diskhub/assets/<disc_id>/<filename>
+            if is_sub and sub_id:
+                asset_url = f'/api/diskhub/assets/{discussion_id}/{filename}?sub_id={sub_id}'
+            else:
+                asset_url = f'/api/diskhub/assets/{discussion_id}/{filename}'
+            image_md_lines.append(f'![{clean_title}]({asset_url})')
 
-# 📷-Präfix + Bild-Referenz in Content
-        title = f'📷 {title}'
+        if image_md_lines:
+            # Default-Titel bei fehlendem title (Bild-Modal ohne Texteingabe)
+            if not title:
+                now_ts = datetime.now(timezone.utc).strftime('%d.%m.%Y')
+                title = f'Screenshot {now_ts}'
+                clean_title = title
 
-        # Absoluter API-Pfad: der Serve-Endpoint unter /api/diskhub/assets/<disc_id>/<filename>
-        # Sub-Diskussionen brauchen ?sub_id= damit der Endpoint den richtigen assets/-Ordner findet
-        if is_sub and sub_id:
-            asset_url = f'/api/diskhub/assets/{discussion_id}/{filename}?sub_id={sub_id}'
-        else:
-            asset_url = f'/api/diskhub/assets/{discussion_id}/{filename}'
-        image_md = f'\n![{clean_title}]({asset_url})'
-        content = content + image_md if content else image_md.strip()
+            # 📷-Präfix + alle Bild-Referenzen als Galerie in Content
+            title = f'📷 {title}'
+            gallery_md = '\n'.join(image_md_lines)
+            content = content + '\n' + gallery_md if content else gallery_md
 
     # ── Block schreiben ──────────────────────────────────────────────────────
     # #H — Einzeldatei-Modus wenn blocks/ existiert
@@ -2171,7 +2177,7 @@ def add_box():
         'sha': sha,
         'is_sub': is_sub,
         'sub_id': sub_id,
-        'has_image': bool(image_file and image_file.filename),
+        'image_count': len(image_md_lines),
         'file_name': file_name,
     })
 

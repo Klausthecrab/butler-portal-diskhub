@@ -1097,7 +1097,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   const [boxTitle, setBoxTitle] = useState('')
   const [boxContent, setBoxContent] = useState('')
   const [boxLoading, setBoxLoading] = useState(false)
-  const [pendingImage, setPendingImage] = useState(null)
+  const [pendingImages, setPendingImages] = useState([])
   const [showImageModal, setShowImageModal] = useState(false)
   const [hideDone, setHideDone] = useState(false)
   const [tocMode, setTocMode] = useState('all')
@@ -1755,7 +1755,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
           if (d.status === 'ok') {
             setBoxTitle('')
             setBoxContent('')
-            setPendingImage(null)
+            setPendingImages([])
             fetchDiscussionData()
             setErrorMsg('✅ Box hinzugefügt: ' + (d.sha || 'ok'))
           } else {
@@ -1768,15 +1768,15 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
         })
     }
 
-    if (pendingImage) {
-      // Multipart-FormData mit Bild
+    if (pendingImages.length > 0) {
+      // Multipart-FormData mit einem oder mehreren Bildern
       const formData = new FormData()
       formData.append('discussion_id', discussion.id)
       formData.append('title', boxTitle.trim())
       formData.append('content', boxContent.trim())
       formData.append('is_sub', activeSubView ? 'true' : 'false')
       if (activeSubView) formData.append('sub_id', activeSubView)
-      formData.append('image', pendingImage)
+      pendingImages.forEach(file => formData.append('images', file))
       doFetch(formData, {}) // kein Content-Type — Browser setzt multipart boundary
     } else {
       // Klassischer JSON-Request
@@ -2090,45 +2090,62 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 onPaste={e => {
                                   const items = e.clipboardData?.items
                                   if (!items) return
+                                  const newFiles = []
                                   for (const item of items) {
                                     if (item.type.startsWith('image/')) {
                                       const file = item.getAsFile()
                                       if (file && file.size <= 5 * 1024 * 1024) {
-                                        setPendingImage(file)
-                                        e.preventDefault()
+                                        newFiles.push(file)
                                       }
-                                      break
                                     }
+                                  }
+                                  if (newFiles.length > 0) {
+                                    setPendingImages(prev => [...prev, ...newFiles])
+                                    e.preventDefault()
                                   }
                                 }}
                               />
-                              {/* Bild-Vorschau */}
-                              {pendingImage && (
-                                <div className={styles.pendingImagePreview}>
-                                  <img
-                                    src={URL.createObjectURL(pendingImage)}
-                                    alt="Vorschau"
-                                    className={styles.pendingImageThumb}
-                                  />
-                                  <span className={styles.pendingImageName}>{pendingImage.name}</span>
-                                  <button
-                                    className={styles.pendingImageRemove}
-                                    onClick={() => setPendingImage(null)}
-                                    title="Bild entfernen"
-                                  >
-                                    ✕
-                                  </button>
+                              {/* Bild-Vorschau(en) */}
+                              {pendingImages.length > 0 && (
+                                <div className={styles.pendingImagesPreview}>
+                                  {pendingImages.map((file, i) => (
+                                    <div key={i} className={styles.pendingImagePreview}>
+                                      <img
+                                        src={URL.createObjectURL(file)}
+                                        alt="Vorschau"
+                                        className={styles.pendingImageThumb}
+                                      />
+                                      <span className={styles.pendingImageName}>{file.name}</span>
+                                      <button
+                                        className={styles.pendingImageRemove}
+                                        onClick={() => setPendingImages(prev => prev.filter((_, j) => j !== i))}
+                                        title="Bild entfernen"
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                  ))}
+                                  <span className={styles.pendingImageCount}>{pendingImages.length} Bild{pendingImages.length !== 1 ? 'er' : ''}</span>
                                 </div>
                               )}
                               <input
                                 ref={boxImageInputRef}
                                 type="file"
                                 accept="image/*"
+                                multiple
                                 style={{ display: 'none' }}
                                 onChange={e => {
-                                  const file = e.target.files?.[0]
-                                  if (file && file.size <= 5 * 1024 * 1024) {
-                                    setPendingImage(file)
+                                  const files = e.target.files
+                                  if (files) {
+                                    const newFiles = []
+                                    for (const file of files) {
+                                      if (file.size <= 5 * 1024 * 1024) {
+                                        newFiles.push(file)
+                                      }
+                                    }
+                                    if (newFiles.length > 0) {
+                                      setPendingImages(prev => [...prev, ...newFiles])
+                                    }
                                   }
                                   e.target.value = ''
                                 }}

@@ -10,7 +10,6 @@
 | 21 | #42: Jedes Element als Session-Starter | gesichtet |
 | 22 | #43: Plan-Phase vor Umsetzung | gesichtet |
 | 23 | #44: Prompt-Baukasten im Webhook | gesichtet |
-| 24 | #45: Auto-Rückkanal | |
 | 25 | #47: Session-interne Verifikation | |
 | 28 | #50: Sub-Diskussion-Verschachtelung — UI zeigt keine Sub-Subs | |
 | 33 | 31.B — Parser ignoriert interne ### im Einzeldateien-Modus | |

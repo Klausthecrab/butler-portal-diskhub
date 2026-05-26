@@ -40,5 +40,15 @@ Ein neuer Galerie-Block-Typ: Ein `###`-Block in blocks.md enthält mehrere Bilde
 - Kein extra Gallery-Modal (Thumbnail + Lightbox reicht)
 - Thumbnail-Strip ist der geöffnete Zustand — nicht schon im geschlossenen Header
 
+**Fortschritt (26.05.2026):**
+
+🔜 **Phase 1 — Code-Inspektion:** Page.jsx + routes.py + ImageUploadModal analysieren
+🔜 **Phase 2 — Backend: Multi-Image-Upload** in routes.py (add-box, edit-block)
+🔜 **Phase 3 — ImageUploadModal: Multi-Image** im Frontend
+🔜 **Phase 4 — STRG+V im Haupt-Formular: Multi-Image**
+🔜 **Phase 5 — Thumbnail-Strip-Rendering** in BlocksSection
+🔜 **Phase 6 — Lightbox mit Pfeil-Navigation**
+🔜 **Phase 7 — Gesamt-Verifikation aller Zielbedingungen**
+
 **Status**
 🔜 offen
