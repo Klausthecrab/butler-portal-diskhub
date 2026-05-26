@@ -44,7 +44,7 @@ Diese Info wird dann an mehreren Stellen genutzt:
 
 Prüfbar: Eine Sub-Diskussion mit erledigten Unterpunkten zeigt sich automatisch als ✅. Man kann das manuell überschreiben (z.B. auf offen setzen). Bei aktiviertem hideDone-Toggle verschwinden erledigte Sub-Diskussionen von der Seite.
 
-**Schritt 4: TOC kriegt einen Zwei-Ansichten-Switch**
+**Schritt 4: TOC kriegt einen Zwei-Ansichten-Switch** ✅ (26.05.2026)
 Oberhalb des Inhaltsverzeichnisses erscheinen 3 Knöpfe:
 [Alle] [Nur Offene] [Nur Erledigte]
 
@@ -57,4 +57,4 @@ Die Sortierung erfolgt nach Datum (wie in der Problembeschreibung). generateToc(
 Prüfbar: Switch auf "Nur Offene" → TOC zeigt weniger Einträge. Switch auf "Nur Erledigte" → TOC zeigt nur ✅-Einträge. Reihenfolge ist nach Datum sortiert.
 
 **Status**
-🔜 offen
+✅ erledigt (26.05.2026 — alle 4 Schritte implementiert)

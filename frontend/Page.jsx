@@ -224,7 +224,7 @@ function renderBlocksMd(md) {
   return html
 }
 
-function generateToc(blocksMd, indexMd, subs = []) {
+function generateToc(blocksMd, indexMd, subs = [], tocMode = 'all') {
   /** Generiert Mini-TOC aus blocks.md + index.md (nur ###-Überschriften) + subs-Array */
   if (!blocksMd && !indexMd && !subs.length) return ''
 
@@ -257,10 +257,20 @@ function generateToc(blocksMd, indexMd, subs = []) {
 
   if (items.length === 0) return ''
 
+  // Nach tocMode filtern
+  let filtered = items
+  if (tocMode === 'open') {
+    filtered = items.filter(i => !i.done)
+  } else if (tocMode === 'done') {
+    filtered = items.filter(i => i.done)
+  }
+
+  if (filtered.length === 0) return ''
+
   let html = '<hr style="border:none;border-top:1px solid #2d3a4e;margin:24px 0 16px 0;opacity:0.5">'
   html += '<div class="miniToc">'
   html += '<div class="tocHeading">📋 Inhaltsverzeichnis</div>'
-  for (const item of items) {
+  for (const item of filtered) {
     let prefix
     if (item.done) {
       prefix = '✅ '
@@ -1081,6 +1091,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   const [pendingImage, setPendingImage] = useState(null)
   const [showImageModal, setShowImageModal] = useState(false)
   const [hideDone, setHideDone] = useState(false)
+  const [tocMode, setTocMode] = useState('all')
 
   // Sub-Override-Helper: override vor automatischer Erkennung
   const getSubDone = useCallback((subId, status) => {
@@ -1907,9 +1918,25 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 />
                               </div>
                             )}
-                            {generateToc(subViewData.blocks, subViewData.index, subViewData.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)}))) && (
+                            <div style={{display:'flex',gap:'6px',margin:'12px 0',fontSize:'0.75rem'}}>
+                              {['all','open','done'].map(m => (
+                                <button key={m}
+                                  onClick={() => setTocMode(m)}
+                                  style={{
+                                    background: tocMode === m ? '#334155' : 'transparent',
+                                    color: '#cbd5e1',
+                                    border: '1px solid #475569',
+                                    borderRadius: '4px',
+                                    padding: '2px 8px',
+                                    cursor: 'pointer',
+                                    fontWeight: tocMode === m ? '600' : '400',
+                                  }}
+                                >{m === 'all' ? 'Alle' : m === 'open' ? 'Nur Offene' : 'Nur ✅'}</button>
+                              ))}
+                            </div>
+                            {generateToc(subViewData.blocks, subViewData.index, subViewData.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) && (
                               <div className={styles.markdownContent}
-                                dangerouslySetInnerHTML={{ __html: generateToc(subViewData.blocks, subViewData.index, subViewData.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)}))) }}
+                                dangerouslySetInnerHTML={{ __html: generateToc(subViewData.blocks, subViewData.index, subViewData.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) }}
                               />
                             )}
                             {subViewData.index && (
@@ -2174,9 +2201,25 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                             />
                           ) : null}
                           {/* TOC */}
-                          {generateToc(data.blocks, data.index, data.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)}))) && (
+                          <div style={{display:'flex',gap:'6px',margin:'12px 0',fontSize:'0.75rem'}}>
+                            {['all','open','done'].map(m => (
+                              <button key={m}
+                                onClick={() => setTocMode(m)}
+                                style={{
+                                  background: tocMode === m ? '#334155' : 'transparent',
+                                  color: '#cbd5e1',
+                                  border: '1px solid #475569',
+                                  borderRadius: '4px',
+                                  padding: '2px 8px',
+                                  cursor: 'pointer',
+                                  fontWeight: tocMode === m ? '600' : '400',
+                                }}
+                              >{m === 'all' ? 'Alle' : m === 'open' ? 'Nur Offene' : 'Nur ✅'}</button>
+                            ))}
+                          </div>
+                          {generateToc(data.blocks, data.index, data.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) && (
                             <div className={styles.markdownContent}
-                              dangerouslySetInnerHTML={{ __html: generateToc(data.blocks, data.index, data.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)}))) }}
+                              dangerouslySetInnerHTML={{ __html: generateToc(data.blocks, data.index, data.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)})), tocMode) }}
                             />
                           )}
                           {data.blocks && (
