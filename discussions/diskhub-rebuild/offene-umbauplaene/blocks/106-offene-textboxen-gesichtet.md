@@ -1,4 +1,4 @@
-### Offene Textboxen — Sichtungsliste
+### Offene Textboxen — Sichtungsliste (✓ erledigt)
 *— · 26.05.2026*
 
 | # | Titel | Gesichtet |
