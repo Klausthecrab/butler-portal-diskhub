@@ -8,7 +8,7 @@
 | 17 | #35: Lightbox für Bilder | gesichtet |
 | 20 | #39: Dead Code Cleanup — Alten 📷-Button + pendingImage-Logik | gesichtet |
 | 21 | #42: Jedes Element als Session-Starter | gesichtet |
-| 22 | #43: Plan-Phase vor Umsetzung | |
+| 22 | #43: Plan-Phase vor Umsetzung | gesichtet |
 | 23 | #44: Prompt-Baukasten im Webhook | |
 | 24 | #45: Auto-Rückkanal | |
 | 25 | #47: Session-interne Verifikation | |
