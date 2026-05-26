@@ -867,7 +867,7 @@ const saveEdit = (idx, file_name) => {
                     className={styles.editBlockTextarea}
                     value={editContent}
                     onChange={e => setEditContent(e.target.value)}
-                    placeholder="Inhalt (Markdown)..."
+                    placeholder="Inhalt (Markdown) — Bilder per STRG+V"
                   />
                   <div className={styles.editBlockButtons}>
                     <button
@@ -953,7 +953,7 @@ const saveEdit = (idx, file_name) => {
                     className={styles.editBlockTextarea}
                     value={editContent}
                     onChange={e => setEditContent(e.target.value)}
-                    placeholder="Inhalt (Markdown)..."
+                    placeholder="Inhalt (Markdown) — Bilder per STRG+V"
                   />
                   <div className={styles.editBlockButtons}>
                     <button
@@ -2084,7 +2084,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                               />
                               <textarea
                                 className={styles.addBoxTextarea}
-                                placeholder="Inhalt (Markdown)..."
+                                placeholder="Inhalt (Markdown) — Bilder per STRG+V"
                                 value={boxContent}
                                 onChange={e => setBoxContent(e.target.value)}
                                 onPaste={e => {
@@ -2140,13 +2140,6 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                   disabled={boxLoading || !boxTitle.trim()}
                                 >
                                   {boxLoading ? '⏳ Speichern...' : '➕ Box hinzufügen'}
-                                </button>
-                                <button
-                                  className={styles.addBoxImageBtn}
-                                  onClick={() => boxImageInputRef.current?.click()}
-                                  title={pendingImage ? 'Bild ausgewählt' : 'Bild einfügen (STRG+V oder Dateiauswahl)'}
-                                >
-                                  {pendingImage ? '📷✓' : '📷'}
                                 </button>
                               </div>
                             </div>
@@ -2371,7 +2364,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                             />
                             <textarea
                               className={styles.addBoxTextarea}
-                              placeholder="Inhalt (Markdown)..."
+                              placeholder="Inhalt (Markdown) — Bilder per STRG+V"
                               value={boxContent}
                               onChange={e => setBoxContent(e.target.value)}
                               onPaste={e => {
@@ -2428,19 +2421,12 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                               >
                                 {boxLoading ? '⏳ Speichern...' : '➕ Box hinzufügen'}
                               </button>
-                              <button
+<button
                                 className={styles.addBoxImageBtn}
                                 onClick={() => setShowImageModal(true)}
-                                title="📷 Bild-Modal (STRG+V oder Upload)"
+                                title="🖼️ Bild-Modal (STRG+V oder Upload)"
                               >
                                 🖼️
-                              </button>
-                              <button
-                                className={styles.addBoxImageBtn}
-                                onClick={() => boxImageInputRef.current?.click()}
-                                title={pendingImage ? 'Bild ausgewählt' : 'Bild einfügen (STRG+V oder Dateiauswahl)'}
-                              >
-                                {pendingImage ? '📷✓' : '📷'}
                               </button>
                             </div>
                           </div>

@@ -19,7 +19,7 @@
 
 **Sub-Punkte:**
 - [ ] **C.05** — `addBoxImageBtn` (📷) aus addBoxActions beider Views (Sub + Main) entfernen
-- [ ] **C.07b** — `.addBoxImageBtn`-CSS-Klasse aus Page.module.css entfernen (optional, verursacht keinen Error)
+- [ ] **C.07b** — `.addBoxImageBtn`-CSS-Klasse aus Page.module.css entfernen (optional, 🖼️-Button nutzt sie noch)
 - [ ] **C.09** — Platzhalter-Text der Textarea aktualisieren auf z.B. `"Inhalt (Markdown) — Bilder per STRG+V"`
 - [ ] **C.08** — Build + Rest + Health-Check
 
@@ -36,3 +36,9 @@
 - [ ] **T.02** — STRG+V in Textarea funktioniert weiterhin (pendingImage-Logik intakt)
 - [ ] **T.03** — Textbox ohne Bild funktioniert (JSON-Submit)
 - [ ] **T.04** — Build fehlerfrei
+
+**Fortschritt (26.05.2026):**
+- [x] **C.05** — 📷-Button aus addBoxActions beider Views entfernt (Sub-View Zeilen 2144-2150, Main-View Zeilen 2438-2444). 🖼️-Button bleibt erhalten.
+- [x] **C.09** — Alle 4 Platzhalter von `"Inhalt (Markdown)..."` auf `"Inhalt (Markdown) — Bilder per STRG+V"` aktualisiert (editBlockModal ×2, addBox Sub-View, addBox Main-View)
+- [-] **C.07b** — Übersprungen, weil 🖼️-Button noch `addBoxImageBtn`-CSS-Klasse nutzt
+- [x] **C.08** — Build 16.07s ✅, Health-Check: `{"discussions_count": 6, "status": "ok"}`
