@@ -1,4 +1,4 @@
-### neue Textbox wird immer noch random eingetragen (🔜 offen)
+### neue Textbox wird immer noch random eingetragen (✓ erledigt)
 *— · 26.05.2026*
 
 **Problem**
@@ -38,10 +38,26 @@ md_files = sorted([f for f in os.listdir(dir) if f.endswith('.md')])
 
 2. **Verifikation** nach dem Fix:
    ```bash
-   curl -s 'http://localhost:8090/api/diskhub/diskhub-rebuild?sub_id=offene-umbauplaene' | \
+   curl -s 'http://localhost:8090/api/diskhub/diskhub-rebuild?sub_path=offene-umbauplaene' | \
      jq '[.blocks_files[].name]'
    ```
    → `108-neue-textbox-...` muss am Ende der Liste stehen (nach `107-ui-umsortierung`).
 
+**Fortschritt (26.05.2026):**
+- [x] `_file_sort_key()` Helferfunktion in `routes.py` eingebaut (Zeile 54)
+- [x] 3× `sorted()`-Aufrufe auf `key=_file_sort_key` umgestellt (Z. 571, 600, 1885)
+- [x] Debug-print wieder entfernt
+- [x] Dashboard frisch gestartet (ohne Debug-Mode)
+- [x] **Verifikation:**
+  ```bash
+  curl -s 'http://localhost:8090/api/diskhub/diskhub-rebuild?sub_path=offene-umbauplaene' | \
+    python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d['blocks_files']), 'Blocks'); print('Last:', d['blocks_files'][-1]['name'])"
+  ```
+  → **47 Blocks, Last: 108-neue-textbox-wird-immer-noch-random-eing** ✅
+- [x] Commit `a1532e3` (Helfer + sorted-Umstellung via Hermi)
+- [x] Zwischenzeitliche Commits durch autonome Pipeline behalten den Fix
+
+**Hinweis:** Der API-Parameter heißt `sub_path=`, nicht `sub_id=` — bei falschem Parameter wird der Haupt-Ordner gelesen (diskhub-rebuild/blocks/ statt offene-umbauplaene/blocks/). Das war die Ursache der scheinbaren Fehlfunktion während der Verifikation.
+
 **Status**
-🔜 offen
+(✓ erledigt)

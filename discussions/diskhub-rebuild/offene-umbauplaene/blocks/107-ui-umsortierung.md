@@ -13,7 +13,7 @@ Textboxen= abgerundete Ecken. Sub-Diskussion= nicht abgerundete Ecken.
 
 **Lösung**
 
-### 1) Einheitliches Akkordeon für Sub-Diskussionen & Textboxen
+## 1) Einheitliches Akkordeon für Sub-Diskussionen & Textboxen
 - **Verhalten:** Beide sind zugeklappt = nur eine einzeilige Titelzeile sichtbar. Aufgeklappt = voller Inhalt.
 - **Optischer Unterschied:** Textboxen haben `border-radius` (abgerundet), Sub-Diskussionen haben `border-radius: 0` (eckig).
 - **Gilt für:** Haupt-Diskussion **und** jede verschachtelte Sub-Diskussion (Punkt 3).

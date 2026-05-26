@@ -569,7 +569,6 @@ def get_discussion(discussion_id):
     blocks_dir = os.path.join(folder, 'blocks')
     if os.path.isdir(blocks_dir):
         md_files = sorted([f for f in os.listdir(blocks_dir) if f.endswith('.md')], key=_file_sort_key)
-        print(f"DEBUG: blocks_dir={blocks_dir}, count={len(md_files)}, first={md_files[:3]}, last={md_files[-3:]}")
         blocks_parts = []
         blocks_files = []
         for fname in md_files:
