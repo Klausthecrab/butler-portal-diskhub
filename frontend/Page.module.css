@@ -2354,3 +2354,126 @@ details[open] .titleOpen {
   border-radius: 4px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
 }
+
+/* ─── Galerie-Thumbnail-Strip (#110) ──────────────────────────────────── */
+.imageGalleryStrip {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 8px 4px;
+  scroll-snap-type: x mandatory;
+  position: relative;
+}
+.imageGalleryStrip img {
+  max-width: none !important;
+  max-height: 180px !important;
+  width: auto !important;
+  height: 180px !important;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  cursor: zoom-in;
+  scroll-snap-align: start;
+  margin: 0 !important;
+  flex-shrink: 0;
+}
+.imageGalleryStrip img:hover {
+  border-color: #6366f1;
+}
+
+.galleryCounter {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #e2e8f0;
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── Lightbox-Navigation (#110) ──────────────────────────────────────── */
+.lightboxNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: #e2e8f0;
+  border: 1px solid #475569;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background 0.15s;
+}
+.lightboxNav:hover {
+  background: rgba(99, 102, 241, 0.7);
+  border-color: #6366f1;
+}
+
+.lightboxCounter {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: #e2e8f0;
+  font-size: 14px;
+  padding: 4px 16px;
+  border-radius: 16px;
+  pointer-events: none;
+}
+
+/* ─── Multi-Image-Preview (#110) ──────────────────────────────────────── */
+.pendingImagesPreview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 4px;
+  align-items: center;
+}
+
+.pendingImageCount {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-left: 4px;
+}
+
+/* ─── ImageUploadModal-Multi (#110) ───────────────────────────────────── */
+.imagePreviewStrip {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 4px;
+}
+
+.imagePreviewItem {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.imagePreviewItem .imagePreviewRemove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #f87171;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
