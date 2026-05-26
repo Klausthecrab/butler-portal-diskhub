@@ -56,5 +56,13 @@ Die Sortierung erfolgt nach Datum (wie in der Problembeschreibung). generateToc(
 
 Prüfbar: Switch auf "Nur Offene" → TOC zeigt weniger Einträge. Switch auf "Nur Erledigte" → TOC zeigt nur ✅-Einträge. Reihenfolge ist nach Datum sortiert.
 
+**Feinschliff (offen)**
+
+**Schritt 5: TOC-Switch in "📋 Inhaltsverzeichnis"-Kopfzeile integrieren** 🔜
+Die 3 Buttons [Alle] [Nur Offene] [Nur ✅] liegen aktuell zwischen Diskussionstext und Trennlinie. Sie sollen in dieselbe Zeile wie "📋 Inhaltsverzeichnis" wandern — rechtsbündig neben der Überschrift.
+
+**Schritt 6: "Ausblenden ✓" steuert TOC-Switch mit** 🔜
+Wenn der globale "Ausblenden ✓"-Toggle aktiviert wird, soll automatisch der TOC-Switch auf "Nur Offene" springen. Wird "Ausblenden ✓" deaktiviert, geht der TOC-Switch zurück auf "Alle". So sind Karten-Ansicht und TOC immer synchron.
+
 **Status**
-✅ erledigt (26.05.2026 — alle 4 Schritte implementiert)
+✅ erledigt (26.05.2026 — Schritte 1–4 implementiert, Schritte 5–6 geplant)
