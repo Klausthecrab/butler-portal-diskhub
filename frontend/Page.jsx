@@ -250,7 +250,7 @@ function generateToc(blocksMd, indexMd, subs = []) {
   // Aus subs-Array (statt ### Sub: aus index.md zu parsen)
   for (const sub of subs) {
     if (sub.id && sub.name) {
-      const subDone = (sub.status?.erledigt > 0 && sub.status?.offen === 0)
+      const subDone = sub._done !== undefined ? sub._done : (sub.status?.erledigt > 0 && sub.status?.offen === 0)
       items.push({ type: 'sub', title: sub.name, href: `#sub-${sub.id}`, done: subDone })
     }
   }
@@ -1082,6 +1082,14 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
   const [showImageModal, setShowImageModal] = useState(false)
   const [hideDone, setHideDone] = useState(false)
 
+  // Sub-Override-Helper: override vor automatischer Erkennung
+  const getSubDone = useCallback((subId, status) => {
+    const override = subOverrides[subId]
+    if (override === 'done') return true
+    if (override === 'open') return false
+    return status?.erledigt > 0 && status?.offen === 0
+  }, [subOverrides])
+
   // SSE Streaming
   const lastTsRef = useRef(0)
   const sseRef = useRef(null)
@@ -1899,9 +1907,9 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 />
                               </div>
                             )}
-                            {generateToc(subViewData.blocks, subViewData.index, subViewData.subs) && (
+                            {generateToc(subViewData.blocks, subViewData.index, subViewData.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)}))) && (
                               <div className={styles.markdownContent}
-                                dangerouslySetInnerHTML={{ __html: generateToc(subViewData.blocks, subViewData.index, subViewData.subs) }}
+                                dangerouslySetInnerHTML={{ __html: generateToc(subViewData.blocks, subViewData.index, subViewData.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)}))) }}
                               />
                             )}
                             {subViewData.index && (
@@ -1996,7 +2004,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                         {isExpanded && (
                                           <div className={styles.subDocBody}>
                                             {(() => {
-                                              const toc = generateToc(sub.blocks, sub.index)
+                                              const toc = generateToc(sub.blocks, sub.index, sub.subs || [])
                                               if (toc) {
                                                 return (
                                                   <div className={styles.markdownContent}
@@ -2166,9 +2174,9 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                             />
                           ) : null}
                           {/* TOC */}
-                          {generateToc(data.blocks, data.index, data.subs) && (
+                          {generateToc(data.blocks, data.index, data.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)}))) && (
                             <div className={styles.markdownContent}
-                              dangerouslySetInnerHTML={{ __html: generateToc(data.blocks, data.index, data.subs) }}
+                              dangerouslySetInnerHTML={{ __html: generateToc(data.blocks, data.index, data.subs?.map(s => ({...s, _done: getSubDone(s.id, s.status)}))) }}
                             />
                           )}
                           {data.blocks && (

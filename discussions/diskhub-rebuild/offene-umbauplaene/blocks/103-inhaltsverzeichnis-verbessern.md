@@ -27,7 +27,7 @@ generateToc() prüft beim Parsen:
 
 Prüfbar: TOC zeigt ✅ oder 🔜 neben jedem Eintrag.
 
-**Schritt 3: Sub-Diskussionen bekommen einen "erledigt"-Status**
+**Schritt 3: Sub-Diskussionen bekommen einen "erledigt"-Status** ✅ (26.05.2026)
 Eine Sub-Diskussion bekommt einen Status. Das passiert auf zwei Arten:
 
 **Automatisch (Standard):** Wenn ALLE Blöcke + index-Einträge in der Sub-Diskussion erledigt sind (done_count > 0 und open_count === 0), gilt die Sub-Diskussion selbst als erledigt. Die Daten dafür sind bereits in sub.parsed vorhanden.
