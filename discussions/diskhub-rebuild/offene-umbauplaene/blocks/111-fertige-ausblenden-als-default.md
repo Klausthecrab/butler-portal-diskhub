@@ -1,4 +1,4 @@
-### fertige ausblenden als default
+### fertige ausblenden als default (✓ erledigt)
 *— · 26.05.2026*
 
 **Problem**
