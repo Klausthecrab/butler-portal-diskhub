@@ -1,4 +1,4 @@
-### #105: Systemd-Autostart zeigt auf alten Pfad (✅ erledigt)
+### #105: Systemd-Autostart zeigt auf alten Pfad (✓ erledigt)
 *— · 26.05.2026*
 
 **Problem**

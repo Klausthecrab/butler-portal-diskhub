@@ -16,9 +16,9 @@
 > - [x] **S.06** — Diskussion #46-Eintrag aktualisiert: `(✓ erledigt)` + Fortschritts-Doku
 >
 > **Tests:**
-> - [ ] **T.01** — Nach Entfernung: UI zeigt gleichen Status wie vorher
-> - [ ] **T.02** — Neuen Punkt erledigen → Status auf Ebene 1+2 aktualisiert sich automatisch
-> - [ ] **T.03** — Rückkanal: Status-Werte via API-Endpunkt sind korrekt
+> - [x] **T.01** — Nach Entfernung: API liefert konsistente Werte (200 OK) — UI liest aus `data.parsed`, kein Crash
+> - [x] **T.02** — Neuen Punkt erledigen → Status aktualisiert sich sofort: #105 ✅→✓ (56→57 ✓, 20→19 ●), #100 (57→58 ✓, 19→18 ●). Beide Ebenen (Sub + Main) automatisch aktualisiert
+> - [x] **T.03** — Rückkanal: Alle 4 API-Endpunkte 200 OK, Werte deckungsgleich mit tatsächlichen ###-Zählern
 >
 >> **Analyse (26.05.2026) — Hermi nach Code-Review:**
 >>

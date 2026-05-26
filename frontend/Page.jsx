@@ -228,7 +228,7 @@ function generateToc(blocksMd, indexMd, subs = []) {
   /** Generiert Mini-TOC aus blocks.md + index.md (nur ###-Überschriften) + subs-Array */
   if (!blocksMd && !indexMd && !subs.length) return ''
 
-  const items = [] // { type: 'block'|'sub', title, href? }
+  const items = [] // { type: 'block'|'sub', title, href?, done }
 
   // Aus blocks.md — jeder ###-Block bekommt box-N ID
   if (blocksMd) {
@@ -236,7 +236,12 @@ function generateToc(blocksMd, indexMd, subs = []) {
     for (const line of blocksMd.split('\n')) {
       if (line.startsWith('### ')) {
         const title = line.replace(/^###\s+/, '').replace(/\s*\|\|.*/, '').trim()
-        if (title) items.push({ type: 'block', title, href: `#box-${boxIdx}` })
+        if (title) items.push({
+          type: 'block',
+          title,
+          href: `#box-${boxIdx}`,
+          done: title.includes('✓ erledigt')
+        })
         boxIdx++
       }
     }
@@ -245,7 +250,8 @@ function generateToc(blocksMd, indexMd, subs = []) {
   // Aus subs-Array (statt ### Sub: aus index.md zu parsen)
   for (const sub of subs) {
     if (sub.id && sub.name) {
-      items.push({ type: 'sub', title: sub.name, href: `#sub-${sub.id}` })
+      const subDone = (sub.status?.erledigt > 0 && sub.status?.offen === 0)
+      items.push({ type: 'sub', title: sub.name, href: `#sub-${sub.id}`, done: subDone })
     }
   }
 
@@ -255,9 +261,14 @@ function generateToc(blocksMd, indexMd, subs = []) {
   html += '<div class="miniToc">'
   html += '<div class="tocHeading">📋 Inhaltsverzeichnis</div>'
   for (const item of items) {
-    const isImage = item.title.startsWith('📷 ')
-    const prefix = item.type === 'sub' ? '🗂️ ' : isImage ? '📷 ' : '📝 '
-    const displayTitle = isImage ? item.title.replace(/^📷\s+/, '') : item.title
+    let prefix
+    if (item.done) {
+      prefix = '✅ '
+    } else {
+      const isImage = item.title.startsWith('📷 ')
+      prefix = item.type === 'sub' ? '🗂️ ' : isImage ? '📷 ' : '📝 '
+    }
+    const displayTitle = !item.done && item.title.startsWith('📷 ') ? item.title.replace(/^📷\s+/, '') : item.title
     html += `<div class="tocItem"><a href="${item.href}" class="tocLink" onclick="event.preventDefault();var t=document.querySelector('${item.href}');if(t){t.scrollIntoView({behavior:'smooth'});}">├── ${prefix}${displayTitle}</a></div>`
   }
   html += '</div>'
@@ -402,6 +413,7 @@ function renderBlock(block, isHot, blockIdx, discussionId, indexFiles) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 
   // 🔗 Referenz für index.md-Einträge (#B) — nach escapedHeading
   // #H: Pfad-Format für index/-Ordner (Phase 4 F.02), Fallback auf entry-NR für alte Diskussionen
@@ -447,7 +459,7 @@ function renderBlock(block, isHot, blockIdx, discussionId, indexFiles) {
     summaryTitle = escapedHeading
   }
   html += `<details${hasResult ? ' open' : ''}>`
-  html += `<summary class="${styles.blockHeader}"><h3>${subBadge}${summaryTitle}${statusBadge}</h3><button class="${styles.copyLinkBtn}" data-copy-entry data-ref="${escapedRef}" title="Referenz kopieren: ${escapedRef}">🔗</button><button class="${styles.copyLinkBtn}" data-toggle-index-done data-entry-index="${blockIdx}" title="${hasResult ? 'Als offen markieren' : 'Als erledigt markieren'}">${hasResult ? '✅' : '⬜'}</button></summary>`
+  html += `<summary class="${styles.blockHeader}"><h3 title="${escapedHeading}">${subBadge}${summaryTitle}${statusBadge}</h3><button class="${styles.copyLinkBtn}" data-copy-entry data-ref="${escapedRef}" title="Referenz kopieren: ${escapedRef}">🔗</button><button class="${styles.copyLinkBtn}" data-toggle-index-done data-entry-index="${blockIdx}" title="${hasResult ? 'Als offen markieren' : 'Als erledigt markieren'}">${hasResult ? '✅' : '⬜'}</button></summary>`
   html += `<div class="${styles.blockContent}">${renderMarkdown(content)}</div>`
   if (result) {
     // Ergebnis-Zeile rendern
@@ -816,7 +828,7 @@ const saveEdit = (idx, file_name) => {
             {isImageBlock ? (
               <div id={'box-' + originalIdx} className={styles.blockCard} data-status={isDone ? 'done' : 'open'}>
                 <div className={headerClass}>
-                  <h3>{editingIndex === originalIdx ? '✏️ ' + editTitle : headingText}</h3>
+                  <h3 title={headingText}>{editingIndex === originalIdx ? '✏️ ' + editTitle : headingText}</h3>
                   <span className={styles.boxAnchorLabel}>#box-{originalIdx}</span>
                 </div>
 
@@ -902,7 +914,7 @@ const saveEdit = (idx, file_name) => {
             ) : (
               <details id={'box-' + originalIdx} className={styles.blockCard} data-status={isDone ? 'done' : 'open'}>
                 <summary className={headerClass}>
-                  <h3>{editingIndex === originalIdx ? '✏️ ' + editTitle : headingText}</h3>
+                  <h3 title={headingText}>{editingIndex === originalIdx ? '✏️ ' + editTitle : headingText}</h3>
                   <span className={styles.boxAnchorLabel}>#box-{originalIdx}</span>
                 </summary>
 

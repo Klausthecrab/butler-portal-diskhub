@@ -19,7 +19,7 @@ Jeder Eintrag im Inhaltsverzeichnis bekommt einen Link:
 
 Prüfbar: Klick auf TOC-Eintrag → Seite scrollt zum passenden Element.
 
-**Schritt 2: TOC erkennt, ob ein Element erledigt ist oder nicht**
+**Schritt 2: TOC erkennt, ob ein Element erledigt ist oder nicht** ✅ (26.05.2026)
 generateToc() prüft beim Parsen:
 - Bei Textboxen: steht "(✓ erledigt)" im Titel? → erledigt
 - Bei index-Einträgen: steht "(✓ erledigt)" im Titel? → erledigt

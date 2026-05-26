@@ -966,17 +966,24 @@
 
 /* ─── Block-Header (Indigo) ─── */
 .blockHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   background: #6366f1;
   padding: 10px 16px;
   cursor: pointer;
   list-style: none;
 }
 .blockHeader h3 {
-  display: inline;
+  flex: 1;
+  min-width: 0;
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .blockHeader .boxAnchorLabel {
-  float: right;
+  flex-shrink: 0;
   font-size: 0.625rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.4);
@@ -1000,7 +1007,8 @@
 }
 .blockHeader::after {
   content: '▾';
-  float: right;
+  margin-left: auto;
+  flex-shrink: 0;
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.6);
   transition: transform 0.2s;
