@@ -6,7 +6,7 @@ Zum Abhaken nach Sichtung und Bewertung.
 
 | # | Titel | gesichtet | punkte |
 |---|-------|-----------|--------|
-| 0 | #49 — neue offene Punkte werden unformatiert angelegt (✓ erledigt) | | |
+| 0 | #49 — neue offene Punkte werden unformatiert angelegt (✓ erledigt) | gesichtet | |
 | 1 | Textbox buttons | | |
 | 2 | feedback | | |
 | 3 | feedback zu "+Textbox" | | |
