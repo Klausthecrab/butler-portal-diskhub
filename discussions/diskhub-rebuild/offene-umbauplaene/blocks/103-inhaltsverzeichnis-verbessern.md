@@ -1,4 +1,4 @@
-### inhaltsverzeichnis verbessern
+### inhaltsverzeichnis verbessern (✓ erledigt)
 *— · 25.05.2026*
 
 **Problem**
