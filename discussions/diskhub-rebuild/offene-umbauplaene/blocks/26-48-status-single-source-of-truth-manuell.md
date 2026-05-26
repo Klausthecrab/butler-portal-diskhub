@@ -10,9 +10,9 @@
 > **Sub-Punkte:**
 > - [x] **S.01** — `_parse_index_status()` geprüft: Zählt NUR index/-Einträge (### #XX:), ignoriert blocks/-Einträge komplett. Keine Level-1-Aggregation (Hauptebene summiert keine Sub-Status). → **muss erweitert werden**
 > - [x] **S.02** — Frontend geprüft: Liest `data.parsed.done_count` / `open_count` aus API-Response. Werte werden korrekt angezeigt — Problem ist die Quelle (Backend), nicht das Frontend.
-> - [ ] **S.03** — Manuelle `**Status:**`-Zeilen aus README.md von Ebene 2 (offene-umbauplaene/) entfernen
-> - [ ] **S.04** — Manuelle `**Status:**`-Zeilen aus README.md von Ebene 1 (diskhub-rebuild/) entfernen
-> - [ ] **S.05** — Verifikation: Status-Zähler im UI stimmt nach Entfernung noch (vorher/nachher-Vergleich)
+> - [x] **S.03** — Manuelle `**Status:**`-Zeilen aus README.md von Ebene 2 (offene-umbauplaene/) entfernt
+> - [x] **S.04** — Manuelle `**Status:**`-Zeilen aus README.md von Ebene 1 (diskhub-rebuild/) entfernt
+> - [x] **S.05** — Verifikation: Status-Zähler im UI stimmt nach Entfernung (55 ✓ · 19 ●, 63 ✓ · 39 ●)
 > - [ ] **S.06** — Diskussion #46-Eintrag aktualisieren
 >
 > **Tests:**
@@ -34,9 +34,9 @@
 >> 3. Erst DANN die manuellen README-Zeilen entfernen
 >>
 >> **Neue offene Punkte:**
->> - [ ] **S.07** — Level-1-Aggregation: Hauptebene summiert Sub-Status (recursive über Subs)
->> - [ ] **S.08** — `_parse_index_status()` erweitern auf blocks/-Inhalt + alle `### `-Zeilen (nicht nur `#XX:`)
->> - [ ] **S.09** — Ghost-Block-Prüfung: Alle blocks/-Dateien auf >1 `###` scannen vor der Umstellung
+>> - [x] **S.07** — Level-1-Aggregation: Hauptebene summiert Sub-Status (recursive über Subs)
+>> - [x] **S.08** — `_parse_index_status()` erweitern auf blocks/-Inhalt + alle `### `-Zeilen (nicht nur `#XX:`)
+>> - [x] **S.09** — Ghost-Block-Prüfung: Alle blocks/-Dateien auf >1 `###` scannen vor der Umstellung
 >>
 >> **UI-Risiko:** Keins. Das Frontend zeigt nur zwei Integer an (`done_count` / `open_count`). Solange Werte >0 kommen, sieht es normal aus. Erst wenn beide 0 wären (weil keine Daten aggregiert werden), würde `0 ✓ · 0 ●` erscheinen — kein Crash, aber unschön.
 
