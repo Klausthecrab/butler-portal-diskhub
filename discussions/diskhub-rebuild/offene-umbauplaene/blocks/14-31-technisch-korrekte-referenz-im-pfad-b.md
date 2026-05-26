@@ -1,4 +1,4 @@
-### #31: Technisch korrekte Referenz im Pfad-Button
+### #31: Technisch korrekte Referenz im Pfad-Button (✓ erledigt)
 *— · 22.05.2026*
 
 > **Quelle:** "feedback zu '+Textbox'" in blocks.md
