@@ -11,7 +11,7 @@ B) Rest (sortiert nach datum).
 **Lösung**
 — Umsetzung in 4 Schritten (jeder Schritt ist für sich testbar) —
 
-**Schritt 1: TOC-Einträge werden zu klickbaren Sprung-Links**
+**Schritt 1: TOC-Einträge werden zu klickbaren Sprung-Links** ✅ (26.05.2026)
 Jeder Eintrag im Inhaltsverzeichnis bekommt einen Link:
 - Textboxen → springen zur Box-Karte (id="box-N")
 - Sub-Diskussionen → springen zum Sub-Accordion-Kopf (NEU: id="sub-{id}")
