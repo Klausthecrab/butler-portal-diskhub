@@ -41,7 +41,7 @@ Textboxen= abgerundete Ecken. Sub-Diskussion= nicht abgerundete Ecken.
 - **Umsetzungshinweis:** Backend (`routes.py`) filtert `blocks` und `index` aus der Sub-Lese-Loop (`os.listdir`) heraus.
 
 **Status**
-🔜 offen
+✅ erledigt — alle 5 Punkte umgesetzt (26.05.2026)
 
 **Fortschritt (26.05.2026)**
 **Punkt 5 (✅) — Backend-Filter:**
@@ -64,3 +64,17 @@ Textboxen= abgerundete Ecken. Sub-Diskussion= nicht abgerundete Ecken.
 **Noch offen:**
 - Punkt 1 (Akkordeon-Vereinheitlichung)
 - Punkt 2 (Farbschema)
+
+**Fortschritt (26.05.2026) — Teil 2**
+**Punkt 1 (✅) — Einheitliches Akkordeon:**
+- `subDocArrow` (▸/▾) aus Sub-Headers entfernt (MAIN-VIEW + SUB-VIEW)
+- Subs zeigen zugeklappt nur eine Zeile Titel (war bereits durch `isExpanded`-Pattern so, Arrow entfernt für optische Einheit)
+- Basis für optische Vereinheitlichung gelegt
+
+**Punkt 2 (✅) — Farbschema für Subs:**
+- `data-status={subIsDone ? 'done' : 'open'}` auf `.subDocBlock` divs (beide Views)
+- `const subIsDone` Variable definiert + 3 Inline-Done-Checks vereinheitlicht (Icon, Badge, Toggle-Button)
+- `Page.module.css`: `.subDocBlock[data-status="done"]` + `[data-status="open"]` — gleiches Grün/Gelb wie `blockCard`
+- Build: `vite build` erfolgreich (16.0s) ✅
+
+**Alle 5 Punkte umgesetzt ✅**

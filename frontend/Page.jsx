@@ -1959,6 +1959,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                   const subNum = String(idx + 1).padStart(2, '0')
                                   const isExpanded = expandedSubs.has(sub.id)
                                   const subDate = parseCreatedDate(sub.readme)
+                                  const subIsDone = subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)
                                   return (
                                     <div key={sub.id} className={styles.blockWrapper}>
                                       <div className={styles.blockConnector}>
@@ -1970,7 +1971,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                           <div className={styles.connectorDate}>{subDate}</div>
                                         )}
                                       </div>
-                                      <div className={styles.subDocBlock}>
+                                      <div className={styles.subDocBlock} data-status={subIsDone ? 'done' : 'open'}>
                                         <div className={styles.subDocHeader}
                                           onClick={() => {
                                             setExpandedSubs(prev => {
@@ -1989,8 +1990,8 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                           }}}
                                         >
 <h3 id={`sub-${sub.id}`} className={styles.subDocTitle}>
-                                            <span className={styles.subIconCheck}>{(subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)) ? '✅' : '📂'}</span> #{subNum}: {readmeTitle(sub.readme) || sub.name}
-                                            {(subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)) && (
+                                            <span className={styles.subIconCheck}>{subIsDone ? '✅' : '📂'}</span> #{subNum}: {readmeTitle(sub.readme) || sub.name}
+                                            {subIsDone && (
                                               <span className={`${styles.badge} ${styles.badgeDone}`}>✓ {sub.status.erledigt} erledigt</span>
                                             )}
                                             {(subOverrides[sub.id] === 'open' || sub.status?.offen > 0) && subOverrides[sub.id] !== 'done' && (
@@ -2013,7 +2014,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                               }
                                             }}
                                             title="Erledigt/Offen umschalten"
-                                          >{(subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)) ? '✅' : '⬜'}</button>
+                                          >{subIsDone ? '✅' : '⬜'}</button>
                                           <button
                                             className={styles.copyLinkBtn}
                                             onClick={(e) => {
@@ -2027,7 +2028,6 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                             }}
                                             title={'Referenz kopieren: ' + discussion.id + '/' + activeSubView + '/' + sub.id}
                                           >{copiedSub === sub.id ? '✅' : '🔗'}</button>
-                                          <span className={styles.subDocArrow}>{isExpanded ? '▾' : '▸'}</span>
                                         </div>
                                         {isExpanded && (
                                           <div className={styles.subDocBody}>
@@ -2247,6 +2247,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                             const subNum = String(idx + 1).padStart(2, '0')
                             const isExpanded = expandedSubs.has(sub.id)
                             const subDate = parseCreatedDate(sub.readme)
+                            const subIsDone = subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)
                             return (
                               <div key={sub.id} className={styles.blockWrapper}>
                                 <div className={styles.blockConnector}>
@@ -2258,7 +2259,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                     <div className={styles.connectorDate}>{subDate}</div>
                                   )}
                                 </div>
-                                <div className={styles.subDocBlock}>
+                                <div className={styles.subDocBlock} data-status={subIsDone ? 'done' : 'open'}>
                                 <div className={styles.subDocHeader}
                                   onClick={() => {
                                     setExpandedSubs(prev => {
@@ -2277,8 +2278,8 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                   }}}
                                 >
                                   <h3 id={`sub-${sub.id}`} className={styles.subDocTitle}>
-                                    <span className={styles.subIconCheck}>{(subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)) ? '✅' : '📂'}</span> #{subNum}: {readmeTitle(sub.readme) || sub.name}
-                                    {(subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)) && (
+                                    <span className={styles.subIconCheck}>{subIsDone ? '✅' : '📂'}</span> #{subNum}: {readmeTitle(sub.readme) || sub.name}
+                                    {subIsDone && (
                                       <span className={`${styles.badge} ${styles.badgeDone}`}>✓ {sub.status.erledigt} erledigt</span>
                                     )}
                                     {(subOverrides[sub.id] === 'open' || sub.status?.offen > 0) && subOverrides[sub.id] !== 'done' && (
@@ -2301,7 +2302,7 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                       }
                                     }}
                                     title="Erledigt/Offen umschalten"
-                                  >{(subOverrides[sub.id] === 'done' || (!subOverrides[sub.id] && sub.status?.erledigt > 0 && sub.status?.offen === 0)) ? '✅' : '⬜'}</button>
+                                  >{subIsDone ? '✅' : '⬜'}</button>
                                   <button
                                     className={styles.copyLinkBtn}
                                     onClick={(e) => {
@@ -2313,7 +2314,6 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                     }}
                                     title={'Referenz kopieren: ' + discussion.id + '/' + sub.id}
                                   >{copiedSub === sub.id ? '✅' : '🔗'}</button>
-                                  <span className={styles.subDocArrow}>{isExpanded ? '▾' : '▸'}</span>
                                 </div>
                                 {isExpanded && (
                                   <div className={styles.subDocBody}>

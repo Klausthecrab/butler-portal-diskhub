@@ -720,6 +720,21 @@
   background: #92400e;
 }
 
+/* Sub-Dokument Status-Farben (Punkt 2) */
+.subDocBlock[data-status="done"] {
+  border-color: #22c55e66;
+}
+.subDocBlock[data-status="done"] .subDocHeader {
+  background: #166534;
+}
+
+.subDocBlock[data-status="open"] {
+  border-color: #f59e0b66;
+}
+.subDocBlock[data-status="open"] .subDocHeader {
+  background: #92400e;
+}
+
 /* Offene Sub-Diskussion (Orange) */
 .blockCardSub[data-status="open"] {
   border-color: #ea580c66;
