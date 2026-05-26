@@ -2141,6 +2141,13 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                 >
                                   {boxLoading ? '⏳ Speichern...' : '➕ Box hinzufügen'}
                                 </button>
+                                <button
+                                  className={styles.addBoxImageBtn}
+                                  onClick={() => setShowImageModal(true)}
+                                  title="🖼️ Bild-Modal (STRG+V oder Upload)"
+                                >
+                                  🖼️
+                                </button>
                               </div>
                             </div>
                           </>

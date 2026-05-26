@@ -1,4 +1,4 @@
-### #39: Alten 📷-Button entfernen + Platzhalter-Hinweis für Bild per STRG+V
+### #39: Alten 📷-Button entfernen + Platzhalter-Hinweis für Bild per STRG+V (✓ erledigt)
 
 *— · 26.05.2026 — Revision 1 (nach Kazzle-Feedback)*
 

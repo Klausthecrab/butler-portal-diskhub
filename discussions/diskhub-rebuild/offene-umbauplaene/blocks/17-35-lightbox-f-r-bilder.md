@@ -101,3 +101,12 @@ Alle Komponenten bereits vorhanden:
 4. Verifikation: Bild erscheint mit max-height, Klick öffnet Lightbox
 
 **Zielbedingung:** Ein sichtbares skalierbares Bild in der Textbox #35, bei dem Klick die Lightbox öffnet.
+
+**Fortschritt (26.05.2026):**
+- [x] L.03 — Beispielbild hochgeladen ✅
+  - Screenshot: `assets/bild-2605-1.png`
+  - Eingefügt:
+
+  ![](/api/diskhub/assets/diskhub-rebuild/bild-2605-1.png?sub_id=offene-umbauplaene)
+
+🔜 **Nächster Schritt:** Verifikation im Browser — Bild muss skaliert sein, Klick muss Lightbox öffnen
