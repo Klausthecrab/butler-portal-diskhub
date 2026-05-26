@@ -2037,6 +2037,16 @@ function SplitViewModal({ discussion, onClose, copiedSub, onCopySub }) {
                                             className={styles.copyLinkBtn}
                                             onClick={(e) => {
                                               e.stopPropagation()
+                                              const subTitle = readmeTitle(sub.readme) || sub.name
+                                              const subContent = sub.readme || ''
+                                              handleConvertToSub(subTitle, subContent)
+                                            }}
+                                            title="💬 Session starten — Diskutiert diese Sub-Diskussion mit Hermi im Discord (rechtes Preview-Panel)"
+                                          >💬</button>
+                                          <button
+                                            className={styles.copyLinkBtn}
+                                            onClick={(e) => {
+                                              e.stopPropagation()
                                               const subId = sub.id
                                               const parentId = discussion.id + '/' + (activeSubView || '')
                                               const ref = parentId.replace(/\/+$/, '') + '/' + subId
@@ -2983,7 +2993,7 @@ export default function Page() {
     }
   }, [selected])
 
-  // Globaler Click-Handler für [data-copy-entry], [data-toggle-index-done] und Lightbox (#35)
+  // Globaler Click-Handler für [data-copy-entry], [data-toggle-index-done] und Lightbox (#35 + #110)
   useEffect(() => {
     const handler = (e) => {
       const btn = e.target.closest('[data-copy-entry]')
@@ -3015,6 +3025,26 @@ export default function Page() {
     document.addEventListener('click', handler)
     return () => document.removeEventListener('click', handler)
   }, [])
+
+  // Lightbox-Keyboard-Navigation (#110)
+  useEffect(() => {
+    const handler = (e) => {
+      if (!lightboxImages || lightboxImages.images.length <= 1) return
+      if (e.key === 'ArrowLeft') {
+        setLightboxImages(prev => ({
+          ...prev,
+          currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length
+        }))
+      } else if (e.key === 'ArrowRight') {
+        setLightboxImages(prev => ({
+          ...prev,
+          currentIndex: (prev.currentIndex + 1) % prev.images.length
+        }))
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [lightboxImages])
 
   return (
     <div className={styles.diskhubContainer}>
@@ -3053,12 +3083,43 @@ export default function Page() {
         <SplitViewModal discussion={selected} onClose={() => setSelected(null)} copiedSub={copiedSub} onCopySub={setCopiedSub} />
       )}
 
-      {/* Lightbox-Overlay für skalierte Bilder (#35) */}
-      {lightboxImage && (
-        <div className={styles.lightboxOverlay} onClick={() => setLightboxImage(null)}>
+      {/* Lightbox-Overlay für skalierte Bilder (#35 + #110 Galerie-Navigation) */}
+      {lightboxImages && (
+        <div className={styles.lightboxOverlay} onClick={() => setLightboxImages(null)}>
           <div className={styles.lightboxContainer} onClick={e => e.stopPropagation()}>
-            <button className={styles.lightboxClose} onClick={() => setLightboxImage(null)}>✕</button>
-            <img src={lightboxImage} alt="" className={styles.lightboxImage} />
+            <button className={styles.lightboxClose} onClick={() => setLightboxImages(null)}>✕</button>
+            {lightboxImages.images.length > 1 && (
+              <>
+                <button
+                  className={styles.lightboxNav}
+                  style={{ left: 16 }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setLightboxImages(prev => ({
+                      ...prev,
+                      currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length
+                    }))
+                  }}
+                >◀</button>
+                <button
+                  className={styles.lightboxNav}
+                  style={{ right: 16 }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setLightboxImages(prev => ({
+                      ...prev,
+                      currentIndex: (prev.currentIndex + 1) % prev.images.length
+                    }))
+                  }}
+                >▶</button>
+              </>
+            )}
+            <img src={lightboxImages.images[lightboxImages.currentIndex]} alt="" className={styles.lightboxImage} />
+            {lightboxImages.images.length > 1 && (
+              <div className={styles.lightboxCounter}>
+                Bild {lightboxImages.currentIndex + 1} von {lightboxImages.images.length}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1575,14 +1575,15 @@ def promote_block():
 @diskhub.route('/diskhub/start-box-to-sub', methods=['POST'])
 def start_box_to_sub():
     """
-    'Zu Sub ändern' — Startet Session mit Box-Content als Kontext (3er-Webhook).
+    Box/Element zu Session — Startet Session mit Box-Content als Kontext (3er-Webhook).
 
     Body:
       discussion_id (str)
-      box_title (str) — Titel der Box
-      box_content (str) — Content der Box
+      box_title (str) — Titel der Box / des Index-Eintrags
+      box_content (str) — Content der Box / des Elements
       is_sub (bool, optional)
       sub_id (str, optional)
+      element_type (str, optional) — 'box' (default), 'index_entry', 'sub_discussion', 'image'
     """
     data = request.get_json(silent=True) or {}
     discussion_id = data.get('discussion_id', '')
@@ -1590,6 +1591,7 @@ def start_box_to_sub():
     box_content = data.get('box_content', '').strip()
     is_sub = data.get('is_sub', False)
     sub_id = data.get('sub_id', '')
+    element_type = data.get('element_type', 'box')
 
     if not discussion_id or not box_title:
         return jsonify({'error': 'discussion_id und box_title erforderlich'}), 400
@@ -1602,18 +1604,51 @@ def start_box_to_sub():
     now = datetime.now(timezone.utc)
     date_str = now.strftime('%d.%m.%y')
     time_str = now.strftime('%H.%M')
-    session_title = f'disc-{discussion_id}-convert-{box_title[:20].lower().replace(" ", "-")}-{date_str}-{time_str}'
+    session_title = f'disc-{discussion_id}-{element_type}-{box_title[:20].lower().replace(" ", "-")}-{date_str}-{time_str}'
+
+    # Element-Typ-spezifische Prompt-Bausteine
+    type_label = {
+        'box': '📦 Box',
+        'index_entry': '📋 Diskussionspunkt',
+        'sub_discussion': '🗂️ Sub-Diskussion',
+        'image': '📷 Bild-Block',
+    }.get(element_type, '📦 Box')
+
+    type_task = {
+        'box': (
+            "Gehe diesen Box-Inhalt mit dem User durch. "
+            "Diskutiere die Ideen, hinterfrage Annahmen, sammle Feedback. "
+            "Leite am Ende 1-n konkrete Sub-Diskussions-Vorschläge ab, "
+            "die automatisch als neue Sub-Diskussionen angelegt werden können. "
+            "Jeder Vorschlag sollte einen klaren Titel und eine kurze Beschreibung haben."
+        ),
+        'index_entry': (
+            "Gehe diesen Diskussionspunkt mit dem User durch. "
+            "Erkläre worum es geht, hinterfrage Annahmen und kläre offene Fragen. "
+            "Leite am Ende einen konkreten Plan ab, was als nächstes zu tun ist."
+        ),
+        'sub_discussion': (
+            "Du bekommst eine gesamte Sub-Diskussion als Kontext. "
+            "Gehe die Inhalte mit dem User durch, fasse den aktuellen Stand zusammen. "
+            "Diskutiere welche Punkte noch offen sind und leite konkrete nächste Schritte ab."
+        ),
+        'image': (
+            "Analysiere das beigefügte Bild und diskutiere mit dem User "
+            "was damit passieren soll. Erkläre was du siehst und schlage "
+            "nächste Schritte vor (z.B. Dokumentation, Umsetzung, Archivierung)."
+        ),
+    }.get(element_type, (
+        "Gehe den Inhalt mit dem User durch. "
+        "Diskutiere die Ideen, sammle Feedback. "
+        "Leite konkrete nächste Schritte ab."
+    ))
 
     context_prompt = (
-        f"📦 **Box: {box_title}** zur Diskussion '{discussion_id}'"
+        f"{type_label}: **{box_title}** zur Diskussion '{discussion_id}'"
         + (f"/{sub_id}" if is_sub and sub_id else "")
-        + ".\n\n"
-        f"**Inhalt der Box:**\n{box_content}\n\n"
-        f"**Aufgabe:** Gehe diesen Box-Inhalt mit dem User durch. "
-        f"Diskutiere die Ideen, hinterfrage Annahmen, sammle Feedback. "
-        f"Leite am Ende 1-n konkrete Sub-Diskussions-Vorschläge ab, "
-        f"die automatisch als neue Sub-Diskussionen angelegt werden können. "
-        f"Jeder Vorschlag sollte einen klaren Titel und eine kurze Beschreibung haben."
+        + "\n\n"
+        f"**Inhalt:**\n{box_content}\n\n"
+        f"**Aufgabe:** {type_task}"
     )
 
     statuses = []
@@ -1632,6 +1667,7 @@ def start_box_to_sub():
         'discussion': discussion_id,
         'box_title': box_title,
         'session_title': session_title,
+        'element_type': element_type,
         'statuses': statuses,
         'is_sub': is_sub,
         'sub_id': sub_id,
