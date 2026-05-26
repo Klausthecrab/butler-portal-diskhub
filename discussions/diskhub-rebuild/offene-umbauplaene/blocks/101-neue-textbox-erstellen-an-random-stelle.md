@@ -7,13 +7,13 @@ erwartung: chronologisch. neue textbox erscheint "unten"
 
 **Lösung**
 
-### Konvention (ab sofort)
+## Konvention (ab sofort)
 
 Neue Boxen kriegen immer die nächsthöhere Nummer — egal ob irgendwo Lücken klaffen. Keine alten Nummern wiederbeleben, keine Lücken füllen. Neue Box = ans Ende.
 
 Konkret: `max(bestehende Nummern) + 1`. Aktuell höchste Nummer ist `105` → nächste neue Box wird `106`.
 
-### Umsetzungsschritte
+## Umsetzungsschritte
 
 1. **Bestand aufnehmen (aktuell höchste Nummer ermitteln)**
    - `ls blocks/*.md | grep -oP '^\d+' | sort -n | tail -1`
