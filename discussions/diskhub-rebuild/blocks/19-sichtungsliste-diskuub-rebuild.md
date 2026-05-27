@@ -11,7 +11,7 @@ Zum Abhaken nach Sichtung und Bewertung.
 | 2 | feedback | gesichtet | |
 | 3 | feedback zu "+Textbox" | gesichtet | |
 | 4 | Feedback unsortiert | gesichtet | |
-| 5 | Ohne Bild | | |
+| 5 | Ohne Bild | gesichtet | |
 | 6 | 📷 Bild-Rendering Fix #38 | | |
 | 7 | feedback | | |
 | 8 | Feedback neu | | |
