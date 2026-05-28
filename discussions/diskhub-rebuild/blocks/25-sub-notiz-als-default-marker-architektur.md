@@ -90,6 +90,25 @@ Kein API-Call, keine Registration, keine Metadaten-Datei. Der Inhalt definiert d
 
 ---
 
+## Entscheidung: Neubau statt Umbau
+
+Das alte DiskHub (eingebettet als Blueprint im Dashboard, Port 8090) wird nicht weiter umgebaut. Stattdessen entsteht ein **eigenständiger Dienst auf eigenem Port (8100)** mit eigenem Backend + Frontend.
+
+**Gründe für den Neubau:**
+- **Split-View** (File-Tree links + Content rechts) – im Dashboard müsste man das gesamte Layout umbauen
+- **Drag & Drop** im Tree – kein Dashboard-Element unterstützt das nativ
+- **Anchor-IDs** für Marker-Abschnitte – jeder `§§§Abschnitt§§§` bekommt eine `#12-einleitung`, 🔗 kopiert `diskhub/thema/block#12-einleitung`
+- **Live-Vorschau** beim Editieren – WebSocket statt Submit-API
+- **Template-Engine** für neue Ordner – `"Neu: Tabelle"` erzeugt `readme.md + daten.csv + schema.yaml`
+- **Flat + Deep gleichzeitig** – Inline-Ansicht für einfache Ordner, Vollbild-View für komplexe
+- **Keine 2200-Zeilen-routes.py** – modular: Parser, Watcher, Template-Engine, API sind getrennt
+- **Echter Router** (React Router / SvelteKit) statt `window.location.hash`
+- **File-Watcher** (watchdog) statt API-Polling – Änderungen am Dateisystem tauchen sofort im UI auf
+
+Der Neubau läuft parallel zum alten DiskHub. Beide koexistieren, bis der alte Dienst nicht mehr genutzt wird und archiviert werden kann.
+
+---
+
 ## Zielbedingungen
 
 **A – Jedes UI-Element ist ein Ordner**
@@ -123,6 +142,40 @@ Kein API-Call, keine Registration, keine Metadaten-Datei. Der Inhalt definiert d
 - Bestehende Subs (bereits Ordner) bleiben unverändert
 - Alte 🔗-Referenzen funktionieren weiter (Fallback im Parser)
 - Kein Datenverlust, kein manuelles Nacharbeiten
+
+**G – Template-System für Ordnerstrukturen**
+- `"Neu: Tabelle"` erzeugt `ordner/readme.md + ordner/daten.csv`
+- `"Neu: Galerie"` erzeugt `ordner/readme.md + ordner/bilder/`
+- `"Neu: Link-Liste"` erzeugt `ordner/readme.md + ordner/links.csv`
+- Marker-Parser unterstützt Template-Variablen (`{{datum}}`, `{{titel}}`)
+- Ein "Quick-Add"-Input oben auf der Seite abstrahiert die Ordner-Erzeugung komplett – der User merkt nie, dass er einen Ordner anlegt
+
+**H – Drag & Drop im File-Tree**
+- Per D&D werden Ordner im Tree umsortiert: Verschieben, Eltern/Kind-Beziehung ändern
+- D&D löst `mv` auf dem Dateisystem aus – der File-Watcher aktualisiert das UI sofort
+- Abbruch / Undo bei fehlgeschlagenem `mv`
+
+**I – Breadcrumb-Navigation im Sub-View**
+- Jede Sub-View zeigt: `DiskHub › Thema › Block › Abschnitt`
+- Jeder Breadcrumb-Teil ist klickbar (springt zurück)
+- Breadcrumb wird aus der Ordner-Hierarchie abgeleitet – kein manueller Eintrag
+
+**J – Batch-Operationen**
+- Mehrere Boxen auswählen (Checkboxen in der Listenansicht)
+- Batch: alle als erledigt markieren, taggen (`#dringend`), verschieben, löschen
+- Batch: alle ausgewählten kopieren / exportieren
+
+**K – Split-Ansicht (File-Tree + Content)**
+- Linke Spalte: aufklappbarer File-Tree aller Ordner
+- Rechte Spalte: Inhalt des ausgewählten Ordners
+- Toggle zum Ein-/Ausklappen der linken Spalte (wie VS Code Explorer)
+- Der Tree ist persistent – wechselt nicht beim Klick auf einen anderen Ordner
+
+**L – Undo / Papierkorb**
+- Gelöschte Ordner landen in `diskhub/.trash/` (versteckt im Root)
+- 7-Tage-Verfallszeit – danach automatisch `git rm + commit`
+- UI: "Gelöschte Elemente" im Tree ganz unten (ausgegraut), mit "Wiederherstellen"-Button
+- Wiederherstellen = `mv .trash/ordner/ ordner/` – inklusive aller Kinder
 
 **Status**
 🔜 offen
