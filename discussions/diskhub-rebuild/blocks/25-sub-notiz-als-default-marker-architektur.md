@@ -39,6 +39,7 @@ Kann Absätze, Listen, Code-Blöcke enthalten.
 §§§Fussnote§§§
 Optionale Fussnote oder Quellenangabe.
 ```
+(Syntax-Entscheidung noch offen: `§§§Marker§§§` oder `[[Marker]]` – beides funktioniert, beides kommt im normalen Fließtext nicht vor. Wird in der Detailplanung final festgelegt.)
 
 Der Parser scannt die Datei auf bekannte Marker und baut daraus das UI. Unbekannte Marker werden ignoriert. Fehlende Marker = leerer Bereich, kein UI-Bruch.
 
@@ -59,9 +60,9 @@ Kein API-Call, keine Registration, keine Metadaten-Datei. Der Inhalt definiert d
 - `git push` funktioniert genauso
 
 **5. Verschieben ohne Bruch**
-- `mv blocks/14-alter-name blocks/14-neuer-name` → Box erscheint unter neuem Namen
+- `mv blocks/14-alter-name blocks/14-neuer-name` → Box erscheint unter neuem Slug
 - `mv blocks/14-thema blocks/03-andere-box/` → Box wird zum Sub-Element
-- 🔗-Referenzen: Ordner-Umbenennung ändert den 🔗-Pfad. Lösung: Entweder Redirect (alter Pfad → neuer Pfad) oder stabile UUID pro Ordner (unsichtbare `.id`-Datei)
+- **Wichtig:** Der Ordner-Name ist NUR ein Slug. Der kanonische Titel steht in der `readme.md` unter `§§§Titel§§§`. Der 🔗-Link referenziert den Inhaltstitel, nicht den Ordnernamen. Daher: Umbenennung des Ordners ändert den 🔗 nicht (Titel in der readme bleibt gleich).
 
 **6. UI bleibt gleich (mit optionalem File-Tree)**
 - Hauptansicht: Liste von Boxen mit Titel, Zusammenfassung, Status-Badge, 🔗 – wie heute
@@ -83,10 +84,10 @@ Kein API-Call, keine Registration, keine Metadaten-Datei. Der Inhalt definiert d
 
 ## Nachteile / Risiken
 - **Mehr Dateisystem-Einträge:** Statt 20 Dateien → 20 Ordner + 20 readme.md = 40 Einträge
-- **Leere Ordner:** Anlegen eines leeren Ordners fühlt sich schwerer an als eine Datei
+- **Leere Ordner:** Anlegen eines leeren Ordners fühlt sich schwerer an als eine Datei → Quick-Add abstrahiert das
 - **Inline-Rendering nötig:** "Einfache" Ordner (nur readme.md) müssen auf der Hauptseite ohne Sub-View-Klick sichtbar sein – sonst Alltagsverschlechterung
-- **Migration:** Alle bestehenden blocks/NN-name.md müssen zu blocks/NN-name/readme.md migriert werden
-- **🔗-Bruch bei Umbenennung:** Wenn Ordner umbenannt werden, brechen alte Referenzen
+- **Performance:** Viele Read-Operationen bei vielen Ordnern – wird bei Bedarf gelöst (Caching, mtime-Index), kein Showstopper
+- **Neubau statt Umbau:** Alte Daten bleiben im alten DiskHub, keine automatische Migration. Koexistenz bis Archivierung
 
 ---
 
@@ -109,6 +110,17 @@ Der Neubau läuft parallel zum alten DiskHub. Beide koexistieren, bis der alte D
 
 ---
 
+**Aus der Diskussion der "blinden Flecken" geklärt:**
+- **Anchor-IDs** sind kein optionales Feature, sondern zentrales Konzept – Abschnitt-genaues Referenzieren ist das Kern-Value-Proposition
+- **Marker-Syntax** (`§§§…§§§` oder `[[…]]`) wird final in der Detailplanung festgelegt – beides funktioniert
+- **Ordner-Name = Slug**, kanonischer Titel aus `readme.md` – löst 🔗-Bruch bei Umbenennung
+- **Performance** wird bei Bedarf gelöst (Caching, mtime), kein Showstopper
+- **Keine parallelen Content-Modelle** – der Neubau steht für sich, kein Legacy-Parser nötig
+- **SSOT = Dateisystem** – Registry ist nur Dienst-Index, keine Content-Speicherung
+- **Schnelle Gedanken** werden extern gelöst (spätere Integration via Import)
+
+---
+
 ## Zielbedingungen
 
 **A – Jedes UI-Element ist ein Ordner**
@@ -118,9 +130,9 @@ Der Neubau läuft parallel zum alten DiskHub. Beide koexistieren, bis der alte D
 
 **B – Marker-Parser funktioniert**
 - `_parse_markers(content)` extrahiert aus jeder `.md` alle bekannten Marker
-- Bekannte Marker: `§§§Titel§§§`, `§§§Tags§§§`, `§§§Status§§§`, `§§§Zusammenfassung§§§`, `§§§Content§§§`, `§§§Fussnote§§§`
+- Bekannte Marker: `Titel`, `Tags`, `Status`, `Zusammenfassung`, `Content`, `Fussnote` (in den Syntaxen `§§§Marker§§§` oder `[[Marker]]` – wird final festgelegt)
 - Frontend rendert aus Markern: Titel, Status-Badge, Zusammenfassung, Content
-- Alte (markerlose) Dateien funktionieren trotzdem → Fallback auf Gesamttext
+- Marker-lose Dateien werden als reiner Markdown-Text gerendert (Fallback, z.B. für extern importierte Dateien ohne Marker)
 
 **C – Externer Import ohne Registration**
 - Jeder Unterordner in `blocks/` mit `.md`-Datei erscheint automatisch als Box
@@ -176,6 +188,13 @@ Der Neubau läuft parallel zum alten DiskHub. Beide koexistieren, bis der alte D
 - 7-Tage-Verfallszeit – danach automatisch `git rm + commit`
 - UI: "Gelöschte Elemente" im Tree ganz unten (ausgegraut), mit "Wiederherstellen"-Button
 - Wiederherstellen = `mv .trash/ordner/ ordner/` – inklusive aller Kinder
+
+**M – Anchor-IDs für seiteninterne Referenzierung**
+- Jeder Marker-Abschnitt in der `readme.md` bekommt eine automatisch generierte ID (aus dem Marker-Namen: `§§§Fazit§§§` → `#fazit`, `[[Zusammenfassung]]` → `#zusammenfassung`)
+- Der 🔗-Button kopiert bei Fokus auf einen Abschnitt: `diskhub/thema/block#fazit`
+- Anchor-IDs sind von Anfang an im Parser integriert – kein nachträgliches Einbauen
+- Das Frontend scrollt beim Laden der URL mit `#anchor` direkt zur entsprechenden Sektion
+- Fallback bei fehlendem Anchor: gesamter Block wird geladen (wie heute)
 
 **Status**
 🔜 offen
